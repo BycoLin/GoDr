@@ -1,0 +1,16 @@
+<view class="safe-pad result">
+  <view class="card result-card">
+    <view class="label">《{{title}}》</view>
+    <view class="stars">
+      <text class="star {{stars >= 1 ? 'on' : ''}}">★</text>
+      <text class="star {{stars >= 2 ? 'on' : ''}}">★</text>
+      <text class="star {{stars >= 3 ? 'on' : ''}}">★</text>
+    </view>
+    <view class="score">{{ratioText}}</view>
+    <view class="encourage">{{encouragement}}</view>
+  </view>
+
+  <button class="btn btn-primary" bindtap="onRetry">再来一局</button>
+  <button class="btn btn-secondary" bindtap="onBackLevels">返回关卡</button>
+  <button class="btn btn-ghost" bindtap="onHome">回到首页</button>
+</view>

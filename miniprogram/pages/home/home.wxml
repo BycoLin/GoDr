@@ -1,0 +1,35 @@
+<view class="safe-pad home">
+  <view class="hero">
+    <view class="brand">诗趣乐园</view>
+    <view class="tagline">边玩边学 · 古诗词闯关</view>
+    <view class="hero-art" aria-hidden="true">
+      <view class="leaf leaf-a"></view>
+      <view class="leaf leaf-b"></view>
+      <view class="scroll"></view>
+    </view>
+  </view>
+
+  <view wx:if="{{continueTip}}" class="card continue" bindtap="onContinue">
+    <view class="continue-label">上次学到</view>
+    <view class="continue-text">{{continueTip}}</view>
+    <view class="continue-go">继续闯关 →</view>
+  </view>
+
+  <view class="section-title">知识库</view>
+  <view class="pack-list">
+    <view
+      class="card pack-card"
+      wx:for="{{packs}}"
+      wx:key="id"
+      data-pack-id="{{item.id}}"
+      bindtap="onTapPack"
+    >
+      <view class="pack-subject">{{item.subject}}</view>
+      <view class="pack-title">{{item.title}}</view>
+      <view class="pack-desc">{{item.description}}</view>
+      <view class="pack-meta">{{item.gradeLabel}}</view>
+    </view>
+  </view>
+
+  <button class="btn btn-ghost progress-link" bindtap="onProgress">我的进度</button>
+</view>

@@ -1,0 +1,48 @@
+.summary {
+  margin-bottom: 28rpx;
+}
+
+.summary-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.summary-progress {
+  margin-top: 8rpx;
+  color: var(--color-muted);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: var(--shadow);
+}
+
+.row-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.row-meta {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.star {
+  color: #d6d3d1;
+  font-size: 28rpx;
+}
+
+.star.on {
+  color: var(--color-accent);
+}
+
+.clear-btn {
+  margin-top: 40rpx;
+}

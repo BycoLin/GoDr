@@ -1,0 +1,67 @@
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  min-height: 100vh;
+}
+
+.result-card {
+  text-align: center;
+  padding: 56rpx 32rpx;
+  margin-bottom: 16rpx;
+  animation: riseIn 0.4s ease;
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(20rpx);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.label {
+  font-size: 28rpx;
+  color: var(--color-muted);
+}
+
+.stars {
+  margin-top: 20rpx;
+}
+
+.star {
+  font-size: 64rpx;
+  color: #d6d3d1;
+  margin: 0 6rpx;
+}
+
+.star.on {
+  color: var(--color-accent);
+  animation: softPulse 0.6s ease;
+}
+
+.score {
+  margin-top: 24rpx;
+  font-size: 56rpx;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.encourage {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  color: var(--color-ink);
+  line-height: 1.5;
+}
+
+@keyframes softPulse {
+  from {
+    transform: scale(0.8);
+  }
+  to {
+    transform: scale(1);
+  }
+}

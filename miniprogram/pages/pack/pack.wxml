@@ -1,0 +1,20 @@
+<view class="safe-pad">
+  <view class="intro card">
+    <view class="intro-title">{{title}}</view>
+    <view class="intro-desc">{{description}}</view>
+  </view>
+
+  <view class="section-title">选择年级</view>
+  <view class="grade-grid">
+    <view
+      class="grade-card"
+      wx:for="{{grades}}"
+      wx:key="*this"
+      data-grade="{{item}}"
+      bindtap="onSelectGrade"
+    >
+      <view class="grade-num">{{item}}</view>
+      <view class="grade-label">年级</view>
+    </view>
+  </view>
+</view>

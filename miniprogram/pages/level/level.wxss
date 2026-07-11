@@ -1,0 +1,107 @@
+.summary {
+  margin-bottom: 32rpx;
+}
+
+.summary-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.summary-progress {
+  margin-top: 8rpx;
+  color: var(--color-muted);
+  font-size: 26rpx;
+}
+
+.bar {
+  margin-top: 20rpx;
+  height: 16rpx;
+  background: #e5ebe7;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #1b6b4a, #3aa876);
+  border-radius: 999rpx;
+  transition: width 0.3s ease;
+}
+
+.level-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.level-card {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28rpx 24rpx;
+}
+
+.level-card.locked {
+  opacity: 0.55;
+}
+
+.level-card.cleared {
+  border: 2rpx solid var(--color-primary-soft);
+}
+
+.level-index {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.level-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.level-title {
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.level-meta {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.stars {
+  margin-top: 8rpx;
+}
+
+.star {
+  color: #d6d3d1;
+  margin-right: 4rpx;
+  font-size: 28rpx;
+}
+
+.star.on {
+  color: var(--color-accent);
+}
+
+.level-status {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.locked .level-status {
+  color: var(--color-muted);
+}

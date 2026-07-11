@@ -1,0 +1,19 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/pack/pack",
+    "pages/level/level",
+    "pages/play/play",
+    "pages/result/result",
+    "pages/progress/progress"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#1B6B4A",
+    "navigationBarTitleText": "诗趣乐园",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#F7F3E8",
+    "backgroundTextStyle": "dark"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

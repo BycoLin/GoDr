@@ -1,0 +1,32 @@
+<view class="safe-pad">
+  <view class="summary card">
+    <view class="summary-title">{{grade}} 年级古诗词</view>
+    <view class="summary-progress">已掌握 {{clearedCount}} / {{totalCount}} 首</view>
+    <view class="bar">
+      <view class="bar-fill" style="width: {{totalCount ? (clearedCount / totalCount * 100) : 0}}%;"></view>
+    </view>
+  </view>
+
+  <view class="level-list">
+    <view
+      class="level-card {{item.unlocked ? '' : 'locked'}} {{item.cleared ? 'cleared' : ''}}"
+      wx:for="{{levels}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      data-unlocked="{{item.unlocked ? 1 : 0}}"
+      bindtap="onTapLevel"
+    >
+      <view class="level-index">{{index + 1}}</view>
+      <view class="level-body">
+        <view class="level-title">《{{item.title}}》</view>
+        <view class="level-meta">{{item.dynasty}} · {{item.author}}</view>
+        <view class="stars">
+          <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
+          <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
+          <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
+        </view>
+      </view>
+      <view class="level-status">{{item.unlocked ? (item.cleared ? '再练' : '开始') : '锁定'}}</view>
+    </view>
+  </view>
+</view>

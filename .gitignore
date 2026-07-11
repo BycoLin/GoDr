@@ -1,0 +1,8 @@
+node_modules/
+miniprogram_npm/
+.DS_Store
+*.log
+.idea/
+.vscode/
+scripts/extract-poetry.raw.txt
+project.private.config.json

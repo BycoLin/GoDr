@@ -1,0 +1,21 @@
+{
+  "name": "smallgame",
+  "version": "1.0.0",
+  "description": "微信小程序 · 古诗词边玩边学（1～2 年级 MVP）",
+  "scripts": {
+    "extract:poetry": "node scripts/extract-poetry.mjs",
+    "smoke:quiz": "node scripts/smoke-quiz.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "miniprogram",
+    "poetry",
+    "education"
+  ],
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "miniprogram-api-typings": "^5.2.1",
+    "typescript": "^7.0.2"
+  }
+}
