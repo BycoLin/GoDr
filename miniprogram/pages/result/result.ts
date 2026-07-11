@@ -12,6 +12,8 @@ Page({
     stars: 0,
     ratioText: '',
     encouragement: '',
+    arcade: false,
+    mode: 'mixed',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -21,15 +23,19 @@ Page({
     const correct = Number(query.correct || 0);
     const total = Number(query.total || 0);
     const title = decodeURIComponent(query.title || '');
+    const arcade = query.arcade === '1';
+    const mode = query.mode || 'mixed';
     const stars = starsFromScore(correct, total);
 
-    recordPlayResult(packId, itemId, grade, correct, total, stars);
+    if (!arcade && itemId) {
+      recordPlayResult(packId, itemId, grade, correct, total, stars);
+    }
 
     let encouragement = '继续加油，下一首也很好玩！';
-    if (stars >= 3) encouragement = '太棒了！全部答对，小小诗人！';
+    if (stars >= 3) encouragement = arcade ? '全对！游戏厅高手！' : '太棒了！全部答对，小小诗人！';
     else if (stars === 2) encouragement = '很不错，再练一遍会更熟～';
-    else if (stars === 1) encouragement = '过关啦，多读几遍记得更牢。';
-    else encouragement = '先读一读原诗，再来挑战一次吧。';
+    else if (stars === 1) encouragement = arcade ? '过关啦，换个玩法再试试。' : '过关啦，多读几遍记得更牢。';
+    else encouragement = arcade ? '再来一局，熟能生巧！' : '先读一读原诗，再来挑战一次吧。';
 
     this.setData({
       packId,
@@ -41,18 +47,30 @@ Page({
       stars,
       ratioText: `${correct} / ${total}`,
       encouragement,
+      arcade,
+      mode,
     });
   },
 
   onRetry() {
-    const { packId, grade, itemId } = this.data;
+    const { packId, grade, itemId, arcade, mode } = this.data;
+    if (arcade) {
+      wx.redirectTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
+      });
+      return;
+    }
     wx.redirectTo({
       url: `/pages/play/play?packId=${packId}&grade=${grade}&itemId=${itemId}`,
     });
   },
 
   onBackLevels() {
-    const { packId, grade } = this.data;
+    const { packId, grade, arcade } = this.data;
+    if (arcade) {
+      wx.switchTab({ url: '/pages/games/games' });
+      return;
+    }
     wx.navigateBack({
       delta: 1,
       fail: () => {
@@ -64,6 +82,6 @@ Page({
   },
 
   onHome() {
-    wx.reLaunch({ url: '/pages/home/home' });
+    wx.switchTab({ url: '/pages/home/home' });
   },
 });

@@ -1,4 +1,4 @@
-import { getPackItems, getPackManifest, isPoetry } from '../../utils/registry';
+import { getPackItems, getPackManifest, listPacks, isPoetry } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
 import type { PoetryItem } from '../../utils/types';
 
@@ -10,22 +10,34 @@ interface ProgressRow {
   cleared: boolean;
 }
 
+interface PackOption {
+  id: string;
+  title: string;
+}
+
 Page({
   data: {
     packId: '',
+    packs: [] as PackOption[],
     packTitle: '',
     clearedCount: 0,
     totalCount: 0,
     rows: [] as ProgressRow[],
   },
 
-  onLoad(query: Record<string, string | undefined>) {
-    const packId = query.packId || 'poetry-g1-g2';
-    this.setData({ packId });
+  onShow() {
+    const packs = listPacks().map((p) => ({ id: p.id, title: p.title }));
+    const packId =
+      this.data.packId && packs.some((p) => p.id === this.data.packId)
+        ? this.data.packId
+        : packs[0]?.id || '';
+    this.setData({ packs, packId });
+    this.refresh();
   },
 
-  onShow() {
+  refresh() {
     const { packId } = this.data;
+    if (!packId) return;
     const manifest = getPackManifest(packId);
     const items = getPackItems(packId).filter(isPoetry) as PoetryItem[];
     const progress = loadPackProgress(packId);
@@ -49,6 +61,12 @@ Page({
     });
   },
 
+  onSelectPack(e: WechatMiniprogram.TouchEvent) {
+    const packId = e.currentTarget.dataset.id as string;
+    this.setData({ packId });
+    this.refresh();
+  },
+
   onClearAll() {
     wx.showModal({
       title: '清空进度？',
@@ -56,7 +74,7 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         wx.removeStorageSync(`progress:${this.data.packId}`);
-        this.onShow();
+        this.refresh();
         wx.showToast({ title: '已清空', icon: 'success' });
       },
     });

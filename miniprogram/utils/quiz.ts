@@ -1,7 +1,10 @@
 import type {
+  ArcadeMode,
   ChoiceOption,
+  FillBlankQuestion,
   FillNextQuestion,
   MatchPairQuestion,
+  OrderLinesQuestion,
   PoetryItem,
   Question,
   QuizType,
@@ -117,10 +120,87 @@ export function makeTitleAuthor(
   };
 }
 
+/** 打乱诗句，按顺序点选还原 */
+export function makeOrderLines(item: PoetryItem): OrderLinesQuestion | null {
+  if (item.lines.length < 2) return null;
+  const lines = item.lines.slice(0, Math.min(item.lines.length, 6));
+  const options: ChoiceOption[] = lines.map((text, i) => ({ id: `L${i}`, text }));
+  const answerOrder = options.map((o) => o.id);
+  let shuffled = shuffle(options);
+  // 避免偶尔打乱后仍完全正确
+  let guard = 0;
+  while (shuffled.every((o, i) => o.id === answerOrder[i]) && guard < 8) {
+    shuffled = shuffle(options);
+    guard += 1;
+  }
+
+  return {
+    id: uid('order'),
+    type: 'orderLines',
+    itemId: item.id,
+    prompt: `把《${item.title}》的诗句排成正确顺序`,
+    options: shuffled,
+    answerOrder,
+  };
+}
+
+/** 缺一字填空 */
+export function makeFillBlank(item: PoetryItem, pool: PoetryItem[]): FillBlankQuestion | null {
+  const candidates = item.lines.filter((line) => line.length >= 2);
+  if (!candidates.length) return null;
+  const line = candidates[Math.floor(Math.random() * candidates.length)];
+  const blankIdx = Math.floor(Math.random() * line.length);
+  const answerChar = line[blankIdx];
+  const promptLine = `${line.slice(0, blankIdx)}＿${line.slice(blankIdx + 1)}`;
+
+  const charPool = pool
+    .flatMap((p) => p.lines.join('').split(''))
+    .filter((ch) => ch && ch !== answerChar && !/\s/.test(ch));
+  const unique = Array.from(new Set(charPool));
+  if (unique.length < 1) return null;
+
+  const options = shuffle([
+    { id: 'ans', text: answerChar },
+    ...pickN(unique, 3).map((text, i) => ({ id: `d${i}`, text })),
+  ]);
+
+  return {
+    id: uid('blank'),
+    type: 'fillBlank',
+    itemId: item.id,
+    prompt: `补上缺字：${promptLine}`,
+    options,
+    answerId: 'ans',
+  };
+}
+
 export interface BuildQuizOptions {
   count?: number;
   modes?: QuizType[];
   preferTitle?: boolean;
+}
+
+function makeByType(
+  mode: QuizType,
+  item: PoetryItem,
+  pool: PoetryItem[],
+  preferTitle: boolean,
+): Question | null {
+  if (mode === 'fillNext') return makeFillNext(item, pool);
+  if (mode === 'titleAuthor') {
+    const modeTA: 'title' | 'author' =
+      preferTitle || item.grade <= 1 ? 'title' : Math.random() < 0.7 ? 'title' : 'author';
+    return makeTitleAuthor(item, pool, modeTA);
+  }
+  if (mode === 'matchPair') {
+    return makeMatchPair(
+      pool.filter((p) => p.grade === item.grade),
+      3,
+    );
+  }
+  if (mode === 'orderLines') return makeOrderLines(item);
+  if (mode === 'fillBlank') return makeFillBlank(item, pool);
+  return null;
 }
 
 /** 围绕单篇诗词生成一局题目（混合题型） */
@@ -130,27 +210,43 @@ export function buildQuizForItem(
   options: BuildQuizOptions = {},
 ): Question[] {
   const count = options.count ?? 5;
-  const modes = options.modes ?? ['fillNext', 'titleAuthor', 'matchPair'];
+  const modes = options.modes ?? ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
   const preferTitle = options.preferTitle !== false;
   const questions: Question[] = [];
   let guard = 0;
 
-  while (questions.length < count && guard < count * 8) {
+  while (questions.length < count && guard < count * 10) {
     guard += 1;
     const mode = modes[questions.length % modes.length];
-    let q: Question | null = null;
+    const q = makeByType(mode, item, pool, preferTitle);
+    if (q) questions.push(q);
+  }
 
-    if (mode === 'fillNext') {
-      q = makeFillNext(item, pool);
-    } else if (mode === 'titleAuthor') {
-      const modeTA: 'title' | 'author' =
-        preferTitle || item.grade <= 1 ? 'title' : Math.random() < 0.7 ? 'title' : 'author';
-      q = makeTitleAuthor(item, pool, modeTA);
-    } else if (mode === 'matchPair') {
-      // 配对用同年级池，保证干扰句来源一致
-      q = makeMatchPair(pool.filter((p) => p.grade === item.grade), 3);
+  return questions;
+}
+
+/** 游戏厅：按专项玩法从年级题库抽题 */
+export function buildArcadeQuiz(
+  pool: PoetryItem[],
+  mode: ArcadeMode,
+  count = 8,
+): Question[] {
+  if (!pool.length) return [];
+  const preferTitle = pool[0].grade <= 1;
+  const questions: Question[] = [];
+  let guard = 0;
+
+  while (questions.length < count && guard < count * 12) {
+    guard += 1;
+    const item = pool[Math.floor(Math.random() * pool.length)];
+    let quizType: QuizType;
+    if (mode === 'mixed') {
+      const all: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+      quizType = all[questions.length % all.length];
+    } else {
+      quizType = mode;
     }
-
+    const q = makeByType(quizType, item, pool, preferTitle);
     if (q) questions.push(q);
   }
 
@@ -160,16 +256,27 @@ export function buildQuizForItem(
 /** 判题 */
 export function gradeAnswer(
   question: Question,
-  payload: string | Record<string, string>,
+  payload: string | string[] | Record<string, string>,
 ): boolean {
-  if (question.type === 'fillNext' || question.type === 'titleAuthor') {
+  if (
+    question.type === 'fillNext' ||
+    question.type === 'titleAuthor' ||
+    question.type === 'fillBlank'
+  ) {
     return typeof payload === 'string' && payload === question.answerId;
   }
   if (question.type === 'matchPair') {
-    if (typeof payload !== 'object' || !payload) return false;
+    if (typeof payload !== 'object' || !payload || Array.isArray(payload)) return false;
     const map = question.answerMap;
     const keys = Object.keys(map);
     return keys.every((k) => payload[k] === map[k]);
+  }
+  if (question.type === 'orderLines') {
+    if (!Array.isArray(payload)) return false;
+    const expected = question.answerOrder;
+    return (
+      payload.length === expected.length && payload.every((id, i) => id === expected[i])
+    );
   }
   return false;
 }
@@ -182,3 +289,12 @@ export function starsFromScore(correct: number, total: number): number {
   if (ratio >= 0.6) return 1;
   return 0;
 }
+
+export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
+  mixed: '随机挑战',
+  fillNext: '下一句闪电',
+  matchPair: '配对达人',
+  titleAuthor: '诗名作者',
+  orderLines: '诗句排序',
+  fillBlank: '缺字填空',
+};

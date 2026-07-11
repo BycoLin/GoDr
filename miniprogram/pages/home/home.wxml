@@ -15,6 +15,12 @@
     <view class="continue-go">继续闯关 →</view>
   </view>
 
+  <view class="card games-entry" bindtap="onGoGames">
+    <view class="games-entry-label">游戏厅</view>
+    <view class="games-entry-title">更多玩法等你挑战</view>
+    <view class="games-entry-desc">随机挑战 · 下一句闪电 · 诗句排序 · 缺字填空</view>
+  </view>
+
   <view class="section-title">知识库</view>
   <view class="pack-list">
     <view
@@ -30,6 +36,4 @@
       <view class="pack-meta">{{item.gradeLabel}}</view>
     </view>
   </view>
-
-  <button class="btn btn-ghost progress-link" bindtap="onProgress">我的进度</button>
 </view>

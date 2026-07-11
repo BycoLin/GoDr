@@ -1,0 +1,100 @@
+.games {
+  min-height: 100vh;
+}
+
+.intro-title {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: #14553a;
+}
+
+.intro-desc {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.grade-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin: 32rpx 0 28rpx;
+  flex-wrap: wrap;
+}
+
+.grade-label {
+  font-size: 26rpx;
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.grade-chip {
+  padding: 12rpx 28rpx;
+  border-radius: 999rpx;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  font-size: 26rpx;
+  border: 2rpx solid transparent;
+}
+
+.grade-chip.on {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-soft);
+  font-weight: 700;
+}
+
+.campaign {
+  margin-bottom: 36rpx;
+  border-left: 8rpx solid var(--color-accent);
+}
+
+.campaign-tag,
+.game-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-bottom: 12rpx;
+}
+
+.campaign-title,
+.game-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.campaign-desc,
+.game-desc {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: var(--color-muted);
+  margin-bottom: 20rpx;
+  font-weight: 600;
+}
+
+.game-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.game-card:active,
+.campaign:active {
+  transform: scale(0.98);
+  transition: transform 0.15s ease;
+}
+
+.game-tag {
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+}

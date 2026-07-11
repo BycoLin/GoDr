@@ -25,7 +25,11 @@ export interface PoetryItem {
 
 export type KnowledgeItem = PoetryItem;
 
-export type QuizType = 'fillNext' | 'matchPair' | 'titleAuthor';
+/** 关卡混合 / 游戏厅专项玩法 */
+export type QuizType = 'fillNext' | 'matchPair' | 'titleAuthor' | 'orderLines' | 'fillBlank';
+
+/** 游戏厅模式（含混合随机） */
+export type ArcadeMode = QuizType | 'mixed';
 
 export interface ChoiceOption {
   id: string;
@@ -61,7 +65,33 @@ export interface TitleAuthorQuestion {
   answerId: string;
 }
 
-export type Question = FillNextQuestion | MatchPairQuestion | TitleAuthorQuestion;
+/** 打乱诗句，按正确顺序点选 */
+export interface OrderLinesQuestion {
+  id: string;
+  type: 'orderLines';
+  itemId: string;
+  prompt: string;
+  options: ChoiceOption[];
+  /** 正确顺序的 option id 列表 */
+  answerOrder: string[];
+}
+
+/** 诗句缺字填空 */
+export interface FillBlankQuestion {
+  id: string;
+  type: 'fillBlank';
+  itemId: string;
+  prompt: string;
+  options: ChoiceOption[];
+  answerId: string;
+}
+
+export type Question =
+  | FillNextQuestion
+  | MatchPairQuestion
+  | TitleAuthorQuestion
+  | OrderLinesQuestion
+  | FillBlankQuestion;
 
 export interface SessionAnswer {
   questionId: string;
@@ -72,7 +102,7 @@ export interface PlaySession {
   packId: string;
   grade: number;
   itemId: string;
-  mode: QuizType | 'mixed';
+  mode: ArcadeMode;
   questions: Question[];
   answers: SessionAnswer[];
   startedAt: number;

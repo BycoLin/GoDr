@@ -53,9 +53,7 @@ Page({
     });
   },
 
-  onProgress() {
-    const pack = this.data.packs[0];
-    if (!pack) return;
-    wx.navigateTo({ url: `/pages/progress/progress?packId=${pack.id}` });
+  onGoGames() {
+    wx.switchTab({ url: '/pages/games/games' });
   },
 });

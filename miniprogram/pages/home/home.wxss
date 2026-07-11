@@ -114,6 +114,30 @@
   font-size: 26rpx;
 }
 
+.games-entry {
+  margin-bottom: 40rpx;
+  border-left: 8rpx solid var(--color-primary);
+}
+
+.games-entry-label {
+  font-size: 22rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.games-entry-title {
+  margin-top: 8rpx;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.games-entry-desc {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
 .section-title {
   font-size: 28rpx;
   color: var(--color-muted);
@@ -161,8 +185,4 @@
   margin-top: 16rpx;
   font-size: 24rpx;
   color: var(--color-muted);
-}
-
-.progress-link {
-  margin-top: 48rpx;
 }

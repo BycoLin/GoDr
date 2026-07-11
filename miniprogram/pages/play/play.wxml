@@ -1,6 +1,7 @@
 <view class="safe-pad play">
   <view class="top">
-    <view class="poem-tag">《{{poemTitle}}》 · {{poemAuthor}}</view>
+    <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
+    <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
     <view class="progress-text">第 {{index + 1}} / {{total}} 题</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{total ? ((index + 1) / total * 100) : 0}}%;"></view>
@@ -8,13 +9,20 @@
   </view>
 
   <block wx:if="{{current}}">
-    <!-- fillNext / titleAuthor -->
-    <view class="card q-card" wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor'}}">
-      <view class="q-type">{{current.type === 'fillNext' ? '下一句' : (current.mode === 'title' ? '选诗名' : '选作者')}}</view>
+    <!-- fillNext / titleAuthor / fillBlank -->
+    <view
+      class="card q-card"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank'}}"
+    >
+      <view class="q-type">
+        <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
+        <block wx:elif="{{current.type === 'fillBlank'}}">缺字填空</block>
+        <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
+      </view>
       <view class="q-prompt">{{current.prompt}}</view>
-      <view class="options">
+      <view class="options {{current.type === 'fillBlank' ? 'options-chars' : ''}}">
         <view
-          class="option {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          class="option {{current.type === 'fillBlank' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
           wx:for="{{current.options}}"
           wx:key="id"
           data-id="{{item.id}}"
@@ -50,6 +58,36 @@
       <view class="match-actions">
         <button class="btn btn-ghost" size="mini" bindtap="onUndoMatch">重来</button>
         <button class="btn btn-primary" disabled="{{!matchReady || locked}}" bindtap="onSubmitMatch">确认配对</button>
+      </view>
+    </view>
+
+    <!-- orderLines -->
+    <view class="card q-card" wx:if="{{current.type === 'orderLines'}}">
+      <view class="q-type">诗句排序</view>
+      <view class="q-prompt">{{current.prompt}}</view>
+      <view class="order-picked" wx:if="{{orderPickedTexts.length}}">
+        <view class="order-picked-label">已选顺序</view>
+        <view class="order-picked-line" wx:for="{{orderPickedTexts}}" wx:key="*this">
+          {{index + 1}}. {{item}}
+        </view>
+      </view>
+      <view class="options">
+        <view
+          class="option {{!orderAvailable[item.id] ? 'done-opt' : ''}}"
+          wx:for="{{current.options}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          data-text="{{item.text}}"
+          bindtap="onTapOrderOption"
+        >{{item.text}}</view>
+      </view>
+      <view class="match-actions">
+        <button class="btn btn-ghost" size="mini" bindtap="onUndoOrder">重来</button>
+        <button
+          class="btn btn-primary"
+          disabled="{{locked || orderPicked.length !== current.answerOrder.length}}"
+          bindtap="onSubmitOrder"
+        >确认顺序</button>
       </view>
     </view>
   </block>

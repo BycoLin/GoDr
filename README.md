@@ -16,7 +16,8 @@
 ```
 miniprogram/
   data/packs/poetry-g1-g2/   # 知识包（manifest.js + items.js）
-  pages/                     # home / pack / level / play / result / progress
+  pages/                     # home / games / progress / mine / pack / level / play / result
+  assets/tab/                # 底部菜单图标
   utils/                     # registry / quiz / progress / types
 scripts/extract-poetry.mjs   # 从 doc 粗抽文本（需 antiword）
 doc/                         # 原始资料（不打包上传）
@@ -30,6 +31,8 @@ doc/                         # 原始资料（不打包上传）
 
 ## 玩法说明
 
-- 选知识包 → 选年级 → 按诗闯关（需先通关上一首）
-- 每局 5 题：选下一句 / 上下句配对 / 选诗名（或作者）
-- 正确率换算星级并写入本地 `progress:{packId}`
+- 底部菜单：首页 / 游戏 / 进度 / 我的
+- 诗词闯关：选知识包 → 选年级 → 按诗闯关（需先通关上一首）
+- 游戏厅：随机挑战、下一句闪电、配对达人、诗句排序、缺字填空、诗名作者
+- 关卡每局约 5 题；游戏厅每局约 8 题
+- 正确率换算星级；闯关进度写入本地 `progress:{packId}`

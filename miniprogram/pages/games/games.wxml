@@ -1,0 +1,38 @@
+<view class="safe-pad games">
+  <view class="intro">
+    <view class="intro-title">选一种玩法开玩</view>
+    <view class="intro-desc">和闯关关卡共用同一套诗词，换种方式记得更牢</view>
+  </view>
+
+  <view class="grade-row">
+    <view class="grade-label">年级</view>
+    <view
+      class="grade-chip {{grade === item ? 'on' : ''}}"
+      wx:for="{{grades}}"
+      wx:key="*this"
+      data-grade="{{item}}"
+      bindtap="onSelectGrade"
+    >{{item}} 年级</view>
+  </view>
+
+  <view class="card campaign" bindtap="onTapCampaign">
+    <view class="campaign-tag">经典</view>
+    <view class="campaign-title">诗词闯关</view>
+    <view class="campaign-desc">按诗逐首解锁，通关攒星星</view>
+  </view>
+
+  <view class="section-title">趣味玩法</view>
+  <view class="game-list">
+    <view
+      class="card game-card"
+      wx:for="{{games}}"
+      wx:key="mode"
+      data-mode="{{item.mode}}"
+      bindtap="onTapGame"
+    >
+      <view class="game-tag">{{item.tag}}</view>
+      <view class="game-title">{{item.title}}</view>
+      <view class="game-desc">{{item.desc}}</view>
+    </view>
+  </view>
+</view>
