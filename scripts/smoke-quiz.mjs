@@ -5,7 +5,7 @@
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
-const items = require('../miniprogram/data/packs/poetry-g1-g2/items.json');
+const items = require('../miniprogram/data/packs/poetry-g1-g2/items.js');
 
 function shuffle(arr) {
   const a = arr.slice();

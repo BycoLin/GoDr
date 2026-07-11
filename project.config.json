@@ -2,9 +2,18 @@
   "description": "GoDr 闯关小博士 · 小学生免费闯关学习小程序",
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "doc" },
-      { "type": "folder", "value": "scripts" },
-      { "type": "folder", "value": "node_modules" }
+      {
+        "value": "doc",
+        "type": "folder"
+      },
+      {
+        "value": "scripts",
+        "type": "folder"
+      },
+      {
+        "value": "node_modules",
+        "type": "folder"
+      }
     ],
     "include": []
   },
@@ -48,7 +57,9 @@
     "condition": false,
     "swc": false,
     "disableSWC": true,
-    "useCompilerPlugins": ["typescript"]
+    "useCompilerPlugins": [
+      "typescript"
+    ]
   },
   "compileType": "miniprogram",
   "libVersion": "3.5.5",
@@ -60,5 +71,6 @@
   "editorSetting": {
     "tabIndent": "insertSpaces",
     "tabSize": 2
-  }
+  },
+  "simulatorPluginLibVersion": {}
 }

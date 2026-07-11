@@ -15,7 +15,7 @@
 
 ```
 miniprogram/
-  data/packs/poetry-g1-g2/   # 知识包（manifest + items）
+  data/packs/poetry-g1-g2/   # 知识包（manifest.js + items.js）
   pages/                     # home / pack / level / play / result / progress
   utils/                     # registry / quiz / progress / types
 scripts/extract-poetry.mjs   # 从 doc 粗抽文本（需 antiword）
@@ -24,7 +24,7 @@ doc/                         # 原始资料（不打包上传）
 
 ## 更新知识包
 
-1. 校对或编辑 `miniprogram/data/packs/poetry-g1-g2/items.json`
+1. 校对或编辑 `miniprogram/data/packs/poetry-g1-g2/items.js`
 2. 新增知识包：见 [`miniprogram/data/README.md`](miniprogram/data/README.md)，并在 `utils/registry.ts` 注册
 3. 可选：`npm run extract:poetry` 从 DOC 导出粗抽文本便于对照
 

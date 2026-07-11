@@ -1,6 +1,6 @@
 /**
- * 从 doc 中的 1-3 年级闯关表 DOC 粗抽文本，便于人工校对 JSON。
- * 实际题库以 miniprogram/data/packs/poetry-g1-g2/items.json 为准。
+ * 从 doc 中的 1-3 年级闯关表 DOC 粗抽文本，便于人工校对题库。
+ * 实际题库以 miniprogram/data/packs/poetry-g1-g2/items.js 为准。
  *
  * 用法：npm run extract:poetry
  * 依赖：系统需安装 antiword（Git Bash / MSYS2 常见自带）
@@ -34,4 +34,4 @@ if (result.error || result.status !== 0) {
 
 fs.writeFileSync(outPath, result.stdout, 'utf8');
 console.log('已写出粗抽文本：', outPath);
-console.log('请对照教材校对后更新 miniprogram/data/packs/poetry-g1-g2/items.json');
+console.log('请对照教材校对后更新 miniprogram/data/packs/poetry-g1-g2/items.js');

@@ -1,13 +1,13 @@
 import type { KnowledgeItem, PackManifest, PoetryItem } from './types';
 
-/** 已注册知识包；新增包时在此追加 id，并 require 对应 JSON */
+/** 已注册知识包；新增包时在此追加 id，并 require 对应 JS 模块 */
 const PACK_IDS = ['poetry-g1-g2'] as const;
 
 type PackId = (typeof PACK_IDS)[number];
 
-// 小程序运行时用 require 加载 JSON，兼容性更好
-const poetryManifest = require('../data/packs/poetry-g1-g2/manifest.json') as PackManifest;
-const poetryItems = require('../data/packs/poetry-g1-g2/items.json') as PoetryItem[];
+// 微信小程序不能直接 require .json，需用 module.exports 的 .js
+const poetryManifest = require('../data/packs/poetry-g1-g2/manifest.js') as PackManifest;
+const poetryItems = require('../data/packs/poetry-g1-g2/items.js') as PoetryItem[];
 
 const manifests: Record<PackId, PackManifest> = {
   'poetry-g1-g2': poetryManifest,
