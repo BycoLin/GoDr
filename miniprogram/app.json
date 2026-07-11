@@ -11,17 +11,17 @@
     "pages/wrongbook/wrongbook"
   ],
   "window": {
-    "navigationBarBackgroundColor": "#1B6B4A",
+    "navigationBarBackgroundColor": "#1FA8A0",
     "navigationBarTitleText": "闯关小博士",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#F7F3E8",
+    "backgroundColor": "#F2F8FC",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
-    "color": "#7a8a80",
-    "selectedColor": "#1B6B4A",
-    "backgroundColor": "#fffdf7",
-    "borderStyle": "black",
+    "color": "#8A9AAD",
+    "selectedColor": "#1FA8A0",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/home/home",

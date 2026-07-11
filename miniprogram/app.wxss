@@ -1,24 +1,28 @@
 page {
-  --color-bg: #f7f3e8;
-  --color-surface: #fffdf7;
-  --color-ink: #1f2a24;
-  --color-muted: #5c6b62;
-  --color-primary: #1b6b4a;
-  --color-primary-soft: #d8efe4;
-  --color-accent: #d97706;
-  --color-accent-soft: #fde8c8;
-  --color-danger: #c2410c;
-  --color-ok: #15803d;
-  --radius: 20rpx;
-  --shadow: 0 8rpx 24rpx rgba(31, 42, 36, 0.08);
+  --color-bg: #f2f8fc;
+  --color-surface: #ffffff;
+  --color-ink: #1a2b3c;
+  --color-muted: #6a7b8f;
+  --color-primary: #1fa8a0;
+  --color-primary-deep: #0f8f88;
+  --color-primary-soft: #d4f5f1;
+  --color-accent: #ff7b54;
+  --color-accent-soft: #ffe4db;
+  --color-sky: #4ba3ff;
+  --color-sky-soft: #dceeff;
+  --color-danger: #ff5c6a;
+  --color-ok: #22c55e;
+  --radius: 28rpx;
+  --shadow: 0 10rpx 28rpx rgba(26, 43, 60, 0.06);
 }
 
 page {
-  background: linear-gradient(180deg, #e8f2ec 0%, var(--color-bg) 40%, #efe6d4 100%);
+  background: linear-gradient(165deg, #dff3ff 0%, #f2f8fc 42%, #e8fff8 100%);
   color: var(--color-ink);
   font-size: 30rpx;
   min-height: 100vh;
   box-sizing: border-box;
+  line-height: 1.45;
 }
 
 .btn {
@@ -39,14 +43,15 @@ page {
 }
 
 .btn-primary {
-  background: var(--color-primary);
+  background: linear-gradient(135deg, #2ec4bb 0%, #1fa8a0 100%);
   color: #fff;
+  box-shadow: 0 10rpx 24rpx rgba(31, 168, 160, 0.28);
 }
 
 .btn-secondary {
-  background: var(--color-surface);
-  color: var(--color-primary);
-  border: 2rpx solid var(--color-primary);
+  background: #fff;
+  color: var(--color-primary-deep);
+  border: 2rpx solid rgba(31, 168, 160, 0.35);
 }
 
 .btn-ghost {
@@ -59,9 +64,18 @@ page {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 32rpx;
+  border: 2rpx solid rgba(255, 255, 255, 0.8);
 }
 
 .safe-pad {
-  padding: 32rpx;
-  padding-bottom: calc(48rpx + env(safe-area-inset-bottom));
+  padding: 36rpx 32rpx;
+  padding-bottom: calc(56rpx + env(safe-area-inset-bottom));
+}
+
+.section-title {
+  font-size: 26rpx;
+  color: var(--color-muted);
+  margin-bottom: 18rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
 }

@@ -1,15 +1,16 @@
 .result {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 20rpx;
   min-height: 100vh;
 }
 
 .result-card {
   text-align: center;
   padding: 56rpx 32rpx;
-  margin-bottom: 16rpx;
+  margin-bottom: 8rpx;
   animation: riseIn 0.4s ease;
+  background: linear-gradient(165deg, #e8fffa 0%, #ffffff 50%, #dceeff 100%);
 }
 
 @keyframes riseIn {
@@ -34,12 +35,12 @@
 
 .star {
   font-size: 64rpx;
-  color: #d6d3d1;
+  color: #d7dee8;
   margin: 0 6rpx;
 }
 
 .star.on {
-  color: var(--color-accent);
+  color: #ffb020;
   animation: softPulse 0.6s ease;
 }
 
@@ -47,7 +48,7 @@
   margin-top: 24rpx;
   font-size: 56rpx;
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-primary-deep);
 }
 
 .points-row {
@@ -73,16 +74,16 @@
   padding: 8rpx 18rpx;
   border-radius: 999rpx;
   background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-primary-deep);
   font-size: 24rpx;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .encourage {
   margin-top: 16rpx;
   font-size: 28rpx;
   color: var(--color-ink);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 @keyframes softPulse {

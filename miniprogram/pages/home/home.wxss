@@ -4,15 +4,15 @@
 
 .hero {
   position: relative;
-  padding: 48rpx 8rpx 56rpx;
+  padding: 28rpx 8rpx 40rpx;
   overflow: hidden;
 }
 
 .brand {
-  font-size: 64rpx;
+  font-size: 56rpx;
   font-weight: 800;
-  letter-spacing: 4rpx;
-  color: #14553a;
+  letter-spacing: 2rpx;
+  color: #0f6f6a;
   line-height: 1.2;
 }
 
@@ -24,47 +24,47 @@
 
 .hero-art {
   position: absolute;
-  right: 0;
-  top: 20rpx;
-  width: 220rpx;
+  right: -8rpx;
+  top: 8rpx;
+  width: 240rpx;
   height: 180rpx;
   pointer-events: none;
 }
 
 .leaf {
   position: absolute;
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 0 70% 0 70%;
-  background: #2f8f66;
-  opacity: 0.35;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50% 40% 55% 45%;
+  background: #5ad1c8;
+  opacity: 0.45;
   animation: floaty 4s ease-in-out infinite;
 }
 
 .leaf-a {
-  right: 40rpx;
-  top: 20rpx;
-  transform: rotate(25deg);
+  right: 36rpx;
+  top: 16rpx;
+  transform: rotate(18deg);
 }
 
 .leaf-b {
-  right: 100rpx;
-  top: 70rpx;
-  background: #d97706;
-  opacity: 0.28;
+  right: 104rpx;
+  top: 72rpx;
+  background: #ff9a74;
+  opacity: 0.4;
   animation-delay: 0.8s;
-  transform: rotate(-15deg);
+  transform: rotate(-20deg);
 }
 
 .scroll {
   position: absolute;
-  right: 20rpx;
-  bottom: 10rpx;
-  width: 120rpx;
-  height: 80rpx;
-  border-radius: 12rpx;
-  background: linear-gradient(135deg, #fffdf7, #f3e7c8);
-  border: 2rpx solid rgba(27, 107, 74, 0.2);
+  right: 16rpx;
+  bottom: 8rpx;
+  width: 128rpx;
+  height: 86rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(145deg, #ffffff, #dceeff);
+  border: 2rpx solid rgba(75, 163, 255, 0.25);
   box-shadow: var(--shadow);
   animation: softPulse 3.2s ease-in-out infinite;
 }
@@ -72,10 +72,10 @@
 @keyframes floaty {
   0%,
   100% {
-    transform: translateY(0) rotate(25deg);
+    transform: translateY(0) rotate(18deg);
   }
   50% {
-    transform: translateY(-12rpx) rotate(30deg);
+    transform: translateY(-14rpx) rotate(24deg);
   }
 }
 
@@ -86,73 +86,68 @@
     opacity: 1;
   }
   50% {
-    transform: scale(1.04);
-    opacity: 0.9;
+    transform: scale(1.05);
+    opacity: 0.92;
   }
 }
 
 .continue {
-  margin-bottom: 40rpx;
-  border-left: 8rpx solid var(--color-accent);
+  margin-bottom: 24rpx;
+  background: linear-gradient(135deg, #fff7f1 0%, #ffffff 70%);
 }
 
 .continue-label {
   font-size: 22rpx;
   color: var(--color-accent);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .continue-text {
   margin-top: 8rpx;
   font-size: 30rpx;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .continue-go {
-  margin-top: 12rpx;
-  color: var(--color-primary);
+  margin-top: 14rpx;
+  color: var(--color-primary-deep);
   font-size: 26rpx;
+  font-weight: 600;
 }
 
 .games-entry {
-  margin-bottom: 40rpx;
-  border-left: 8rpx solid var(--color-primary);
+  margin-bottom: 36rpx;
+  background: linear-gradient(135deg, #e8fffa 0%, #ffffff 65%);
 }
 
 .games-entry-label {
   font-size: 22rpx;
-  color: var(--color-primary);
-  font-weight: 600;
+  color: var(--color-primary-deep);
+  font-weight: 700;
 }
 
 .games-entry-title {
   margin-top: 8rpx;
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 34rpx;
+  font-weight: 800;
 }
 
 .games-entry-desc {
-  margin-top: 8rpx;
+  margin-top: 10rpx;
   font-size: 24rpx;
   color: var(--color-muted);
-  line-height: 1.45;
-}
-
-.section-title {
-  font-size: 28rpx;
-  color: var(--color-muted);
-  margin-bottom: 20rpx;
-  font-weight: 600;
+  line-height: 1.5;
 }
 
 .pack-list {
   display: flex;
   flex-direction: column;
-  gap: 24rpx;
+  gap: 20rpx;
 }
 
 .pack-card {
   transition: transform 0.2s ease;
+  background: linear-gradient(160deg, #ffffff 0%, #f4fbff 100%);
 }
 
 .pack-card:active {
@@ -162,27 +157,29 @@
 .pack-subject {
   display: inline-block;
   font-size: 22rpx;
-  color: var(--color-primary);
-  background: var(--color-primary-soft);
+  color: var(--color-sky);
+  background: var(--color-sky-soft);
   padding: 6rpx 16rpx;
-  border-radius: 8rpx;
-  margin-bottom: 12rpx;
+  border-radius: 999rpx;
+  margin-bottom: 14rpx;
+  font-weight: 700;
 }
 
 .pack-title {
   font-size: 36rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .pack-desc {
-  margin-top: 8rpx;
+  margin-top: 10rpx;
   color: var(--color-muted);
   font-size: 26rpx;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .pack-meta {
-  margin-top: 16rpx;
+  margin-top: 18rpx;
   font-size: 24rpx;
-  color: var(--color-muted);
+  color: var(--color-primary-deep);
+  font-weight: 600;
 }

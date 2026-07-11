@@ -5,21 +5,21 @@
 .intro-title {
   font-size: 44rpx;
   font-weight: 800;
-  color: #14553a;
+  color: #0f6f6a;
 }
 
 .intro-desc {
   margin-top: 10rpx;
   font-size: 26rpx;
   color: var(--color-muted);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
 .grade-row {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  margin: 32rpx 0 28rpx;
+  gap: 14rpx;
+  margin: 28rpx 0 24rpx;
   flex-wrap: wrap;
 }
 
@@ -32,51 +32,58 @@
 .grade-chip {
   padding: 12rpx 28rpx;
   border-radius: 999rpx;
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.85);
   color: var(--color-muted);
   font-size: 26rpx;
   border: 2rpx solid transparent;
 }
 
 .grade-chip.on {
-  color: var(--color-primary);
-  border-color: var(--color-primary);
-  background: var(--color-primary-soft);
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #2ec4bb, #1fa8a0);
   font-weight: 700;
+  box-shadow: 0 8rpx 18rpx rgba(31, 168, 160, 0.25);
 }
 
 .feature-row {
   display: flex;
   gap: 16rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .feature-card {
   flex: 1;
-  padding: 24rpx;
+  padding: 26rpx 22rpx;
 }
 
 .feature-card.boss {
-  border-left: 8rpx solid var(--color-danger);
+  background: linear-gradient(160deg, #ffe8eb 0%, #ffffff 70%);
 }
 
 .feature-card.daily {
-  border-left: 8rpx solid var(--color-accent);
+  background: linear-gradient(160deg, #fff0e6 0%, #ffffff 70%);
 }
 
 .feature-tag {
   display: inline-block;
   font-size: 20rpx;
-  color: var(--color-primary);
-  background: var(--color-primary-soft);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
   padding: 4rpx 12rpx;
-  border-radius: 8rpx;
+  border-radius: 999rpx;
   margin-bottom: 10rpx;
+  font-weight: 700;
+}
+
+.feature-card.boss .feature-tag {
+  color: var(--color-danger);
+  background: #ffe0e4;
 }
 
 .feature-title {
   font-size: 30rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .feature-desc {
@@ -87,62 +94,63 @@
 }
 
 .campaign {
-  margin-bottom: 20rpx;
-  border-left: 8rpx solid var(--color-accent);
+  margin-bottom: 16rpx;
+  background: linear-gradient(135deg, #dceeff 0%, #ffffff 60%);
 }
 
 .link-wrong {
-  margin-bottom: 28rpx;
-  color: var(--color-primary);
+  margin-bottom: 24rpx;
+  color: var(--color-primary-deep);
   font-size: 26rpx;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .campaign-tag,
 .game-tag {
   display: inline-block;
-  font-size: 22rpx;
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
-  padding: 6rpx 16rpx;
-  border-radius: 8rpx;
+  font-size: 20rpx;
+  color: var(--color-sky);
+  background: var(--color-sky-soft);
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
   margin-bottom: 12rpx;
+  font-weight: 700;
 }
 
 .campaign-title,
 .game-title {
-  font-size: 34rpx;
-  font-weight: 700;
+  font-size: 32rpx;
+  font-weight: 800;
 }
 
 .campaign-desc,
 .game-desc {
   margin-top: 8rpx;
-  font-size: 26rpx;
+  font-size: 24rpx;
   color: var(--color-muted);
   line-height: 1.45;
 }
 
-.section-title {
-  font-size: 28rpx;
-  color: var(--color-muted);
-  margin-bottom: 20rpx;
-  font-weight: 600;
+.game-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
 }
 
-.game-list {
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
+.game-card {
+  padding: 24rpx 20rpx;
+  min-height: 180rpx;
+  background: linear-gradient(165deg, #ffffff 0%, #f3fffc 100%);
 }
 
 .game-card:active,
-.campaign:active {
+.campaign:active,
+.feature-card:active {
   transform: scale(0.98);
   transition: transform 0.15s ease;
 }
 
 .game-tag {
-  color: var(--color-primary);
+  color: var(--color-primary-deep);
   background: var(--color-primary-soft);
 }

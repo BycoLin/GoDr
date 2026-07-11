@@ -4,12 +4,13 @@
 
 .profile {
   margin-bottom: 28rpx;
+  background: linear-gradient(145deg, #e8fffa 0%, #ffffff 55%, #dceeff 100%);
 }
 
 .brand {
   font-size: 40rpx;
   font-weight: 800;
-  color: #14553a;
+  color: #0f6f6a;
 }
 
 .slogan {
@@ -20,19 +21,22 @@
 
 .stats {
   display: flex;
-  gap: 24rpx;
-  margin-top: 32rpx;
+  gap: 12rpx;
+  margin-top: 28rpx;
 }
 
 .stat {
   flex: 1;
   text-align: center;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 20rpx;
+  padding: 16rpx 8rpx;
 }
 
 .stat-num {
-  font-size: 40rpx;
+  font-size: 38rpx;
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-primary-deep);
 }
 
 .stat-label {
@@ -42,42 +46,38 @@
 }
 
 .daily-tip {
-  margin-top: 24rpx;
+  margin-top: 20rpx;
   font-size: 24rpx;
   color: var(--color-muted);
   text-align: center;
 }
 
-.section-title {
-  font-size: 28rpx;
-  color: var(--color-muted);
-  margin-bottom: 16rpx;
-  font-weight: 600;
-}
-
 .badge-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16rpx;
+  gap: 14rpx;
   margin-bottom: 28rpx;
 }
 
 .badge-item {
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.7);
   border-radius: var(--radius);
   padding: 20rpx;
-  box-shadow: var(--shadow);
-  opacity: 0.45;
+  box-shadow: none;
+  opacity: 0.5;
+  border: 2rpx solid transparent;
 }
 
 .badge-item.on {
   opacity: 1;
-  border: 2rpx solid var(--color-primary-soft);
+  background: #fff;
+  border-color: var(--color-primary-soft);
+  box-shadow: var(--shadow);
 }
 
 .badge-title {
   font-size: 26rpx;
-  font-weight: 700;
+  font-weight: 800;
 }
 
 .badge-desc {
@@ -88,15 +88,16 @@
 }
 
 .menu {
-  padding: 0 32rpx;
+  padding: 0 28rpx;
+  overflow: hidden;
 }
 
 .menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 34rpx 0;
-  border-bottom: 1rpx solid #e8eee9;
+  padding: 32rpx 0;
+  border-bottom: 1rpx solid #e8eef5;
   font-size: 30rpx;
 }
 
@@ -109,7 +110,7 @@
 }
 
 .arrow {
-  color: var(--color-muted);
+  color: #a8b5c6;
   font-size: 36rpx;
 }
 
