@@ -1,7 +1,7 @@
 <view class="safe-pad home">
   <view class="hero">
-    <view class="brand">诗趣乐园</view>
-    <view class="tagline">边玩边学 · 古诗词闯关</view>
+    <view class="brand">GoDr 闯关小博士</view>
+    <view class="tagline">闯关答题 · 快乐学习</view>
     <view class="hero-art" aria-hidden="true">
       <view class="leaf leaf-a"></view>
       <view class="leaf leaf-b"></view>

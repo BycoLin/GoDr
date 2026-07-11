@@ -1,5 +1,5 @@
 {
-  "description": "古诗词边玩边学",
+  "description": "GoDr 闯关小博士 · 小学生免费闯关学习小程序",
   "packOptions": {
     "ignore": [
       { "type": "folder", "value": "doc" },
@@ -53,7 +53,7 @@
   "compileType": "miniprogram",
   "libVersion": "3.5.5",
   "appid": "touristappid",
-  "projectname": "poetry-learn-play",
+  "projectname": "GoDr",
   "condition": {},
   "miniprogramRoot": "miniprogram/",
   "srcMiniprogramRoot": "miniprogram/",

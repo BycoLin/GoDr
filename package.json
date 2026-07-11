@@ -1,7 +1,7 @@
 {
-  "name": "smallgame",
+  "name": "GoDr",
   "version": "1.0.0",
-  "description": "微信小程序 · 古诗词边玩边学（1～2 年级 MVP）",
+  "description": "GoDr 闯关小博士 · 面向小学生的免费闯关学习微信小程序，覆盖数学、语文、英语等学科",
   "scripts": {
     "extract:poetry": "node scripts/extract-poetry.mjs",
     "smoke:quiz": "node scripts/smoke-quiz.mjs",
@@ -9,8 +9,8 @@
   },
   "keywords": [
     "miniprogram",
-    "poetry",
-    "education"
+    "education",
+    "quiz"
   ],
   "license": "UNLICENSED",
   "private": true,
