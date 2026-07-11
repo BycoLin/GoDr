@@ -4,17 +4,34 @@
     <view class="slogan">免费学习 · 闯关答题 · 快乐成长</view>
     <view class="stats">
       <view class="stat">
+        <view class="stat-num">{{points}}</view>
+        <view class="stat-label">积分</view>
+      </view>
+      <view class="stat">
         <view class="stat-num">{{clearedTotal}}</view>
         <view class="stat-label">已掌握</view>
       </view>
       <view class="stat">
-        <view class="stat-num">{{packCount}}</view>
-        <view class="stat-label">知识包</view>
+        <view class="stat-num">{{bestCombo}}</view>
+        <view class="stat-label">最高连击</view>
       </view>
+    </view>
+    <view class="daily-tip">{{dailyTip}}</view>
+  </view>
+
+  <view class="section-title">成就徽章</view>
+  <view class="badge-grid">
+    <view class="badge-item {{item.unlocked ? 'on' : ''}}" wx:for="{{badges}}" wx:key="id">
+      <view class="badge-title">{{item.title}}</view>
+      <view class="badge-desc">{{item.desc}}</view>
     </view>
   </view>
 
   <view class="menu card">
+    <view class="menu-item" bindtap="onGoWrongbook">
+      <text>{{wrongbookLabel}}</text>
+      <text class="arrow">›</text>
+    </view>
     <view class="menu-item" bindtap="onGoGames">
       <text>去游戏厅</text>
       <text class="arrow">›</text>

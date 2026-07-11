@@ -1,0 +1,22 @@
+<view class="safe-pad wrongbook">
+  <view class="card summary">
+    <view class="summary-title">薄弱点 {{wrongCount}} 个</view>
+    <view class="summary-desc">集中攻克错题，就是挑战 Boss</view>
+  </view>
+
+  <view wx:if="{{!rows.length}}" class="empty">
+    <view>太棒了，错题本是空的！</view>
+    <view class="empty-tip">去闯关或游戏厅练习吧</view>
+  </view>
+
+  <view class="row" wx:for="{{rows}}" wx:key="key">
+    <view class="row-main">
+      <view class="row-title">《{{item.title}}》</view>
+      <view class="row-meta">{{item.quizTypeLabel}} · 错 {{item.wrongCount}} 次</view>
+    </view>
+  </view>
+
+  <button class="btn btn-primary boss-btn" wx:if="{{wrongCount > 0}}" bindtap="onChallengeBoss">
+    挑战错题 Boss
+  </button>
+</view>

@@ -28,8 +28,8 @@ export type KnowledgeItem = PoetryItem;
 /** 关卡混合 / 游戏厅专项玩法 */
 export type QuizType = 'fillNext' | 'matchPair' | 'titleAuthor' | 'orderLines' | 'fillBlank';
 
-/** 游戏厅模式（含混合随机） */
-export type ArcadeMode = QuizType | 'mixed';
+/** 游戏厅模式（含混合随机 / Boss / 每日） */
+export type ArcadeMode = QuizType | 'mixed' | 'boss' | 'daily';
 
 export interface ChoiceOption {
   id: string;

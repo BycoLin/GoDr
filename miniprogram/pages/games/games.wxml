@@ -15,11 +15,26 @@
     >{{item}} 年级</view>
   </view>
 
+  <view class="feature-row">
+    <view class="card feature-card boss" bindtap="onTapBoss">
+      <view class="feature-tag">成长</view>
+      <view class="feature-title">错题 Boss</view>
+      <view class="feature-desc">{{wrongTip}}</view>
+    </view>
+    <view class="card feature-card daily" bindtap="onTapDaily">
+      <view class="feature-tag">限时</view>
+      <view class="feature-title">每日限时</view>
+      <view class="feature-desc">{{dailyTip}}</view>
+    </view>
+  </view>
+
   <view class="card campaign" bindtap="onTapCampaign">
     <view class="campaign-tag">经典</view>
     <view class="campaign-title">诗词闯关</view>
     <view class="campaign-desc">按诗逐首解锁，通关攒星星</view>
   </view>
+
+  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">查看错题本 →</view>
 
   <view class="section-title">趣味玩法</view>
   <view class="game-list">

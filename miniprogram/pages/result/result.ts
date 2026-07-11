@@ -1,5 +1,9 @@
 import { recordPlayResult } from '../../utils/progress';
 import { starsFromScore } from '../../utils/quiz';
+import { applySessionReward } from '../../utils/wallet';
+import { unlockBadges } from '../../utils/badges';
+import { recordDailyResult } from '../../utils/daily';
+import { countActiveWrongs } from '../../utils/wrongbook';
 
 Page({
   data: {
@@ -14,6 +18,12 @@ Page({
     encouragement: '',
     arcade: false,
     mode: 'mixed',
+    boss: false,
+    daily: false,
+    points: 0,
+    bestCombo: 0,
+    timedOut: false,
+    newBadges: [] as Array<{ id: string; title: string }>,
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -25,17 +35,55 @@ Page({
     const title = decodeURIComponent(query.title || '');
     const arcade = query.arcade === '1';
     const mode = query.mode || 'mixed';
+    const boss = query.boss === '1' || mode === 'boss';
+    const daily = query.daily === '1' || mode === 'daily';
+    const sessionPoints = Number(query.points || 0);
+    const bestCombo = Number(query.bestCombo || 0);
+    const timedOut = query.timedOut === '1';
     const stars = starsFromScore(correct, total);
+    const cleared = stars >= 1 || correct >= Math.ceil(Math.max(total, 1) * 0.6);
 
     if (!arcade && itemId) {
       recordPlayResult(packId, itemId, grade, correct, total, stars);
     }
 
+    if (daily) {
+      recordDailyResult(correct, total, sessionPoints);
+    }
+
+    const wallet = applySessionReward({
+      correct,
+      total,
+      stars,
+      bestCombo,
+      sessionPoints,
+      isBoss: boss,
+      isDaily: daily,
+      cleared,
+    });
+
+    const newBadges = unlockBadges({
+      wallet,
+      stars,
+      bestCombo,
+      isBoss: boss,
+      isDaily: daily,
+      cleared,
+    }).map((b) => ({ id: b.id, title: b.title }));
+
     let encouragement = '继续加油，下一首也很好玩！';
-    if (stars >= 3) encouragement = arcade ? '全对！游戏厅高手！' : '太棒了！全部答对，小小诗人！';
+    if (timedOut) encouragement = '时间到！再练练手速吧～';
+    else if (stars >= 3) encouragement = arcade ? '全对！游戏厅高手！' : '太棒了！全部答对，小小诗人！';
     else if (stars === 2) encouragement = '很不错，再练一遍会更熟～';
-    else if (stars === 1) encouragement = arcade ? '过关啦，换个玩法再试试。' : '过关啦，多读几遍记得更牢。';
-    else encouragement = arcade ? '再来一局，熟能生巧！' : '先读一读原诗，再来挑战一次吧。';
+    else if (stars === 1) {
+      encouragement = boss
+        ? `Boss 战过关！还剩 ${countActiveWrongs(packId)} 个薄弱点`
+        : arcade
+          ? '过关啦，换个玩法再试试。'
+          : '过关啦，多读几遍记得更牢。';
+    } else {
+      encouragement = arcade ? '再来一局，熟能生巧！' : '先读一读原诗，再来挑战一次吧。';
+    }
 
     this.setData({
       packId,
@@ -49,11 +97,29 @@ Page({
       encouragement,
       arcade,
       mode,
+      boss,
+      daily,
+      points: sessionPoints,
+      bestCombo,
+      timedOut,
+      newBadges,
     });
   },
 
   onRetry() {
-    const { packId, grade, itemId, arcade, mode } = this.data;
+    const { packId, grade, itemId, arcade, mode, boss, daily } = this.data;
+    if (boss) {
+      wx.redirectTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=boss&boss=1&arcade=1`,
+      });
+      return;
+    }
+    if (daily) {
+      wx.redirectTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=daily&daily=1&timed=1&limitSec=90&arcade=1`,
+      });
+      return;
+    }
     if (arcade) {
       wx.redirectTo({
         url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
@@ -66,7 +132,11 @@ Page({
   },
 
   onBackLevels() {
-    const { packId, grade, arcade } = this.data;
+    const { packId, grade, arcade, boss } = this.data;
+    if (boss) {
+      wx.redirectTo({ url: `/pages/wrongbook/wrongbook?packId=${packId}` });
+      return;
+    }
     if (arcade) {
       wx.switchTab({ url: '/pages/games/games' });
       return;

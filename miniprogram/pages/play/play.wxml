@@ -1,8 +1,14 @@
 <view class="safe-pad play">
   <view class="top">
-    <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
-    <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
-    <view class="progress-text">第 {{index + 1}} / {{total}} 题</view>
+    <view class="hud">
+      <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
+      <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
+      <view class="hud-right">
+        <view class="combo {{comboPulse ? 'pulse' : ''}}" wx:if="{{combo >= 2}}">连击 x{{combo}}</view>
+        <view class="timer {{remainSec <= 10 ? 'urgent' : ''}}" wx:if="{{timed}}">{{remainSec}}s</view>
+      </view>
+    </view>
+    <view class="progress-text">第 {{index + 1}} / {{total}} 题 · {{sessionPoints}} 分</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{total ? ((index + 1) / total * 100) : 0}}%;"></view>
     </view>

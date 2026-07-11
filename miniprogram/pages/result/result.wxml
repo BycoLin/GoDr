@@ -8,10 +8,17 @@
       <text class="star {{stars >= 3 ? 'on' : ''}}">★</text>
     </view>
     <view class="score">{{ratioText}}</view>
+    <view class="points-row">+{{points}} 分<text wx:if="{{bestCombo >= 2}}"> · 最高连击 x{{bestCombo}}</text></view>
     <view class="encourage">{{encouragement}}</view>
+    <view class="badge-new" wx:if="{{newBadges.length}}">
+      <view class="badge-new-label">新成就</view>
+      <view class="badge-chip" wx:for="{{newBadges}}" wx:key="id">{{item.title}}</view>
+    </view>
   </view>
 
   <button class="btn btn-primary" bindtap="onRetry">再来一局</button>
-  <button class="btn btn-secondary" bindtap="onBackLevels">{{arcade ? '返回游戏厅' : '返回关卡'}}</button>
+  <button class="btn btn-secondary" bindtap="onBackLevels">
+    {{boss ? '返回错题本' : (arcade ? '返回游戏厅' : '返回关卡')}}
+  </button>
   <button class="btn btn-ghost" bindtap="onHome">回到首页</button>
 </view>

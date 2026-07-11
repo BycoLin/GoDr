@@ -50,6 +50,34 @@
   color: var(--color-primary);
 }
 
+.points-row {
+  margin-top: 12rpx;
+  font-size: 28rpx;
+  color: var(--color-accent);
+  font-weight: 700;
+}
+
+.badge-new {
+  margin-top: 28rpx;
+}
+
+.badge-new-label {
+  font-size: 22rpx;
+  color: var(--color-muted);
+  margin-bottom: 12rpx;
+}
+
+.badge-chip {
+  display: inline-block;
+  margin: 6rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
 .encourage {
   margin-top: 16rpx;
   font-size: 28rpx;

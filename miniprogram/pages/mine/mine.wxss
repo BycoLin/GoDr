@@ -20,20 +20,71 @@
 
 .stats {
   display: flex;
-  gap: 48rpx;
+  gap: 24rpx;
   margin-top: 32rpx;
 }
 
+.stat {
+  flex: 1;
+  text-align: center;
+}
+
 .stat-num {
-  font-size: 44rpx;
+  font-size: 40rpx;
   font-weight: 800;
   color: var(--color-primary);
 }
 
 .stat-label {
   margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--color-muted);
+}
+
+.daily-tip {
+  margin-top: 24rpx;
   font-size: 24rpx;
   color: var(--color-muted);
+  text-align: center;
+}
+
+.section-title {
+  font-size: 28rpx;
+  color: var(--color-muted);
+  margin-bottom: 16rpx;
+  font-weight: 600;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-bottom: 28rpx;
+}
+
+.badge-item {
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 20rpx;
+  box-shadow: var(--shadow);
+  opacity: 0.45;
+}
+
+.badge-item.on {
+  opacity: 1;
+  border: 2rpx solid var(--color-primary-soft);
+}
+
+.badge-title {
+  font-size: 26rpx;
+  font-weight: 700;
+}
+
+.badge-desc {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--color-muted);
+  line-height: 1.35;
 }
 
 .menu {

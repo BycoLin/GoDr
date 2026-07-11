@@ -1,7 +1,30 @@
-import { getItemById, getItemsByGrade, isPoetry } from '../../utils/registry';
-import { ARCADE_MODE_LABELS, buildArcadeQuiz, buildQuizForItem, gradeAnswer } from '../../utils/quiz';
+import { getItemById, getItemsByGrade, getPackItems, isPoetry } from '../../utils/registry';
+import {
+  ARCADE_MODE_LABELS,
+  buildArcadeQuiz,
+  buildBossQuiz,
+  buildQuizForItem,
+  gradeAnswer,
+  nextAdaptiveQuestion,
+  questionItemId,
+  starsFromScore,
+} from '../../utils/quiz';
 import { saveLastSession } from '../../utils/progress';
-import type { ArcadeMode, PoetryItem, Question, SessionAnswer } from '../../utils/types';
+import { pickBossPool, recordFix, recordWrong } from '../../utils/wrongbook';
+import { pointsForCorrect } from '../../utils/wallet';
+import {
+  DAILY_LIMIT_SEC,
+  DAILY_QUESTION_COUNT,
+  pickSeededIndex,
+  todayKey,
+} from '../../utils/daily';
+import type {
+  ArcadeMode,
+  PoetryItem,
+  Question,
+  QuizType,
+  SessionAnswer,
+} from '../../utils/types';
 
 interface MatchState {
   selectedLeft: string;
@@ -11,12 +34,20 @@ interface MatchState {
   rightDone: Record<string, boolean>;
 }
 
+const ROLLING_TARGET = 8;
+
 Page({
   data: {
     packId: '',
     grade: 1,
     itemId: '',
     arcade: false,
+    rolling: false,
+    boss: false,
+    daily: false,
+    timed: false,
+    limitSec: 0,
+    remainSec: 0,
     mode: 'mixed' as ArcadeMode,
     modeLabel: '',
     poemTitle: '',
@@ -29,6 +60,10 @@ Page({
     feedback: '' as '' | 'ok' | 'bad',
     feedbackText: '',
     locked: false,
+    combo: 0,
+    bestCombo: 0,
+    sessionPoints: 0,
+    comboPulse: false,
     match: {
       selectedLeft: '',
       selectedRight: '',
@@ -42,13 +77,29 @@ Page({
     orderAvailable: {} as Record<string, boolean>,
   },
 
+  poolCache: [] as PoetryItem[],
+  wrongHints: [] as Array<{ itemId: string; quizType: QuizType }>,
+  timerId: 0 as number,
+  finished: false,
+  lastType: undefined as QuizType | undefined,
+  lastCorrect: true,
+
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
     const grade = Number(query.grade || 1);
     const itemId = query.itemId || '';
-    const arcade = query.arcade === '1' || !itemId;
     const mode = (query.mode || 'mixed') as ArcadeMode;
-    const pool = getItemsByGrade(packId, grade).filter(isPoetry) as PoetryItem[];
+    const boss = mode === 'boss' || query.boss === '1';
+    const daily = mode === 'daily' || query.daily === '1';
+    const timed = query.timed === '1' || daily;
+    const limitSec = Number(query.limitSec || (daily ? DAILY_LIMIT_SEC : 0));
+    const arcade = boss || daily || query.arcade === '1' || !itemId;
+    const rolling = arcade;
+
+    let pool = getItemsByGrade(packId, grade).filter(isPoetry) as PoetryItem[];
+    if (daily && !pool.length) {
+      pool = getPackItems(packId).filter(isPoetry) as PoetryItem[];
+    }
 
     if (!pool.length) {
       wx.showToast({ title: '暂无题目', icon: 'none' });
@@ -56,13 +107,48 @@ Page({
       return;
     }
 
+    const wrongHints = pickBossPool(packId, 12).map((e) => ({
+      itemId: e.itemId,
+      quizType: e.quizType,
+    }));
+    this.poolCache = pool;
+    this.wrongHints = wrongHints;
+    this.finished = false;
+
     let questions: Question[] = [];
     let poemTitle = '';
     let poemAuthor = '';
     let modeLabel = '';
+    let targetTotal = 5;
 
-    if (arcade) {
-      questions = buildArcadeQuiz(pool, mode, 8);
+    if (boss) {
+      if (!wrongHints.length) {
+        wx.showToast({ title: '暂无错题，去闯关吧', icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 900);
+        return;
+      }
+      questions = buildBossQuiz(wrongHints, pool, 1);
+      targetTotal = ROLLING_TARGET;
+      poemTitle = '错题 Boss';
+      poemAuthor = `${wrongHints.length} 个薄弱点`;
+      modeLabel = '错题 Boss';
+      wx.setNavigationBarTitle({ title: '错题 Boss' });
+    } else if (daily) {
+      const seed = todayKey();
+      const seededPool = pool.slice().sort((a, b) => a.id.localeCompare(b.id));
+      const rotated: PoetryItem[] = [];
+      for (let i = 0; i < Math.min(DAILY_QUESTION_COUNT, seededPool.length * 2); i += 1) {
+        rotated.push(seededPool[pickSeededIndex(seed, i, seededPool.length)]);
+      }
+      questions = buildArcadeQuiz(rotated.length ? rotated : pool, 'mixed', 1);
+      targetTotal = DAILY_QUESTION_COUNT;
+      poemTitle = '每日限时';
+      poemAuthor = `${limitSec} 秒挑战`;
+      modeLabel = '每日限时';
+      wx.setNavigationBarTitle({ title: '每日限时' });
+    } else if (arcade) {
+      questions = buildArcadeQuiz(pool, mode, 1);
+      targetTotal = ROLLING_TARGET;
       poemTitle = ARCADE_MODE_LABELS[mode] || '趣味闯关';
       poemAuthor = `${grade} 年级`;
       modeLabel = poemTitle;
@@ -74,7 +160,8 @@ Page({
         setTimeout(() => wx.navigateBack(), 800);
         return;
       }
-      questions = buildQuizForItem(item, pool, { count: 5 });
+      questions = buildQuizForItem(item, pool, { count: 5, rampHard: true });
+      targetTotal = questions.length;
       poemTitle = item.title;
       poemAuthor = item.author;
       modeLabel = '诗词闯关';
@@ -91,34 +178,63 @@ Page({
       grade,
       itemId: arcade ? '' : itemId,
       arcade,
-      mode,
+      rolling,
+      boss,
+      daily,
+      timed,
+      limitSec,
+      remainSec: limitSec,
+      mode: boss ? 'boss' : daily ? 'daily' : mode,
       modeLabel,
       poemTitle,
       poemAuthor,
       questions,
-      total: questions.length,
+      total: targetTotal,
       index: 0,
       current: questions[0],
       answers: [],
+      combo: 0,
+      bestCombo: 0,
+      sessionPoints: 0,
     });
     this.resetMatchState(questions[0]);
     this.resetOrderState(questions[0]);
+
+    if (timed && limitSec > 0) {
+      this.startTimer();
+    }
+  },
+
+  onUnload() {
+    this.clearTimer();
+  },
+
+  startTimer() {
+    this.clearTimer();
+    this.timerId = setInterval(() => {
+      if (this.finished) {
+        this.clearTimer();
+        return;
+      }
+      const remain = this.data.remainSec - 1;
+      if (remain <= 0) {
+        this.setData({ remainSec: 0 });
+        this.clearTimer();
+        this.finish(this.data.answers, true);
+        return;
+      }
+      this.setData({ remainSec: remain });
+    }, 1000) as unknown as number;
+  },
+
+  clearTimer() {
+    if (this.timerId) {
+      clearInterval(this.timerId);
+      this.timerId = 0;
+    }
   },
 
   resetMatchState(question: Question | null) {
-    if (!question || question.type !== 'matchPair') {
-      this.setData({
-        match: {
-          selectedLeft: '',
-          selectedRight: '',
-          pairs: {},
-          leftDone: {},
-          rightDone: {},
-        },
-        matchReady: false,
-      });
-      return;
-    }
     this.setData({
       match: {
         selectedLeft: '',
@@ -129,6 +245,7 @@ Page({
       },
       matchReady: false,
     });
+    if (!question || question.type !== 'matchPair') return;
   },
 
   resetOrderState(question: Question | null) {
@@ -151,10 +268,52 @@ Page({
     });
   },
 
+  handleGraded(correct: boolean, feedbackOk: string, feedbackBad: string) {
+    const { current, answers, index, questions, total, packId, boss, combo, bestCombo, sessionPoints } =
+      this.data;
+    if (!current) return;
+
+    const itemId = questionItemId(current);
+    const quizType = current.type as QuizType;
+
+    if (correct) {
+      if (boss && itemId) recordFix(packId, itemId, quizType);
+    } else if (itemId) {
+      recordWrong(packId, itemId, quizType);
+    }
+
+    const nextCombo = correct ? combo + 1 : 0;
+    const gained = correct ? pointsForCorrect(nextCombo) : 0;
+    const nextAnswers = answers.concat([{ questionId: current.id, correct }]);
+
+    this.lastCorrect = correct;
+    this.lastType = quizType;
+
+    this.setData({
+      locked: true,
+      feedback: correct ? 'ok' : 'bad',
+      feedbackText: correct
+        ? nextCombo >= 3
+          ? `${feedbackOk} 连击 x${nextCombo}`
+          : feedbackOk
+        : feedbackBad,
+      answers: nextAnswers,
+      combo: nextCombo,
+      bestCombo: Math.max(bestCombo, nextCombo),
+      sessionPoints: sessionPoints + gained,
+      comboPulse: correct && nextCombo >= 2,
+    });
+
+    setTimeout(() => {
+      this.setData({ comboPulse: false });
+      this.advance(nextAnswers, index, questions, total);
+    }, correct ? 700 : 800);
+  },
+
   onChooseOption(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.locked) return;
+    if (this.data.locked || this.finished) return;
     const optionId = e.currentTarget.dataset.id as string;
-    const { current, answers, index, questions, total } = this.data;
+    const { current } = this.data;
     if (
       !current ||
       (current.type !== 'fillNext' &&
@@ -163,23 +322,12 @@ Page({
     ) {
       return;
     }
-
     const correct = gradeAnswer(current, optionId);
-    const nextAnswers = answers.concat([{ questionId: current.id, correct }]);
-    this.setData({
-      locked: true,
-      feedback: correct ? 'ok' : 'bad',
-      feedbackText: correct ? '答对啦！' : '再想想～',
-      answers: nextAnswers,
-    });
-
-    setTimeout(() => {
-      this.advance(nextAnswers, index, questions, total);
-    }, 700);
+    this.handleGraded(correct, '答对啦！', '再想想～');
   },
 
   onTapLeft(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.locked) return;
+    if (this.data.locked || this.finished) return;
     const id = e.currentTarget.dataset.id as string;
     if (this.data.match.leftDone[id]) return;
     this.setData({ 'match.selectedLeft': id });
@@ -187,7 +335,7 @@ Page({
   },
 
   onTapRight(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.locked) return;
+    if (this.data.locked || this.finished) return;
     const id = e.currentTarget.dataset.id as string;
     if (this.data.match.rightDone[id]) return;
     this.setData({ 'match.selectedRight': id });
@@ -224,26 +372,15 @@ Page({
   },
 
   onSubmitMatch() {
-    if (this.data.locked || !this.data.matchReady) return;
-    const { current, answers, index, questions, total, match } = this.data;
+    if (this.data.locked || !this.data.matchReady || this.finished) return;
+    const { current, match } = this.data;
     if (!current || current.type !== 'matchPair') return;
-
     const correct = gradeAnswer(current, match.pairs);
-    const nextAnswers = answers.concat([{ questionId: current.id, correct }]);
-    this.setData({
-      locked: true,
-      feedback: correct ? 'ok' : 'bad',
-      feedbackText: correct ? '配对成功！' : '有的对不上哦',
-      answers: nextAnswers,
-    });
-
-    setTimeout(() => {
-      this.advance(nextAnswers, index, questions, total);
-    }, 800);
+    this.handleGraded(correct, '配对成功！', '有的对不上哦');
   },
 
   onTapOrderOption(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.locked) return;
+    if (this.data.locked || this.finished) return;
     const id = e.currentTarget.dataset.id as string;
     const text = e.currentTarget.dataset.text as string;
     if (!this.data.orderAvailable[id]) return;
@@ -259,36 +396,54 @@ Page({
   },
 
   onSubmitOrder() {
-    if (this.data.locked) return;
-    const { current, answers, index, questions, total, orderPicked } = this.data;
+    if (this.data.locked || this.finished) return;
+    const { current, orderPicked } = this.data;
     if (!current || current.type !== 'orderLines') return;
     if (orderPicked.length !== current.answerOrder.length) {
       wx.showToast({ title: '请排完所有诗句', icon: 'none' });
       return;
     }
-
     const correct = gradeAnswer(current, orderPicked);
-    const nextAnswers = answers.concat([{ questionId: current.id, correct }]);
-    this.setData({
-      locked: true,
-      feedback: correct ? 'ok' : 'bad',
-      feedbackText: correct ? '顺序正确！' : '顺序不对哦',
-      answers: nextAnswers,
-    });
-
-    setTimeout(() => {
-      this.advance(nextAnswers, index, questions, total);
-    }, 800);
+    this.handleGraded(correct, '顺序正确！', '顺序不对哦');
   },
 
   advance(answers: SessionAnswer[], index: number, questions: Question[], total: number) {
+    if (this.finished) return;
     const nextIndex = index + 1;
+
+    let nextQuestions = questions;
+    if (this.data.rolling && nextIndex < total && nextIndex >= questions.length) {
+      const q = nextAdaptiveQuestion(
+        this.poolCache,
+        this.data.mode,
+        {
+          combo: this.data.combo,
+          lastCorrect: this.lastCorrect,
+          lastType: this.lastType,
+        },
+        this.data.boss ? this.wrongHints : this.wrongHints,
+      );
+      if (q) {
+        nextQuestions = questions.concat([q]);
+      } else {
+        this.finish(answers);
+        return;
+      }
+    }
+
     if (nextIndex >= total) {
       this.finish(answers);
       return;
     }
-    const nextQ = questions[nextIndex];
+
+    const nextQ = nextQuestions[nextIndex];
+    if (!nextQ) {
+      this.finish(answers);
+      return;
+    }
+
     this.setData({
+      questions: nextQuestions,
       index: nextIndex,
       current: nextQ,
       locked: false,
@@ -299,25 +454,49 @@ Page({
     this.resetOrderState(nextQ);
   },
 
-  finish(answers: SessionAnswer[]) {
-    const { packId, grade, itemId, poemTitle, questions, arcade, mode } = this.data;
+  finish(answers: SessionAnswer[], timedOut = false) {
+    if (this.finished) return;
+    this.finished = true;
+    this.clearTimer();
+
+    const {
+      packId,
+      grade,
+      itemId,
+      poemTitle,
+      questions,
+      arcade,
+      mode,
+      boss,
+      daily,
+      sessionPoints,
+      bestCombo,
+      total,
+    } = this.data;
     const correct = answers.filter((a) => a.correct).length;
-    const total = questions.length;
+    const answeredTotal = Math.max(answers.length, questions.length ? Math.min(questions.length, total) : answers.length);
+    const stars = starsFromScore(correct, Math.max(answeredTotal, 1));
     const session = {
       packId,
       grade,
       itemId,
       poemTitle,
       correct,
-      total,
+      total: answeredTotal,
       answers,
       arcade,
       mode,
+      boss,
+      daily,
+      sessionPoints,
+      bestCombo,
+      timedOut,
+      stars,
     };
     saveLastSession(session);
     const title = encodeURIComponent(poemTitle);
     wx.redirectTo({
-      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${total}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}`,
+      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}`,
     });
   },
 });

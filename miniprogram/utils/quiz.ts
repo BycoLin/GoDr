@@ -178,7 +178,19 @@ export interface BuildQuizOptions {
   count?: number;
   modes?: QuizType[];
   preferTitle?: boolean;
+  /** 中段偏难：后半程优先难题型 */
+  rampHard?: boolean;
 }
+
+export interface AdaptiveContext {
+  combo: number;
+  lastCorrect: boolean;
+  lastType?: QuizType;
+  preferModes?: QuizType[];
+}
+
+const HARD_MODES: QuizType[] = ['orderLines', 'fillBlank', 'matchPair'];
+const EASY_MODES: QuizType[] = ['fillNext', 'titleAuthor'];
 
 function makeByType(
   mode: QuizType,
@@ -203,21 +215,40 @@ function makeByType(
   return null;
 }
 
-/** 围绕单篇诗词生成一局题目（混合题型） */
+function resolvePreferModes(ctx: AdaptiveContext, baseMode: ArcadeMode): QuizType[] {
+  if (ctx.preferModes?.length) return ctx.preferModes;
+  if (!ctx.lastCorrect && ctx.lastType) return [ctx.lastType];
+  if (ctx.combo >= 3) return HARD_MODES;
+  if (baseMode === 'mixed' || baseMode === 'boss' || baseMode === 'daily') {
+    return [...EASY_MODES, ...HARD_MODES];
+  }
+  if (baseMode === 'fillNext' || baseMode === 'matchPair' || baseMode === 'titleAuthor' || baseMode === 'orderLines' || baseMode === 'fillBlank') {
+    return [baseMode];
+  }
+  return [...EASY_MODES, ...HARD_MODES];
+}
+
+/** 围绕单篇诗词生成一局题目（混合题型，可中段偏难） */
 export function buildQuizForItem(
   item: PoetryItem,
   pool: PoetryItem[],
   options: BuildQuizOptions = {},
 ): Question[] {
   const count = options.count ?? 5;
-  const modes = options.modes ?? ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
   const preferTitle = options.preferTitle !== false;
+  const rampHard = options.rampHard !== false;
   const questions: Question[] = [];
   let guard = 0;
 
   while (questions.length < count && guard < count * 10) {
     guard += 1;
-    const mode = modes[questions.length % modes.length];
+    let mode: QuizType;
+    if (rampHard && questions.length >= Math.floor(count / 2)) {
+      mode = HARD_MODES[questions.length % HARD_MODES.length];
+    } else {
+      const easyFirst: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+      mode = (options.modes || easyFirst)[questions.length % (options.modes || easyFirst).length];
+    }
     const q = makeByType(mode, item, pool, preferTitle);
     if (q) questions.push(q);
   }
@@ -230,6 +261,7 @@ export function buildArcadeQuiz(
   pool: PoetryItem[],
   mode: ArcadeMode,
   count = 8,
+  preferModes?: QuizType[],
 ): Question[] {
   if (!pool.length) return [];
   const preferTitle = pool[0].grade <= 1;
@@ -240,7 +272,9 @@ export function buildArcadeQuiz(
     guard += 1;
     const item = pool[Math.floor(Math.random() * pool.length)];
     let quizType: QuizType;
-    if (mode === 'mixed') {
+    if (preferModes?.length) {
+      quizType = preferModes[questions.length % preferModes.length];
+    } else if (mode === 'mixed' || mode === 'boss' || mode === 'daily') {
       const all: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
       quizType = all[questions.length % all.length];
     } else {
@@ -251,6 +285,72 @@ export function buildArcadeQuiz(
   }
 
   return questions;
+}
+
+export interface WrongHint {
+  itemId: string;
+  quizType: QuizType;
+}
+
+/** 错题 Boss：围绕薄弱条目与题型出题 */
+export function buildBossQuiz(
+  wrongPool: WrongHint[],
+  pool: PoetryItem[],
+  count = 8,
+): Question[] {
+  if (!pool.length || !wrongPool.length) return [];
+  const preferTitle = pool[0].grade <= 1;
+  const byId = new Map(pool.map((p) => [p.id, p]));
+  const questions: Question[] = [];
+  let guard = 0;
+  let cursor = 0;
+
+  while (questions.length < count && guard < count * 15) {
+    guard += 1;
+    const hint = wrongPool[cursor % wrongPool.length];
+    cursor += 1;
+    const item = byId.get(hint.itemId) || pool[Math.floor(Math.random() * pool.length)];
+    const q = makeByType(hint.quizType, item, pool, preferTitle);
+    if (q) questions.push(q);
+  }
+
+  return questions;
+}
+
+/** 滚动出题：根据连击/对错生成下一题 */
+export function nextAdaptiveQuestion(
+  pool: PoetryItem[],
+  baseMode: ArcadeMode,
+  ctx: AdaptiveContext,
+  wrongHints?: WrongHint[],
+): Question | null {
+  if (!pool.length) return null;
+  const preferTitle = pool[0].grade <= 1;
+  const modes = resolvePreferModes(ctx, baseMode);
+  let guard = 0;
+
+  while (guard < 12) {
+    guard += 1;
+    const quizType = modes[Math.floor(Math.random() * modes.length)];
+    let item = pool[Math.floor(Math.random() * pool.length)];
+    if (wrongHints?.length && (baseMode === 'boss' || !ctx.lastCorrect)) {
+      const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
+      const found = pool.find((p) => p.id === hint.itemId);
+      if (found) {
+        item = found;
+        const q = makeByType(
+          !ctx.lastCorrect ? hint.quizType : quizType,
+          item,
+          pool,
+          preferTitle,
+        );
+        if (q) return q;
+      }
+    }
+    const q = makeByType(quizType, item, pool, preferTitle);
+    if (q) return q;
+  }
+  return null;
 }
 
 /** 判题 */
@@ -290,6 +390,11 @@ export function starsFromScore(correct: number, total: number): number {
   return 0;
 }
 
+export function questionItemId(question: Question): string {
+  if (question.type === 'matchPair') return question.itemIds[0] || '';
+  return question.itemId;
+}
+
 export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   mixed: '随机挑战',
   fillNext: '下一句闪电',
@@ -297,4 +402,6 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   titleAuthor: '诗名作者',
   orderLines: '诗句排序',
   fillBlank: '缺字填空',
+  boss: '错题 Boss',
+  daily: '每日限时',
 };

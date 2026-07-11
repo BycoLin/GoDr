@@ -1,0 +1,50 @@
+.summary {
+  margin-bottom: 28rpx;
+}
+
+.summary-title {
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.summary-desc {
+  margin-top: 8rpx;
+  color: var(--color-muted);
+  font-size: 26rpx;
+}
+
+.empty {
+  text-align: center;
+  padding: 80rpx 24rpx;
+  color: var(--color-muted);
+}
+
+.empty-tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: var(--shadow);
+}
+
+.row-title {
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.row-meta {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-muted);
+}
+
+.boss-btn {
+  margin-top: 40rpx;
+}

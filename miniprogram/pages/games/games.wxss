@@ -45,9 +45,57 @@
   font-weight: 700;
 }
 
-.campaign {
-  margin-bottom: 36rpx;
+.feature-row {
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 20rpx;
+}
+
+.feature-card {
+  flex: 1;
+  padding: 24rpx;
+}
+
+.feature-card.boss {
+  border-left: 8rpx solid var(--color-danger);
+}
+
+.feature-card.daily {
   border-left: 8rpx solid var(--color-accent);
+}
+
+.feature-tag {
+  display: inline-block;
+  font-size: 20rpx;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  margin-bottom: 10rpx;
+}
+
+.feature-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.feature-desc {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.campaign {
+  margin-bottom: 20rpx;
+  border-left: 8rpx solid var(--color-accent);
+}
+
+.link-wrong {
+  margin-bottom: 28rpx;
+  color: var(--color-primary);
+  font-size: 26rpx;
+  font-weight: 600;
 }
 
 .campaign-tag,
