@@ -12,26 +12,26 @@ interface GameCard {
 }
 
 const POETRY_GAMES: GameCard[] = [
-  { mode: 'mixed', title: '随机挑战', desc: '下一句、配对、排序、填空混合出击', tag: '综合', toneClass: 'tone-0' },
-  { mode: 'fillNext', title: '下一句闪电', desc: '给出上句，快速选出正确下一句', tag: '反应', toneClass: 'tone-1' },
-  { mode: 'matchPair', title: '配对达人', desc: '把上下句一对一对上', tag: '配对', toneClass: 'tone-2' },
+  { mode: 'mixed', title: '综合自测', desc: '下一句、配对、排序、填空混合练习', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'fillNext', title: '下一句练习', desc: '给出上句，选出正确下一句', tag: '默写', toneClass: 'tone-1' },
+  { mode: 'matchPair', title: '上下句配对', desc: '把上下句一对一对上', tag: '配对', toneClass: 'tone-2' },
   { mode: 'orderLines', title: '诗句排序', desc: '打乱的诗句，按正确顺序点回来', tag: '记忆', toneClass: 'tone-0' },
   { mode: 'fillBlank', title: '缺字填空', desc: '补上诗句里缺掉的那一个字', tag: '细心', toneClass: 'tone-1' },
   { mode: 'titleAuthor', title: '诗名作者', desc: '看诗句，选出诗名或作者', tag: '认知', toneClass: 'tone-2' },
 ];
 
 const MATH_GAMES: GameCard[] = [
-  { mode: 'mixed', title: '数学混合', desc: '速算、比大小、填空一起练', tag: '综合', toneClass: 'tone-0' },
-  { mode: 'mathCalc', title: '速算闯关', desc: '加减口算，连击更带劲', tag: '速算', toneClass: 'tone-1' },
+  { mode: 'mixed', title: '数学综合练', desc: '速算、比大小、填空一起练', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'mathCalc', title: '口算练习', desc: '加减口算，连对更熟练', tag: '速算', toneClass: 'tone-1' },
   { mode: 'mathCompare', title: '比大小', desc: '选对 > < = 符号', tag: '比较', toneClass: 'tone-2' },
-  { mode: 'mathMissing', title: '填空达人', desc: '找出算式里缺的数', tag: '填空', toneClass: 'tone-0' },
+  { mode: 'mathMissing', title: '算式填空', desc: '找出算式里缺的数', tag: '填空', toneClass: 'tone-0' },
 ];
 
 const ENGLISH_GAMES: GameCard[] = [
-  { mode: 'mixed', title: '英语混合', desc: '选义、选词、缺字母、配对一起练', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'mixed', title: '英语综合练', desc: '选义、选词、缺字母、配对一起练', tag: '综合', toneClass: 'tone-0' },
   { mode: 'enWordMean', title: '看词选义', desc: '看见英文，选出中文意思', tag: '词汇', toneClass: 'tone-1' },
   { mode: 'enMeanWord', title: '看义选词', desc: '看见中文，选出正确英文', tag: '记忆', toneClass: 'tone-2' },
-  { mode: 'enSpell', title: '缺字母闯关', desc: '补全单词里缺的字母', tag: '拼写', toneClass: 'tone-0' },
+  { mode: 'enSpell', title: '缺字母练习', desc: '补全单词里缺的字母', tag: '拼写', toneClass: 'tone-0' },
   { mode: 'matchPair', title: '中英配对', desc: '把英文和中文一对一对上', tag: '配对', toneClass: 'tone-1' },
 ];
 
@@ -44,21 +44,21 @@ function gamesForPack(packId: string): {
   if (kind === 'math') {
     return {
       games: MATH_GAMES,
-      campaignTitle: '数学闯关',
-      campaignDesc: '按关卡练口算，通关攒星星',
+      campaignTitle: '数学循序练习',
+      campaignDesc: '按关卡练口算，完成可记录进度',
     };
   }
   if (kind === 'english') {
     return {
       games: ENGLISH_GAMES,
-      campaignTitle: '英语闯关',
-      campaignDesc: '按单词逐个解锁，通关攒星星',
+      campaignTitle: '英语循序练习',
+      campaignDesc: '按单词逐个练习，完成可记录进度',
     };
   }
   return {
     games: POETRY_GAMES,
-    campaignTitle: '诗词闯关',
-    campaignDesc: '按诗逐首解锁，通关攒星星',
+    campaignTitle: '诗词循序练习',
+    campaignDesc: '按诗逐首练习，完成可记录进度',
   };
 }
 
@@ -69,12 +69,12 @@ Page({
     grade: 1,
     packId: 'poetry-g1-g2',
     packSubject: '语文',
-    campaignTitle: '诗词闯关',
-    campaignDesc: '按诗逐首解锁，通关攒星星',
+    campaignTitle: '诗词循序练习',
+    campaignDesc: '按诗逐首练习，完成可记录进度',
     games: POETRY_GAMES,
     wrongCount: 0,
-    wrongTip: '暂无错题，继续闯关',
-    dailyTip: '今日尚未挑战',
+    wrongTip: '暂无错题，先去练习',
+    dailyTip: '今日尚未自测',
     dailyDone: false,
   },
 
@@ -106,11 +106,11 @@ Page({
       campaignTitle,
       campaignDesc,
       wrongCount,
-      wrongTip: wrongCount > 0 ? `${wrongCount} 个薄弱点待攻克` : '暂无错题，继续闯关',
+      wrongTip: wrongCount > 0 ? `${wrongCount} 个薄弱点待复习` : '暂无错题，先去练习',
       dailyDone: Boolean(daily?.completed),
       dailyTip: daily?.completed
         ? `今日最佳 ${daily.bestCorrect}/${daily.bestTotal} · ${daily.bestPoints} 分`
-        : `${DAILY_LIMIT_SEC} 秒限时 · 每日一挑战`,
+        : `${DAILY_LIMIT_SEC} 秒限时 · 每日自测`,
     });
   },
 
@@ -142,7 +142,7 @@ Page({
   onTapBoss() {
     const { packId, grade, wrongCount } = this.data;
     if (wrongCount <= 0) {
-      wx.showToast({ title: '暂无错题，先去闯关吧', icon: 'none' });
+      wx.showToast({ title: '暂无错题，先去练习吧', icon: 'none' });
       return;
     }
     wx.navigateTo({

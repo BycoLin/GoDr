@@ -5,7 +5,7 @@
     <view class="intro-desc">{{description}}</view>
   </view>
 
-  <view class="section-title">你是几年级小勇士？</view>
+  <view class="section-title">你是几年级？</view>
   <view class="grade-grid">
     <view
       class="grade-card"

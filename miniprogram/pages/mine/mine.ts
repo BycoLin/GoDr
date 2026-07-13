@@ -39,8 +39,8 @@ Page({
       bestCombo: wallet.bestCombo,
       badges: listBadgesWithState(),
       dailyTip: daily?.completed
-        ? `今日已挑战 · 最佳 ${daily.bestCorrect}/${daily.bestTotal}`
-        : '今日限时尚未挑战',
+        ? `今日已自测 · 最佳 ${daily.bestCorrect}/${daily.bestTotal}`
+        : '今日限时尚未自测',
     });
   },
 
@@ -59,7 +59,7 @@ Page({
   onClearAll() {
     wx.showModal({
       title: '清空全部进度？',
-      content: '将清除闯关进度、错题本、积分、成就与每日挑战记录，不可恢复',
+      content: '将清除练习进度、错题本、积分、成就与每日自测记录，不可恢复',
       success: (res) => {
         if (!res.confirm) return;
         const ids = listPacks().map((p) => p.id);

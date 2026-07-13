@@ -1,8 +1,8 @@
 <view class="safe-pad">
   <view class="summary card">
     <view class="summary-badge">关卡地图</view>
-    <view class="summary-title">{{grade}} 年级{{subject}}冒险</view>
-    <view class="summary-progress">已通关 {{clearedCount}} / {{totalCount}} {{unitLabel}}，继续加油！</view>
+    <view class="summary-title">{{grade}} 年级{{subject}}练习</view>
+    <view class="summary-progress">已完成 {{clearedCount}} / {{totalCount}} {{unitLabel}}，继续加油！</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{totalCount ? (clearedCount / totalCount * 100) : 0}}%;"></view>
     </view>
@@ -28,7 +28,7 @@
         </view>
       </view>
       <view class="level-status {{item.unlocked ? (item.cleared ? 'again' : 'go') : 'lock'}}">
-        {{item.unlocked ? (item.cleared ? '再玩' : '开闯') : '锁住'}}
+        {{item.unlocked ? (item.cleared ? '再练' : '开始') : '待解锁'}}
       </view>
     </view>
   </view>

@@ -285,10 +285,10 @@ export function nextMathAdaptiveQuestion(
 }
 
 export const MATH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
-  mixed: '数学混合挑战',
-  mathCalc: '速算闯关',
+  mixed: '数学综合练',
+  mathCalc: '口算练习',
   mathCompare: '比大小',
-  mathMissing: '填空达人',
-  boss: '错题 Boss',
-  daily: '每日限时',
+  mathMissing: '算式填空',
+  boss: '错题复习',
+  daily: '每日自测',
 };

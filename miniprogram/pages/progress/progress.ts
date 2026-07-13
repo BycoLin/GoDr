@@ -80,10 +80,10 @@ Page({
     const starSum = rows.reduce((sum, r) => sum + r.stars, 0);
     const unitLabel = manifest?.subject === '语文' ? '首' : '关';
 
-    let cheerText = '还没开始？选一关开闯吧！';
-    if (percent >= 100) cheerText = '全部通关！你是超级小博士！';
-    else if (percent >= 60) cheerText = '超棒！再冲一把就更多啦！';
-    else if (percent > 0) cheerText = '已经上路啦，继续加油哦！';
+    let cheerText = '还没开始？选一关练习吧！';
+    if (percent >= 100) cheerText = '全部练完啦，真棒！';
+    else if (percent >= 60) cheerText = '进度不错，再练几关更熟！';
+    else if (percent > 0) cheerText = '已经开始练了，继续加油！';
 
     const gradeMap = new Map<number, ProgressRow[]>();
     rows.forEach((row) => {
@@ -164,7 +164,7 @@ Page({
   onClearAll() {
     wx.showModal({
       title: '清空进度？',
-      content: '将清除本知识包的本地闯关记录',
+      content: '将清除本知识包的本地练习记录',
       success: (res) => {
         if (!res.confirm) return;
         wx.removeStorageSync(`progress:${this.data.packId}`);

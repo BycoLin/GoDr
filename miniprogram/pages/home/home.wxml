@@ -1,9 +1,9 @@
 <view class="safe-pad home">
   <view class="hero">
     <view class="hero-copy">
-      <view class="hello-chip">Hi 小勇士</view>
-      <view class="brand">闯关小博士</view>
-      <view class="tagline">学习也能像打怪一样好玩！</view>
+      <view class="hello-chip">Hi 小朋友</view>
+      <view class="brand">小博士练习</view>
+      <view class="tagline">语文 · 数学 · 英语，趣味自测记牢一点</view>
     </view>
     <view class="mascot">
       <view class="mascot-body">
@@ -16,7 +16,7 @@
         </view>
         <view class="mascot-hat">博</view>
       </view>
-      <view class="sticker s1">冲</view>
+      <view class="sticker s1">练</view>
       <view class="sticker s2">GO</view>
       <view class="dot d1"></view>
       <view class="dot d2"></view>
@@ -25,24 +25,24 @@
   </view>
 
   <view wx:if="{{continueTip}}" class="card continue" bindtap="onContinue">
-    <view class="continue-badge">接着玩</view>
-    <view class="continue-label">你上次闯到这里啦</view>
+    <view class="continue-badge">继续练</view>
+    <view class="continue-label">你上次练到这里</view>
     <view class="continue-text">{{continueTip}}</view>
-    <view class="continue-go">继续闯关 →</view>
+    <view class="continue-go">接着练习 →</view>
   </view>
 
   <view class="card games-entry" bindtap="onGoGames">
-    <view class="games-art">
+    <view class="game-art">
       <view class="orb orb-a"></view>
       <view class="orb orb-b"></view>
     </view>
-    <view class="games-entry-label">游戏乐园</view>
-    <view class="games-entry-title">去玩点新鲜的！</view>
-    <view class="games-entry-desc">诗词对决 · 数学速算 · Boss 大战</view>
-    <view class="go-pill">出发</view>
+    <view class="games-entry-label">趣味练习</view>
+    <view class="games-entry-title">换种方式练一练</view>
+    <view class="games-entry-desc">诗词默写 · 口算自测 · 单词认读 · 错题复习</view>
+    <view class="go-pill">去练习</view>
   </view>
 
-  <view class="section-title">选一个背包出发</view>
+  <view class="section-title">选择学习内容</view>
   <view class="pack-list">
     <view
       class="card pack-card {{item.toneClass}}"
@@ -53,10 +53,10 @@
     >
       <view class="pack-icon">{{item.iconText}}</view>
       <view class="pack-body">
-        <view class="pack-subject">{{item.subject}}冒险</view>
+        <view class="pack-subject">{{item.subject}}练习</view>
         <view class="pack-title">{{item.title}}</view>
         <view class="pack-desc">{{item.description}}</view>
-        <view class="pack-meta">{{item.gradeLabel}} · 点我开闯</view>
+        <view class="pack-meta">{{item.gradeLabel}} · 开始练习</view>
       </view>
     </view>
   </view>

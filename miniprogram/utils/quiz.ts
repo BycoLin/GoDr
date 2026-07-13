@@ -402,18 +402,18 @@ export function questionItemId(question: Question): string {
 }
 
 export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
-  mixed: '随机挑战',
-  fillNext: '下一句闪电',
-  matchPair: '配对达人',
+  mixed: '综合自测',
+  fillNext: '下一句练习',
+  matchPair: '配对练习',
   titleAuthor: '诗名作者',
   orderLines: '诗句排序',
   fillBlank: '缺字填空',
-  mathCalc: '速算闯关',
+  mathCalc: '口算练习',
   mathCompare: '比大小',
-  mathMissing: '填空达人',
+  mathMissing: '算式填空',
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
-  enSpell: '缺字母闯关',
-  boss: '错题 Boss',
-  daily: '每日限时',
+  enSpell: '缺字母练习',
+  boss: '错题复习',
+  daily: '每日自测',
 };

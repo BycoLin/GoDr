@@ -12,7 +12,7 @@
   <view class="card hero">
     <view class="hero-top">
       <view class="hero-copy">
-        <view class="hero-badge">{{subject}}战报</view>
+        <view class="hero-badge">{{subject}}进度</view>
         <view class="hero-title">{{packTitle}}</view>
         <view class="hero-cheer">{{cheerText}}</view>
       </view>
@@ -25,7 +25,7 @@
     <view class="stat-row">
       <view class="stat">
         <view class="stat-num">{{clearedCount}}</view>
-        <view class="stat-label">已通关</view>
+        <view class="stat-label">已完成</view>
       </view>
       <view class="stat">
         <view class="stat-num">{{totalCount - clearedCount}}</view>
@@ -41,13 +41,13 @@
       <view class="bar-fill" style="width: {{percent}}%;"></view>
     </view>
 
-    <button class="btn btn-primary continue-btn" bindtap="onContinue">继续闯关</button>
+    <button class="btn btn-primary continue-btn" bindtap="onContinue">继续练习</button>
   </view>
 
   <view class="filter-row">
     <view class="filter-chip {{filter === 'all' ? 'on' : ''}}" data-filter="all" bindtap="onSelectFilter">全部</view>
-    <view class="filter-chip {{filter === 'done' ? 'on' : ''}}" data-filter="done" bindtap="onSelectFilter">已通关</view>
-    <view class="filter-chip {{filter === 'todo' ? 'on' : ''}}" data-filter="todo" bindtap="onSelectFilter">未通关</view>
+    <view class="filter-chip {{filter === 'done' ? 'on' : ''}}" data-filter="done" bindtap="onSelectFilter">已完成</view>
+    <view class="filter-chip {{filter === 'todo' ? 'on' : ''}}" data-filter="todo" bindtap="onSelectFilter">未完成</view>
   </view>
 
   <view class="section-title">按年级看看</view>
@@ -58,7 +58,7 @@
         <view class="grade-dot">{{item.grade}}</view>
         <view>
           <view class="grade-title">{{item.title}}</view>
-          <view class="grade-meta">通关 {{item.cleared}}/{{item.total}} · 星 {{item.starSum}}</view>
+          <view class="grade-meta">完成 {{item.cleared}}/{{item.total}} · 星 {{item.starSum}}</view>
         </view>
       </view>
       <view class="grade-right">
@@ -76,7 +76,7 @@
       <view class="item-row" wx:for="{{item.items}}" wx:for-item="row" wx:key="id">
         <view class="item-main">
           <view class="item-title">{{row.title}}</view>
-          <view class="item-status {{row.cleared ? 'ok' : ''}}">{{row.cleared ? '已通关' : '未通关'}}</view>
+          <view class="item-status {{row.cleared ? 'ok' : ''}}">{{row.cleared ? '已完成' : '未完成'}}</view>
         </view>
         <view class="stars">
           <text class="star {{row.stars >= 1 ? 'on' : ''}}">★</text>

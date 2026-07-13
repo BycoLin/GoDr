@@ -41,7 +41,7 @@ Page({
         const progress = loadPackProgress(pack.id);
         if (progress.lastItemId && progress.lastGrade) {
           const manifest = getPackManifest(pack.id);
-          continueTip = `继续：${manifest?.title || pack.title} · ${progress.lastGrade} 年级`;
+          continueTip = `继续练习：${manifest?.title || pack.title} · ${progress.lastGrade} 年级`;
           continuePackId = pack.id;
           continueGrade = progress.lastGrade;
           break;

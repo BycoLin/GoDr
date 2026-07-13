@@ -165,7 +165,7 @@ Page({
 
     if (boss) {
       if (!wrongHints.length) {
-        wx.showToast({ title: '暂无错题，去闯关吧', icon: 'none' });
+        wx.showToast({ title: '暂无错题，去练习吧', icon: 'none' });
         setTimeout(() => wx.navigateBack(), 900);
         return;
       }
@@ -177,10 +177,10 @@ Page({
         questions = buildBossQuiz(wrongHints, poetryPool, 1);
       }
       targetTotal = ROLLING_TARGET;
-      poemTitle = '错题 Boss';
+      poemTitle = '错题复习';
       poemAuthor = `${wrongHints.length} 个薄弱点`;
-      modeLabel = '错题 Boss';
-      wx.setNavigationBarTitle({ title: '错题 Boss' });
+      modeLabel = '错题复习';
+      wx.setNavigationBarTitle({ title: '错题复习' });
     } else if (daily) {
       const seed = todayKey();
       const seededPool = pool.slice().sort((a, b) => a.id.localeCompare(b.id));
@@ -214,20 +214,20 @@ Page({
         );
       }
       targetTotal = DAILY_QUESTION_COUNT;
-      poemTitle = '每日限时';
-      poemAuthor = `${limitSec} 秒挑战`;
-      modeLabel = '每日限时';
-      wx.setNavigationBarTitle({ title: '每日限时' });
+      poemTitle = '每日自测';
+      poemAuthor = `${limitSec} 秒自测`;
+      modeLabel = '每日自测';
+      wx.setNavigationBarTitle({ title: '每日自测' });
     } else if (arcade) {
       if (subjectKind === 'math') {
         questions = buildMathArcadeQuiz(mathPool, mode, 1);
-        poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味闯关';
+        poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else if (subjectKind === 'english') {
         questions = buildEnglishArcadeQuiz(englishPool, mode, 1);
-        poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味闯关';
+        poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else {
         questions = buildArcadeQuiz(poetryPool, mode, 1);
-        poemTitle = ARCADE_MODE_LABELS[mode] || '趣味闯关';
+        poemTitle = ARCADE_MODE_LABELS[mode] || '趣味练习';
       }
       targetTotal = ROLLING_TARGET;
       poemAuthor = `${grade} 年级`;
@@ -243,20 +243,20 @@ Page({
       if (isMath(item)) {
         questions = buildMathQuizForItem(item, 5);
         poemTitle = item.title;
-        poemAuthor = item.subtitle || '数学闯关';
-        modeLabel = '数学闯关';
+        poemAuthor = item.subtitle || '数学练习';
+        modeLabel = '数学练习';
         wx.setNavigationBarTitle({ title: item.title });
       } else if (isEnglish(item)) {
         questions = buildEnglishQuizForItem(item, englishPool, 5);
         poemTitle = item.word;
         poemAuthor = item.meaning;
-        modeLabel = '英语闯关';
+        modeLabel = '英语练习';
         wx.setNavigationBarTitle({ title: item.word });
       } else if (isPoetry(item)) {
         questions = buildQuizForItem(item, poetryPool, { count: 5, rampHard: true });
         poemTitle = item.title;
         poemAuthor = item.author;
-        modeLabel = '诗词闯关';
+        modeLabel = '诗词练习';
         wx.setNavigationBarTitle({ title: `《${item.title}》` });
       } else {
         wx.showToast({ title: '关卡不存在', icon: 'none' });
@@ -394,7 +394,7 @@ Page({
       feedback: correct ? 'ok' : 'bad',
       feedbackText: correct
         ? nextCombo >= 3
-          ? `${feedbackOk} 连击 x${nextCombo}`
+          ? `${feedbackOk} 连对 x${nextCombo}`
           : feedbackOk
         : feedbackBad,
       answers: nextAnswers,

@@ -90,22 +90,22 @@ Page({
     } else if (stars === 2) encouragement = '很不错，再练一遍会更熟～';
     else if (stars === 1) {
       encouragement = boss
-        ? `Boss 战过关！还剩 ${countActiveWrongs(packId)} 个薄弱点`
+        ? `错题复习完成！还剩 ${countActiveWrongs(packId)} 个薄弱点`
         : arcade
-          ? '过关啦，换个玩法再试试。'
+          ? '完成啦，可以换一种练习再试试。'
           : isMath
-            ? '过关啦，口算又进步了。'
+            ? '完成啦，口算又进步了。'
             : isEnglish
-              ? '过关啦，单词记得更牢了。'
-              : '过关啦，多读几遍记得更牢。';
+              ? '完成啦，单词记得更牢了。'
+              : '完成啦，多读几遍记得更牢。';
     } else {
       encouragement = arcade
-        ? '再来一局，熟能生巧！'
+        ? '再练一局，熟能生巧！'
         : isMath
           ? '再算几题，会越来越快。'
           : isEnglish
-            ? '再读几遍单词，再来挑战一次吧。'
-            : '先读一读原诗，再来挑战一次吧。';
+            ? '再读几遍单词，然后继续练习吧。'
+            : '先读一读原诗，然后继续练习吧。';
     }
 
     this.setData({

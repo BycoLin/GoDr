@@ -5,6 +5,6 @@ module.exports = {
   subject: '英语',
   grades: [1, 2],
   version: '1.0.0',
-  description: '看词选义、看义选词、缺字母、中英配对，边玩边记单词',
+  description: '看词选义、看义选词、缺字母、中英配对，趣味认读练习',
   itemCount: 16,
 };

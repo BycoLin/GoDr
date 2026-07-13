@@ -264,11 +264,11 @@ export function nextEnglishAdaptiveQuestion(
 }
 
 export const ENGLISH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
-  mixed: '英语混合挑战',
+  mixed: '英语综合练',
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
-  enSpell: '缺字母闯关',
+  enSpell: '缺字母练习',
   matchPair: '中英配对',
-  boss: '错题 Boss',
-  daily: '每日限时',
+  boss: '错题复习',
+  daily: '每日自测',
 };

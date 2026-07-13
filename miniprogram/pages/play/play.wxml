@@ -5,7 +5,7 @@
       <view class="poem-tag" wx:elif="{{isMathPack || isEnglishPack}}">{{poemTitle}} · {{poemAuthor}}</view>
       <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
       <view class="hud-right">
-        <view class="combo {{comboPulse ? 'pulse' : ''}}" wx:if="{{combo >= 2}}">连击 x{{combo}}</view>
+        <view class="combo {{comboPulse ? 'pulse' : ''}}" wx:if="{{combo >= 2}}">连对 x{{combo}}</view>
         <view class="timer {{remainSec <= 10 ? 'urgent' : ''}}" wx:if="{{timed}}">{{remainSec}}s</view>
       </view>
     </view>

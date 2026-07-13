@@ -5,6 +5,6 @@ module.exports = {
   subject: '数学',
   grades: [1, 2],
   version: '1.0.0',
-  description: '加减速算、比大小、填空闯关，边玩边练口算',
+  description: '加减速算、比大小、填空练习，边练边巩固口算',
   itemCount: 10,
 };

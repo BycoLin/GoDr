@@ -10,8 +10,8 @@
       </view>
       <view class="avatar-tag">小博士</view>
     </view>
-    <view class="brand">这是你的荣誉墙</view>
-    <view class="slogan">闯关越多，徽章越闪！</view>
+    <view class="brand">我的练习记录</view>
+    <view class="slogan">多练习，记得更牢！</view>
     <view class="stats">
       <view class="stat">
         <view class="stat-num">{{points}}</view>
@@ -19,17 +19,17 @@
       </view>
       <view class="stat">
         <view class="stat-num">{{clearedTotal}}</view>
-        <view class="stat-label">通关</view>
+        <view class="stat-label">已完成</view>
       </view>
       <view class="stat">
         <view class="stat-num">{{bestCombo}}</view>
-        <view class="stat-label">连击</view>
+        <view class="stat-label">连对</view>
       </view>
     </view>
     <view class="daily-tip">{{dailyTip}}</view>
   </view>
 
-  <view class="section-title">徽章收集册</view>
+  <view class="section-title">练习成就</view>
   <view class="badge-grid">
     <view class="badge-item {{item.unlocked ? 'on' : ''}}" wx:for="{{badges}}" wx:key="id">
       <view class="badge-seal">{{item.unlocked ? '亮' : '？'}}</view>
@@ -44,7 +44,7 @@
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoGames">
-      <text>去游戏乐园玩</text>
+      <text>去趣味练习</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoProgress">
@@ -58,7 +58,7 @@
   </view>
 
   <view class="about">
-    <view>GoDr 闯关小博士 · v{{version}}</view>
-    <view class="about-desc">学知识像打怪一样有趣，语文数学英语一起闯！</view>
+    <view>GoDr 小博士练习 · v{{version}}</view>
+    <view class="about-desc">免费本地练习工具：语文、数学、英语趣味自测，记录学习进度。</view>
   </view>
 </view>

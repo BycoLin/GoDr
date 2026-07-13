@@ -1,8 +1,8 @@
 <view class="safe-pad games">
   <view class="intro">
-    <view class="intro-badge">今日开放</view>
-    <view class="intro-title">想玩哪一关？</view>
-    <view class="intro-desc">选科目、选年级，然后开冲！</view>
+    <view class="intro-badge">今日练习</view>
+    <view class="intro-title">想练哪一块？</view>
+    <view class="intro-desc">选科目、选年级，开始趣味自测</view>
   </view>
 
   <view class="pack-row">
@@ -16,7 +16,7 @@
   </view>
 
   <view class="grade-row">
-    <view class="grade-label">我是</view>
+    <view class="grade-label">年级</view>
     <view
       class="grade-chip {{grade === item ? 'on' : ''}}"
       wx:for="{{grades}}"
@@ -28,27 +28,27 @@
 
   <view class="feature-row">
     <view class="card feature-card boss" bindtap="onTapBoss">
-      <view class="feature-emoji">BOSS</view>
-      <view class="feature-title">错题大战</view>
+      <view class="feature-emoji">复习</view>
+      <view class="feature-title">错题复习</view>
       <view class="feature-desc">{{wrongTip}}</view>
     </view>
     <view class="card feature-card daily" bindtap="onTapDaily">
       <view class="feature-emoji">限时</view>
-      <view class="feature-title">每日冲刺</view>
+      <view class="feature-title">每日自测</view>
       <view class="feature-desc">{{dailyTip}}</view>
     </view>
   </view>
 
   <view class="card campaign" bindtap="onTapCampaign">
     <view class="campaign-badge">主线</view>
-    <view class="campaign-tag">一步步通关</view>
+    <view class="campaign-tag">按关卡循序练习</view>
     <view class="campaign-title">{{campaignTitle}}</view>
     <view class="campaign-desc">{{campaignDesc}}</view>
   </view>
 
-  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">去错题本练兵 →</view>
+  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">去错题本看看 →</view>
 
-  <view class="section-title">{{packSubject}}小游戏</view>
+  <view class="section-title">{{packSubject}}趣味练习</view>
   <view class="game-list">
     <view
       class="card game-card {{item.toneClass}}"
@@ -60,7 +60,7 @@
       <view class="game-tag">{{item.tag}}</view>
       <view class="game-title">{{item.title}}</view>
       <view class="game-desc">{{item.desc}}</view>
-      <view class="game-go">玩</view>
+      <view class="game-go">练</view>
     </view>
   </view>
 </view>

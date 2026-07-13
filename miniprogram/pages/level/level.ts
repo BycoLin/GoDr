@@ -66,7 +66,7 @@ Page({
         index === 0 || Boolean(progress.items[items[index - 1].id]?.cleared);
       let meta = '';
       if (isMath(item)) {
-        meta = item.subtitle || item.tags?.join(' · ') || '数学闯关';
+        meta = item.subtitle || item.tags?.join(' · ') || '数学练习';
       } else if (isEnglish(item)) {
         meta = item.meaning + (item.phonetic ? ` · ${item.phonetic}` : '');
       } else if (isPoetry(item)) {
@@ -93,7 +93,7 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     const unlocked = Number(e.currentTarget.dataset.unlocked) === 1;
     if (!unlocked) {
-      wx.showToast({ title: '先通关上一关哦', icon: 'none' });
+      wx.showToast({ title: '请先完成上一关', icon: 'none' });
       return;
     }
     const { packId, grade } = this.data;
