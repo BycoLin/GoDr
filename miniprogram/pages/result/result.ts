@@ -4,6 +4,7 @@ import { applySessionReward } from '../../utils/wallet';
 import { unlockBadges } from '../../utils/badges';
 import { recordDailyResult } from '../../utils/daily';
 import { countActiveWrongs } from '../../utils/wrongbook';
+import { isMathPack } from '../../utils/registry';
 
 Page({
   data: {
@@ -17,6 +18,7 @@ Page({
     ratioText: '',
     encouragement: '',
     arcade: false,
+    isMath: false,
     mode: 'mixed',
     boss: false,
     daily: false,
@@ -42,6 +44,7 @@ Page({
     const timedOut = query.timedOut === '1';
     const stars = starsFromScore(correct, total);
     const cleared = stars >= 1 || correct >= Math.ceil(Math.max(total, 1) * 0.6);
+    const isMath = isMathPack(packId);
 
     if (!arcade && itemId) {
       recordPlayResult(packId, itemId, grade, correct, total, stars);
@@ -71,18 +74,29 @@ Page({
       cleared,
     }).map((b) => ({ id: b.id, title: b.title }));
 
-    let encouragement = '继续加油，下一首也很好玩！';
+    let encouragement = '继续加油！';
     if (timedOut) encouragement = '时间到！再练练手速吧～';
-    else if (stars >= 3) encouragement = arcade ? '全对！游戏厅高手！' : '太棒了！全部答对，小小诗人！';
-    else if (stars === 2) encouragement = '很不错，再练一遍会更熟～';
+    else if (stars >= 3) {
+      encouragement = arcade
+        ? '全对！太厉害了！'
+        : isMath
+          ? '全对！小小速算王！'
+          : '太棒了！全部答对，小小诗人！';
+    } else if (stars === 2) encouragement = '很不错，再练一遍会更熟～';
     else if (stars === 1) {
       encouragement = boss
         ? `Boss 战过关！还剩 ${countActiveWrongs(packId)} 个薄弱点`
         : arcade
           ? '过关啦，换个玩法再试试。'
-          : '过关啦，多读几遍记得更牢。';
+          : isMath
+            ? '过关啦，口算又进步了。'
+            : '过关啦，多读几遍记得更牢。';
     } else {
-      encouragement = arcade ? '再来一局，熟能生巧！' : '先读一读原诗，再来挑战一次吧。';
+      encouragement = arcade
+        ? '再来一局，熟能生巧！'
+        : isMath
+          ? '再算几题，会越来越快。'
+          : '先读一读原诗，再来挑战一次吧。';
     }
 
     this.setData({
@@ -96,6 +110,7 @@ Page({
       ratioText: `${correct} / ${total}`,
       encouragement,
       arcade,
+      isMath,
       mode,
       boss,
       daily,

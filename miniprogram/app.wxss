@@ -1,23 +1,29 @@
 page {
-  --color-bg: #f2f8fc;
+  --color-bg: #fff8ef;
   --color-surface: #ffffff;
-  --color-ink: #1a2b3c;
-  --color-muted: #6a7b8f;
-  --color-primary: #1fa8a0;
-  --color-primary-deep: #0f8f88;
-  --color-primary-soft: #d4f5f1;
-  --color-accent: #ff7b54;
-  --color-accent-soft: #ffe4db;
-  --color-sky: #4ba3ff;
-  --color-sky-soft: #dceeff;
-  --color-danger: #ff5c6a;
-  --color-ok: #22c55e;
-  --radius: 28rpx;
-  --shadow: 0 10rpx 28rpx rgba(26, 43, 60, 0.06);
+  --color-ink: #2b2540;
+  --color-muted: #7a7390;
+  --color-primary: #22b8a8;
+  --color-primary-deep: #11998a;
+  --color-primary-soft: #d6f8f2;
+  --color-accent: #ff6f61;
+  --color-accent-soft: #ffe2de;
+  --color-sky: #5b8cff;
+  --color-sky-soft: #e2ebff;
+  --color-sun: #ffc93c;
+  --color-sun-soft: #fff3c4;
+  --color-danger: #ff5a7a;
+  --color-ok: #3ecf8e;
+  --radius: 36rpx;
+  --shadow: 0 12rpx 0 rgba(43, 37, 64, 0.08);
 }
 
 page {
-  background: linear-gradient(165deg, #dff3ff 0%, #f2f8fc 42%, #e8fff8 100%);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 201, 60, 0.35) 0%, transparent 28%),
+    radial-gradient(circle at 88% 12%, rgba(91, 140, 255, 0.28) 0%, transparent 26%),
+    radial-gradient(circle at 80% 78%, rgba(34, 184, 168, 0.22) 0%, transparent 30%),
+    linear-gradient(180deg, #fff4e2 0%, #f3fbff 45%, #eafff6 100%);
   color: var(--color-ink);
   font-size: 30rpx;
   min-height: 100vh;
@@ -29,11 +35,11 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 88rpx;
+  min-height: 92rpx;
   padding: 0 40rpx;
   border-radius: 999rpx;
   font-size: 32rpx;
-  font-weight: 600;
+  font-weight: 800;
   border: none;
   line-height: 1.2;
 }
@@ -43,15 +49,21 @@ page {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2ec4bb 0%, #1fa8a0 100%);
+  background: linear-gradient(135deg, #42d6c5 0%, #22b8a8 100%);
   color: #fff;
-  box-shadow: 0 10rpx 24rpx rgba(31, 168, 160, 0.28);
+  box-shadow: 0 10rpx 0 #11998a;
+}
+
+.btn-primary:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 6rpx 0 #11998a;
 }
 
 .btn-secondary {
   background: #fff;
   color: var(--color-primary-deep);
-  border: 2rpx solid rgba(31, 168, 160, 0.35);
+  border: 4rpx solid #b8efe7;
+  box-shadow: 0 8rpx 0 rgba(17, 153, 138, 0.15);
 }
 
 .btn-ghost {
@@ -64,18 +76,30 @@ page {
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 32rpx;
-  border: 2rpx solid rgba(255, 255, 255, 0.8);
+  border: 4rpx solid #fff;
+  position: relative;
 }
 
 .safe-pad {
-  padding: 36rpx 32rpx;
+  padding: 28rpx 28rpx;
   padding-bottom: calc(56rpx + env(safe-area-inset-bottom));
 }
 
 .section-title {
-  font-size: 26rpx;
-  color: var(--color-muted);
-  margin-bottom: 18rpx;
-  font-weight: 700;
-  letter-spacing: 2rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 30rpx;
+  color: var(--color-ink);
+  margin: 8rpx 0 18rpx;
+  font-weight: 800;
+}
+
+.section-title::before {
+  content: '';
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: var(--color-sun);
+  box-shadow: 8rpx 0 0 var(--color-accent), 16rpx 0 0 var(--color-sky);
 }

@@ -4,6 +4,8 @@ import type { PackManifest } from '../../utils/types';
 
 interface PackCard extends PackManifest {
   gradeLabel: string;
+  toneClass: string;
+  iconText: string;
 }
 
 Page({
@@ -15,29 +17,40 @@ Page({
   },
 
   onShow() {
-    const packs: PackCard[] = listPacks().map((pack) => ({
-      ...pack,
-      gradeLabel:
-        pack.grades.length > 1
-          ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级`
-          : `${pack.grades[0]} 年级`,
-    }));
-    let continueTip = '';
-    let continuePackId = '';
-    let continueGrade = 0;
+    try {
+      const packs: PackCard[] = listPacks().map((pack) => {
+        const isMath = pack.subject === '数学';
+        return {
+          ...pack,
+          gradeLabel:
+            pack.grades.length > 1
+              ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级`
+              : `${pack.grades[0]} 年级`,
+          toneClass: isMath ? 'pack-math' : 'pack-cn',
+          iconText: isMath ? '算' : '诗',
+        };
+      });
 
-    for (const pack of packs) {
-      const progress = loadPackProgress(pack.id);
-      if (progress.lastItemId && progress.lastGrade) {
-        const manifest = getPackManifest(pack.id);
-        continueTip = `继续：${manifest?.title || pack.title} · ${progress.lastGrade} 年级`;
-        continuePackId = pack.id;
-        continueGrade = progress.lastGrade;
-        break;
+      let continueTip = '';
+      let continuePackId = '';
+      let continueGrade = 0;
+
+      for (const pack of packs) {
+        const progress = loadPackProgress(pack.id);
+        if (progress.lastItemId && progress.lastGrade) {
+          const manifest = getPackManifest(pack.id);
+          continueTip = `继续：${manifest?.title || pack.title} · ${progress.lastGrade} 年级`;
+          continuePackId = pack.id;
+          continueGrade = progress.lastGrade;
+          break;
+        }
       }
-    }
 
-    this.setData({ packs, continueTip, continuePackId, continueGrade });
+      this.setData({ packs, continueTip, continuePackId, continueGrade });
+    } catch (err) {
+      console.error('home onShow failed', err);
+      wx.showToast({ title: '首页加载失败', icon: 'none' });
+    }
   },
 
   onTapPack(e: WechatMiniprogram.TouchEvent) {

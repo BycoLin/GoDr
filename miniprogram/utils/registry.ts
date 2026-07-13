@@ -1,20 +1,23 @@
-import type { KnowledgeItem, PackManifest, PoetryItem } from './types';
+import type { KnowledgeItem, MathItem, PackManifest, PoetryItem } from './types';
 
 /** 已注册知识包；新增包时在此追加 id，并 require 对应 JS 模块 */
-const PACK_IDS = ['poetry-g1-g2'] as const;
+const PACK_IDS = ['poetry-g1-g2', 'math-g1-g2'] as const;
 
 type PackId = (typeof PACK_IDS)[number];
 
-// 微信小程序不能直接 require .json，需用 module.exports 的 .js
 const poetryManifest = require('../data/packs/poetry-g1-g2/manifest.js') as PackManifest;
 const poetryItems = require('../data/packs/poetry-g1-g2/items.js') as PoetryItem[];
+const mathManifest = require('../data/packs/math-g1-g2/manifest.js') as PackManifest;
+const mathItems = require('../data/packs/math-g1-g2/items.js') as MathItem[];
 
 const manifests: Record<PackId, PackManifest> = {
   'poetry-g1-g2': poetryManifest,
+  'math-g1-g2': mathManifest,
 };
 
 const itemsByPack: Record<PackId, KnowledgeItem[]> = {
   'poetry-g1-g2': poetryItems,
+  'math-g1-g2': mathItems,
 };
 
 export function listPacks(): PackManifest[] {
@@ -39,4 +42,12 @@ export function getItemById(packId: string, itemId: string): KnowledgeItem | und
 
 export function isPoetry(item: KnowledgeItem): item is PoetryItem {
   return item.type === 'poetry';
+}
+
+export function isMath(item: KnowledgeItem): item is MathItem {
+  return item.type === 'math';
+}
+
+export function isMathPack(packId: string): boolean {
+  return getPackManifest(packId)?.subject === '数学';
 }

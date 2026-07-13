@@ -1,6 +1,6 @@
 <view class="safe-pad result">
   <view class="card result-card">
-    <view class="label" wx:if="{{arcade}}">{{title}}</view>
+    <view class="label" wx:if="{{arcade || isMath}}">{{title}}</view>
     <view class="label" wx:else>《{{title}}》</view>
     <view class="stars">
       <text class="star {{stars >= 1 ? 'on' : ''}}">★</text>

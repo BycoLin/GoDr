@@ -1,6 +1,6 @@
 /** 知识包 / 条目 / 题目类型定义 */
 
-export type KnowledgeType = 'poetry' | 'quote' | string;
+export type KnowledgeType = 'poetry' | 'math' | string;
 
 export interface PackManifest {
   id: string;
@@ -23,10 +23,34 @@ export interface PoetryItem {
   tags?: string[];
 }
 
-export type KnowledgeItem = PoetryItem;
+/** 数学关卡：按技能模板动态出题 */
+export type MathSkill = 'add' | 'sub' | 'mix' | 'compare' | 'missing';
+
+export interface MathItem {
+  id: string;
+  type: 'math';
+  grade: number;
+  title: string;
+  subtitle?: string;
+  skill: MathSkill;
+  /** 运算数上限，如 10 / 20 / 100 */
+  max: number;
+  tags?: string[];
+}
+
+export type KnowledgeItem = PoetryItem | MathItem;
 
 /** 关卡混合 / 游戏厅专项玩法 */
-export type QuizType = 'fillNext' | 'matchPair' | 'titleAuthor' | 'orderLines' | 'fillBlank';
+export type PoetryQuizType =
+  | 'fillNext'
+  | 'matchPair'
+  | 'titleAuthor'
+  | 'orderLines'
+  | 'fillBlank';
+
+export type MathQuizType = 'mathCalc' | 'mathCompare' | 'mathMissing';
+
+export type QuizType = PoetryQuizType | MathQuizType;
 
 /** 游戏厅模式（含混合随机 / Boss / 每日） */
 export type ArcadeMode = QuizType | 'mixed' | 'boss' | 'daily';
@@ -86,12 +110,23 @@ export interface FillBlankQuestion {
   answerId: string;
 }
 
+/** 数学选择题（计算 / 比较 / 填空）共用 */
+export interface MathChoiceQuestion {
+  id: string;
+  type: MathQuizType;
+  itemId: string;
+  prompt: string;
+  options: ChoiceOption[];
+  answerId: string;
+}
+
 export type Question =
   | FillNextQuestion
   | MatchPairQuestion
   | TitleAuthorQuestion
   | OrderLinesQuestion
-  | FillBlankQuestion;
+  | FillBlankQuestion
+  | MathChoiceQuestion;
 
 export interface SessionAnswer {
   questionId: string;

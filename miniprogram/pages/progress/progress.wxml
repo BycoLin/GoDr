@@ -11,12 +11,12 @@
 
   <view class="card summary">
     <view class="summary-title">{{packTitle}}</view>
-    <view class="summary-progress">已掌握 {{clearedCount}} / {{totalCount}} 首</view>
+    <view class="summary-progress">已掌握 {{clearedCount}} / {{totalCount}} {{unitLabel}}</view>
   </view>
 
   <view class="row" wx:for="{{rows}}" wx:key="id">
     <view class="row-main">
-      <view class="row-title">《{{item.title}}》</view>
+      <view class="row-title">{{item.title}}</view>
       <view class="row-meta">{{item.grade}} 年级 · {{item.cleared ? '已掌握' : '未通关'}}</view>
     </view>
     <view class="stars">

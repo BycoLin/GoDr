@@ -361,7 +361,10 @@ export function gradeAnswer(
   if (
     question.type === 'fillNext' ||
     question.type === 'titleAuthor' ||
-    question.type === 'fillBlank'
+    question.type === 'fillBlank' ||
+    question.type === 'mathCalc' ||
+    question.type === 'mathCompare' ||
+    question.type === 'mathMissing'
   ) {
     return typeof payload === 'string' && payload === question.answerId;
   }
@@ -402,6 +405,9 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   titleAuthor: '诗名作者',
   orderLines: '诗句排序',
   fillBlank: '缺字填空',
+  mathCalc: '速算闯关',
+  mathCompare: '比大小',
+  mathMissing: '填空达人',
   boss: '错题 Boss',
   daily: '每日限时',
 };

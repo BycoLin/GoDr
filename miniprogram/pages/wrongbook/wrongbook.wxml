@@ -11,7 +11,7 @@
 
   <view class="row" wx:for="{{rows}}" wx:key="key">
     <view class="row-main">
-      <view class="row-title">《{{item.title}}》</view>
+      <view class="row-title">{{item.title}}</view>
       <view class="row-meta">{{item.quizTypeLabel}} · 错 {{item.wrongCount}} 次</view>
     </view>
   </view>

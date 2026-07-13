@@ -1,7 +1,17 @@
 <view class="safe-pad mine">
   <view class="card profile">
-    <view class="brand">GoDr 闯关小博士</view>
-    <view class="slogan">免费学习 · 闯关答题 · 快乐成长</view>
+    <view class="avatar-wrap">
+      <view class="avatar">
+        <view class="avatar-face">
+          <view class="a-eye a-l"></view>
+          <view class="a-eye a-r"></view>
+          <view class="a-smile"></view>
+        </view>
+      </view>
+      <view class="avatar-tag">小博士</view>
+    </view>
+    <view class="brand">这是你的荣誉墙</view>
+    <view class="slogan">闯关越多，徽章越闪！</view>
     <view class="stats">
       <view class="stat">
         <view class="stat-num">{{points}}</view>
@@ -9,19 +19,20 @@
       </view>
       <view class="stat">
         <view class="stat-num">{{clearedTotal}}</view>
-        <view class="stat-label">已掌握</view>
+        <view class="stat-label">通关</view>
       </view>
       <view class="stat">
         <view class="stat-num">{{bestCombo}}</view>
-        <view class="stat-label">最高连击</view>
+        <view class="stat-label">连击</view>
       </view>
     </view>
     <view class="daily-tip">{{dailyTip}}</view>
   </view>
 
-  <view class="section-title">成就徽章</view>
+  <view class="section-title">徽章收集册</view>
   <view class="badge-grid">
     <view class="badge-item {{item.unlocked ? 'on' : ''}}" wx:for="{{badges}}" wx:key="id">
+      <view class="badge-seal">{{item.unlocked ? '亮' : '？'}}</view>
       <view class="badge-title">{{item.title}}</view>
       <view class="badge-desc">{{item.desc}}</view>
     </view>
@@ -33,11 +44,11 @@
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoGames">
-      <text>去游戏厅</text>
+      <text>去游戏乐园玩</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoProgress">
-      <text>查看进度</text>
+      <text>看看我的进度</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item danger" bindtap="onClearAll">
@@ -47,7 +58,7 @@
   </view>
 
   <view class="about">
-    <view>版本 {{version}}</view>
-    <view class="about-desc">面向小学生的免费学习小程序，覆盖数学、语文、英语等学科知识。</view>
+    <view>GoDr 闯关小博士 · v{{version}}</view>
+    <view class="about-desc">学知识像打怪一样有趣，语文数学一起闯！</view>
   </view>
 </view>

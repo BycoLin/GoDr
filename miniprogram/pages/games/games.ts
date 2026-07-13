@@ -1,60 +1,42 @@
-import { listPacks } from '../../utils/registry';
+import { listPacks, isMathPack } from '../../utils/registry';
 import { countActiveWrongs } from '../../utils/wrongbook';
 import { loadDailyRecord, DAILY_LIMIT_SEC } from '../../utils/daily';
-import type { ArcadeMode } from '../../utils/types';
+import type { ArcadeMode, PackManifest } from '../../utils/types';
 
 interface GameCard {
   mode: ArcadeMode;
   title: string;
   desc: string;
   tag: string;
+  toneClass: string;
 }
 
-const GAMES: GameCard[] = [
-  {
-    mode: 'mixed',
-    title: '随机挑战',
-    desc: '下一句、配对、排序、填空混合出击',
-    tag: '综合',
-  },
-  {
-    mode: 'fillNext',
-    title: '下一句闪电',
-    desc: '给出上句，快速选出正确下一句',
-    tag: '反应',
-  },
-  {
-    mode: 'matchPair',
-    title: '配对达人',
-    desc: '把上下句一对一对上',
-    tag: '配对',
-  },
-  {
-    mode: 'orderLines',
-    title: '诗句排序',
-    desc: '打乱的诗句，按正确顺序点回来',
-    tag: '记忆',
-  },
-  {
-    mode: 'fillBlank',
-    title: '缺字填空',
-    desc: '补上诗句里缺掉的那一个字',
-    tag: '细心',
-  },
-  {
-    mode: 'titleAuthor',
-    title: '诗名作者',
-    desc: '看诗句，选出诗名或作者',
-    tag: '认知',
-  },
+const POETRY_GAMES: GameCard[] = [
+  { mode: 'mixed', title: '随机挑战', desc: '下一句、配对、排序、填空混合出击', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'fillNext', title: '下一句闪电', desc: '给出上句，快速选出正确下一句', tag: '反应', toneClass: 'tone-1' },
+  { mode: 'matchPair', title: '配对达人', desc: '把上下句一对一对上', tag: '配对', toneClass: 'tone-2' },
+  { mode: 'orderLines', title: '诗句排序', desc: '打乱的诗句，按正确顺序点回来', tag: '记忆', toneClass: 'tone-0' },
+  { mode: 'fillBlank', title: '缺字填空', desc: '补上诗句里缺掉的那一个字', tag: '细心', toneClass: 'tone-1' },
+  { mode: 'titleAuthor', title: '诗名作者', desc: '看诗句，选出诗名或作者', tag: '认知', toneClass: 'tone-2' },
+];
+
+const MATH_GAMES: GameCard[] = [
+  { mode: 'mixed', title: '数学混合', desc: '速算、比大小、填空一起练', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'mathCalc', title: '速算闯关', desc: '加减口算，连击更带劲', tag: '速算', toneClass: 'tone-1' },
+  { mode: 'mathCompare', title: '比大小', desc: '选对 > < = 符号', tag: '比较', toneClass: 'tone-2' },
+  { mode: 'mathMissing', title: '填空达人', desc: '找出算式里缺的数', tag: '填空', toneClass: 'tone-0' },
 ];
 
 Page({
   data: {
+    packs: [] as Array<PackManifest & { label: string }>,
     grades: [1, 2] as number[],
     grade: 1,
     packId: 'poetry-g1-g2',
-    games: GAMES,
+    packSubject: '语文',
+    campaignTitle: '诗词闯关',
+    campaignDesc: '按诗逐首解锁，通关攒星星',
+    games: POETRY_GAMES,
     wrongCount: 0,
     wrongTip: '暂无错题，继续闯关',
     dailyTip: '今日尚未挑战',
@@ -63,16 +45,31 @@ Page({
 
   onShow() {
     const packs = listPacks();
-    const pack = packs[0];
-    if (!pack) return;
-    const grade = this.data.grade;
-    const nextGrade = pack.grades.includes(grade) ? grade : pack.grades[0];
+    if (!packs.length) return;
+    const current =
+      packs.find((p) => p.id === this.data.packId) || packs[0];
+    this.applyPack(current);
+  },
+
+  applyPack(pack: PackManifest) {
+    const math = isMathPack(pack.id);
+    const grade = pack.grades.includes(this.data.grade)
+      ? this.data.grade
+      : pack.grades[0];
     const wrongCount = countActiveWrongs(pack.id);
     const daily = loadDailyRecord();
     this.setData({
+      packs: listPacks().map((p) => ({
+        ...p,
+        label: p.subject === '数学' ? '数学闯关' : '诗词闯关',
+      })),
       packId: pack.id,
+      packSubject: pack.subject,
       grades: pack.grades,
-      grade: nextGrade,
+      grade,
+      games: math ? MATH_GAMES : POETRY_GAMES,
+      campaignTitle: math ? '数学闯关' : '诗词闯关',
+      campaignDesc: math ? '按关卡练口算，通关攒星星' : '按诗逐首解锁，通关攒星星',
       wrongCount,
       wrongTip: wrongCount > 0 ? `${wrongCount} 个薄弱点待攻克` : '暂无错题，继续闯关',
       dailyDone: Boolean(daily?.completed),
@@ -80,6 +77,13 @@ Page({
         ? `今日最佳 ${daily.bestCorrect}/${daily.bestTotal} · ${daily.bestPoints} 分`
         : `${DAILY_LIMIT_SEC} 秒限时 · 每日一挑战`,
     });
+  },
+
+  onSelectPack(e: WechatMiniprogram.TouchEvent) {
+    const packId = e.currentTarget.dataset.id as string;
+    const pack = this.data.packs.find((p) => p.id === packId);
+    if (!pack) return;
+    this.applyPack(pack);
   },
 
   onSelectGrade(e: WechatMiniprogram.TouchEvent) {

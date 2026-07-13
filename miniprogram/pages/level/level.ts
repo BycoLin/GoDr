@@ -1,12 +1,11 @@
-import { getItemsByGrade, getPackManifest, isPoetry } from '../../utils/registry';
+import { getItemsByGrade, getPackManifest, isMath, isPoetry } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
-import type { PoetryItem } from '../../utils/types';
+import type { KnowledgeItem } from '../../utils/types';
 
 interface LevelRow {
   id: string;
   title: string;
-  author: string;
-  dynasty: string;
+  meta: string;
   stars: number;
   cleared: boolean;
   unlocked: boolean;
@@ -17,6 +16,8 @@ Page({
     packId: '',
     grade: 1,
     packTitle: '',
+    subject: '',
+    unitLabel: '关',
     levels: [] as LevelRow[],
     clearedCount: 0,
     totalCount: 0,
@@ -25,12 +26,18 @@ Page({
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
     const grade = Number(query.grade || 1);
-    this.setData({ packId, grade });
     const manifest = getPackManifest(packId);
-    wx.setNavigationBarTitle({
-      title: `${grade} 年级 · 关卡`,
+    const subject = manifest?.subject || '';
+    this.setData({
+      packId,
+      grade,
+      packTitle: manifest?.title || '',
+      subject,
+      unitLabel: subject === '数学' ? '关' : '首',
     });
-    this.setData({ packTitle: manifest?.title || '' });
+    wx.setNavigationBarTitle({
+      title: `${grade} 年级 · ${subject || '关卡'}`,
+    });
   },
 
   onShow() {
@@ -38,29 +45,32 @@ Page({
   },
 
   refreshLevels() {
-    const { packId, grade } = this.data;
-    const items = getItemsByGrade(packId, grade).filter(isPoetry) as PoetryItem[];
+    const { packId, grade, subject } = this.data;
+    const items = getItemsByGrade(packId, grade).filter(
+      (item) => (subject === '数学' ? isMath(item) : isPoetry(item)),
+    ) as KnowledgeItem[];
     const progress = loadPackProgress(packId);
 
     const levels: LevelRow[] = items.map((item, index) => {
       const itemProg = progress.items[item.id];
       const prevCleared =
         index === 0 || Boolean(progress.items[items[index - 1].id]?.cleared);
+      const meta = isMath(item)
+        ? item.subtitle || item.tags?.join(' · ') || '数学闯关'
+        : `${item.dynasty || ''} · ${item.author}`.replace(/^\s·\s/, '');
       return {
         id: item.id,
         title: item.title,
-        author: item.author,
-        dynasty: item.dynasty || '',
+        meta,
         stars: itemProg?.stars || 0,
         cleared: Boolean(itemProg?.cleared),
         unlocked: prevCleared,
       };
     });
 
-    const clearedCount = levels.filter((l) => l.cleared).length;
     this.setData({
       levels,
-      clearedCount,
+      clearedCount: levels.filter((l) => l.cleared).length,
       totalCount: levels.length,
     });
   },
@@ -69,7 +79,7 @@ Page({
     const id = e.currentTarget.dataset.id as string;
     const unlocked = Number(e.currentTarget.dataset.unlocked) === 1;
     if (!unlocked) {
-      wx.showToast({ title: '先通关上一首哦', icon: 'none' });
+      wx.showToast({ title: '先通关上一关哦', icon: 'none' });
       return;
     }
     const { packId, grade } = this.data;

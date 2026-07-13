@@ -1,10 +1,11 @@
 <view class="safe-pad">
   <view class="intro card">
+    <view class="intro-badge">准备出发</view>
     <view class="intro-title">{{title}}</view>
     <view class="intro-desc">{{description}}</view>
   </view>
 
-  <view class="section-title">选择年级</view>
+  <view class="section-title">你是几年级小勇士？</view>
   <view class="grade-grid">
     <view
       class="grade-card"
@@ -14,7 +15,7 @@
       bindtap="onSelectGrade"
     >
       <view class="grade-num">{{item}}</view>
-      <view class="grade-label">年级</view>
+      <view class="grade-label">年级 · 开闯</view>
     </view>
   </view>
 </view>

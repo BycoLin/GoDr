@@ -1,39 +1,63 @@
 <view class="safe-pad home">
   <view class="hero">
-    <view class="brand">GoDr 闯关小博士</view>
-    <view class="tagline">闯关答题 · 快乐学习</view>
-    <view class="hero-art" aria-hidden="true">
-      <view class="leaf leaf-a"></view>
-      <view class="leaf leaf-b"></view>
-      <view class="scroll"></view>
+    <view class="hero-copy">
+      <view class="hello-chip">Hi 小勇士</view>
+      <view class="brand">闯关小博士</view>
+      <view class="tagline">学习也能像打怪一样好玩！</view>
+    </view>
+    <view class="mascot">
+      <view class="mascot-body">
+        <view class="mascot-face">
+          <view class="eye eye-l"></view>
+          <view class="eye eye-r"></view>
+          <view class="cheek cheek-l"></view>
+          <view class="cheek cheek-r"></view>
+          <view class="smile"></view>
+        </view>
+        <view class="mascot-hat">博</view>
+      </view>
+      <view class="sticker s1">冲</view>
+      <view class="sticker s2">GO</view>
+      <view class="dot d1"></view>
+      <view class="dot d2"></view>
+      <view class="dot d3"></view>
     </view>
   </view>
 
   <view wx:if="{{continueTip}}" class="card continue" bindtap="onContinue">
-    <view class="continue-label">上次学到</view>
+    <view class="continue-badge">接着玩</view>
+    <view class="continue-label">你上次闯到这里啦</view>
     <view class="continue-text">{{continueTip}}</view>
     <view class="continue-go">继续闯关 →</view>
   </view>
 
   <view class="card games-entry" bindtap="onGoGames">
-    <view class="games-entry-label">游戏厅</view>
-    <view class="games-entry-title">更多玩法等你挑战</view>
-    <view class="games-entry-desc">随机挑战 · 下一句闪电 · 诗句排序 · 缺字填空</view>
+    <view class="games-art">
+      <view class="orb orb-a"></view>
+      <view class="orb orb-b"></view>
+    </view>
+    <view class="games-entry-label">游戏乐园</view>
+    <view class="games-entry-title">去玩点新鲜的！</view>
+    <view class="games-entry-desc">诗词对决 · 数学速算 · Boss 大战</view>
+    <view class="go-pill">出发</view>
   </view>
 
-  <view class="section-title">知识库</view>
+  <view class="section-title">选一个背包出发</view>
   <view class="pack-list">
     <view
-      class="card pack-card"
+      class="card pack-card {{item.toneClass}}"
       wx:for="{{packs}}"
       wx:key="id"
       data-pack-id="{{item.id}}"
       bindtap="onTapPack"
     >
-      <view class="pack-subject">{{item.subject}}</view>
-      <view class="pack-title">{{item.title}}</view>
-      <view class="pack-desc">{{item.description}}</view>
-      <view class="pack-meta">{{item.gradeLabel}}</view>
+      <view class="pack-icon">{{item.iconText}}</view>
+      <view class="pack-body">
+        <view class="pack-subject">{{item.subject}}冒险</view>
+        <view class="pack-title">{{item.title}}</view>
+        <view class="pack-desc">{{item.description}}</view>
+        <view class="pack-meta">{{item.gradeLabel}} · 点我开闯</view>
+      </view>
     </view>
   </view>
 </view>

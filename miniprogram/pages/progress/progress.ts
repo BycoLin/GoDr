@@ -1,6 +1,5 @@
-import { getPackItems, getPackManifest, listPacks, isPoetry } from '../../utils/registry';
+import { getPackItems, getPackManifest, listPacks } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
-import type { PoetryItem } from '../../utils/types';
 
 interface ProgressRow {
   id: string;
@@ -20,6 +19,7 @@ Page({
     packId: '',
     packs: [] as PackOption[],
     packTitle: '',
+    unitLabel: '首',
     clearedCount: 0,
     totalCount: 0,
     rows: [] as ProgressRow[],
@@ -39,7 +39,7 @@ Page({
     const { packId } = this.data;
     if (!packId) return;
     const manifest = getPackManifest(packId);
-    const items = getPackItems(packId).filter(isPoetry) as PoetryItem[];
+    const items = getPackItems(packId);
     const progress = loadPackProgress(packId);
 
     const rows: ProgressRow[] = items.map((item) => {
@@ -55,6 +55,7 @@ Page({
 
     this.setData({
       packTitle: manifest?.title || '',
+      unitLabel: manifest?.subject === '数学' ? '关' : '首',
       clearedCount: rows.filter((r) => r.cleared).length,
       totalCount: rows.length,
       rows,

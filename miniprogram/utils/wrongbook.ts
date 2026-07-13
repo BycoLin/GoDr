@@ -20,6 +20,9 @@ const QUIZ_TYPE_LABELS: Record<QuizType, string> = {
   titleAuthor: '诗名作者',
   orderLines: '排序',
   fillBlank: '填空',
+  mathCalc: '速算',
+  mathCompare: '比大小',
+  mathMissing: '数学填空',
 };
 
 export function quizTypeLabel(type: QuizType): string {

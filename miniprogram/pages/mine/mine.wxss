@@ -3,39 +3,107 @@
 }
 
 .profile {
-  margin-bottom: 28rpx;
-  background: linear-gradient(145deg, #e8fffa 0%, #ffffff 55%, #dceeff 100%);
+  margin-bottom: 24rpx;
+  background: linear-gradient(150deg, #e8fff8 0%, #ffffff 48%, #fff0d8 100%);
+  text-align: center;
+  overflow: hidden;
+}
+
+.avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.avatar {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 46% 54% 50% 50%;
+  background: linear-gradient(160deg, #7cf0df, #22b8a8);
+  box-shadow: 0 10rpx 0 rgba(17, 153, 138, 0.25);
+  position: relative;
+  animation: popIn 0.5s ease;
+}
+
+.avatar-face {
+  position: absolute;
+  top: 34rpx;
+  right: 30rpx;
+  bottom: 36rpx;
+  left: 30rpx;
+}
+
+.a-eye {
+  position: absolute;
+  top: 10rpx;
+  width: 12rpx;
+  height: 18rpx;
+  background: #2b2540;
+  border-radius: 50%;
+}
+
+.a-l {
+  left: 14rpx;
+}
+
+.a-r {
+  right: 14rpx;
+}
+
+.a-smile {
+  position: absolute;
+  left: 50%;
+  bottom: 4rpx;
+  width: 28rpx;
+  height: 14rpx;
+  margin-left: -14rpx;
+  border: 3rpx solid #2b2540;
+  border-top: 0;
+  border-radius: 0 0 30rpx 30rpx;
+}
+
+.avatar-tag {
+  margin-top: 10rpx;
+  background: var(--color-sun);
+  color: #6a5000;
+  font-size: 20rpx;
+  font-weight: 900;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
 }
 
 .brand {
-  font-size: 40rpx;
-  font-weight: 800;
-  color: #0f6f6a;
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #1f1a33;
 }
 
 .slogan {
-  margin-top: 10rpx;
+  margin-top: 8rpx;
   font-size: 26rpx;
   color: var(--color-muted);
+  font-weight: 600;
 }
 
 .stats {
   display: flex;
   gap: 12rpx;
-  margin-top: 28rpx;
+  margin-top: 24rpx;
 }
 
 .stat {
   flex: 1;
   text-align: center;
-  background: rgba(255, 255, 255, 0.75);
-  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 24rpx;
   padding: 16rpx 8rpx;
+  box-shadow: 0 6rpx 0 rgba(43, 37, 64, 0.05);
 }
 
 .stat-num {
-  font-size: 38rpx;
-  font-weight: 800;
+  font-size: 36rpx;
+  font-weight: 900;
   color: var(--color-primary-deep);
 }
 
@@ -43,41 +111,61 @@
   margin-top: 4rpx;
   font-size: 22rpx;
   color: var(--color-muted);
+  font-weight: 700;
 }
 
 .daily-tip {
-  margin-top: 20rpx;
+  margin-top: 18rpx;
   font-size: 24rpx;
   color: var(--color-muted);
-  text-align: center;
+  font-weight: 600;
 }
 
 .badge-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 14rpx;
-  margin-bottom: 28rpx;
+  margin-bottom: 24rpx;
 }
 
 .badge-item {
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: var(--radius);
-  padding: 20rpx;
-  box-shadow: none;
-  opacity: 0.5;
-  border: 2rpx solid transparent;
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 28rpx;
+  padding: 20rpx 16rpx;
+  opacity: 0.55;
+  border: 4rpx dashed #d7dbe6;
+  position: relative;
 }
 
 .badge-item.on {
   opacity: 1;
   background: #fff;
-  border-color: var(--color-primary-soft);
-  box-shadow: var(--shadow);
+  border: 4rpx solid #fff;
+  box-shadow: 0 10rpx 0 rgba(43, 37, 64, 0.07);
+}
+
+.badge-seal {
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #e8eef8;
+  color: #9aa3b5;
+  font-size: 22rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10rpx;
+}
+
+.badge-item.on .badge-seal {
+  background: linear-gradient(145deg, #ffc93c, #ff9f1c);
+  color: #fff;
 }
 
 .badge-title {
   font-size: 26rpx;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .badge-desc {
@@ -85,6 +173,7 @@
   font-size: 22rpx;
   color: var(--color-muted);
   line-height: 1.35;
+  font-weight: 600;
 }
 
 .menu {
@@ -97,8 +186,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 32rpx 0;
-  border-bottom: 1rpx solid #e8eef5;
+  border-bottom: 2rpx dashed #e8eef5;
   font-size: 30rpx;
+  font-weight: 800;
 }
 
 .menu-item:last-child {
@@ -115,14 +205,26 @@
 }
 
 .about {
-  margin-top: 48rpx;
+  margin-top: 40rpx;
   text-align: center;
   font-size: 24rpx;
   color: var(--color-muted);
   line-height: 1.6;
+  font-weight: 600;
 }
 
 .about-desc {
-  margin-top: 12rpx;
+  margin-top: 10rpx;
   padding: 0 24rpx;
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }

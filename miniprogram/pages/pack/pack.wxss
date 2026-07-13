@@ -1,17 +1,30 @@
 .intro {
-  margin-bottom: 36rpx;
+  margin-bottom: 28rpx;
+  background: linear-gradient(145deg, #fff4e0, #ffffff 60%);
+  overflow: hidden;
+}
+
+.intro-badge {
+  display: inline-block;
+  background: var(--color-accent);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: 900;
+  padding: 6rpx 14rpx;
+  border-radius: 999rpx;
+  margin-bottom: 12rpx;
 }
 
 .intro-title {
   font-size: 40rpx;
-  font-weight: 800;
-  color: #0f6f6a;
+  font-weight: 900;
 }
 
 .intro-desc {
   margin-top: 12rpx;
   color: var(--color-muted);
   line-height: 1.55;
+  font-weight: 600;
 }
 
 .grade-grid {
@@ -22,22 +35,21 @@
 
 .grade-card {
   width: calc(50% - 8rpx);
-  background: linear-gradient(160deg, #ffffff 0%, #e8fffa 100%);
-  border-radius: 28rpx;
-  box-shadow: var(--shadow);
+  background: linear-gradient(160deg, #ffffff 0%, #e8fff8 100%);
+  border-radius: 32rpx;
+  box-shadow: 0 10rpx 0 rgba(43, 37, 64, 0.07);
   padding: 48rpx 24rpx;
   text-align: center;
-  border: 2rpx solid transparent;
+  border: 4rpx solid #fff;
 }
 
 .grade-card:active {
-  border-color: var(--color-primary);
-  transform: scale(0.98);
+  transform: translateY(4rpx) scale(0.98);
 }
 
 .grade-num {
-  font-size: 72rpx;
-  font-weight: 800;
+  font-size: 80rpx;
+  font-weight: 900;
   color: var(--color-primary-deep);
   line-height: 1;
 }
@@ -45,5 +57,6 @@
 .grade-label {
   margin-top: 8rpx;
   color: var(--color-muted);
-  font-size: 28rpx;
+  font-size: 26rpx;
+  font-weight: 800;
 }

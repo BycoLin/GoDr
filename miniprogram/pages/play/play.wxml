@@ -2,13 +2,14 @@
   <view class="top">
     <view class="hud">
       <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
+      <view class="poem-tag" wx:elif="{{isMathPack}}">{{poemTitle}} · {{poemAuthor}}</view>
       <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
       <view class="hud-right">
         <view class="combo {{comboPulse ? 'pulse' : ''}}" wx:if="{{combo >= 2}}">连击 x{{combo}}</view>
         <view class="timer {{remainSec <= 10 ? 'urgent' : ''}}" wx:if="{{timed}}">{{remainSec}}s</view>
       </view>
     </view>
-    <view class="progress-text">第 {{index + 1}} / {{total}} 题 · {{sessionPoints}} 分</view>
+    <view class="progress-text">第 {{index + 1}} / {{total}} 题 · 攒了 {{sessionPoints}} 分</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{total ? ((index + 1) / total * 100) : 0}}%;"></view>
     </view>
@@ -18,17 +19,20 @@
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
       class="card q-card"
-      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank'}}"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing'}}"
     >
       <view class="q-type">
         <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
         <block wx:elif="{{current.type === 'fillBlank'}}">缺字填空</block>
+        <block wx:elif="{{current.type === 'mathCalc'}}">速算</block>
+        <block wx:elif="{{current.type === 'mathCompare'}}">比大小</block>
+        <block wx:elif="{{current.type === 'mathMissing'}}">填空</block>
         <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
       </view>
       <view class="q-prompt">{{current.prompt}}</view>
-      <view class="options {{current.type === 'fillBlank' ? 'options-chars' : ''}}">
+      <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' ? 'options-chars' : ''}}">
         <view
-          class="option {{current.type === 'fillBlank' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
           wx:for="{{current.options}}"
           wx:key="id"
           data-id="{{item.id}}"

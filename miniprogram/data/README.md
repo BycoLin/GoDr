@@ -43,4 +43,19 @@ module.exports = {
 3. 在 [`registry.ts`](../utils/registry.ts) 的 `PACK_IDS` 中注册并 `require`
 4. 若条目 `type` 不是 `poetry`，需在出题引擎中增加对应题型模板
 
-首期仅注册 `poetry-g1-g2`。资料来源见仓库 `doc/`，抽取脚本：`npm run extract:poetry`。
+首期注册 `poetry-g1-g2`（语文）与 `math-g1-g2`（数学）。诗词资料见仓库 `doc/`，抽取脚本：`npm run extract:poetry`。
+
+## 数学条目 schema
+
+```js
+{
+  id: 'math_g1_add10',
+  type: 'math',
+  grade: 1,
+  title: '10以内加法',
+  subtitle: '速算入门',
+  skill: 'add', // add | sub | mix | compare | missing
+  max: 10,
+  tags: ['速算', '加法'],
+}
+```
