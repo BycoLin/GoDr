@@ -2,7 +2,7 @@
   <view class="hero">
     <view class="hero-copy">
       <view class="hello-chip">Hi 小朋友</view>
-      <view class="brand">小博士练习</view>
+      <view class="brand">闯关叭叭</view>
       <view class="tagline">语文 · 数学 · 英语，趣味自测记牢一点</view>
     </view>
     <view class="mascot">
@@ -14,7 +14,7 @@
           <view class="cheek cheek-r"></view>
           <view class="smile"></view>
         </view>
-        <view class="mascot-hat">博</view>
+        <view class="mascot-hat">叭</view>
       </view>
       <view class="sticker s1">练</view>
       <view class="sticker s2">GO</view>

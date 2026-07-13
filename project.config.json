@@ -1,5 +1,5 @@
 {
-  "description": "GoDr 小博士练习 · 小学生免费趣味自测小程序",
+  "description": "闯关叭叭 · 小学生免费趣味闯关练习小程序",
   "packOptions": {
     "ignore": [
       {
@@ -63,7 +63,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.5.5",
-  "appid": "touristappid",
+  "appid": "wx0b996dbb62bf50cc",
   "projectname": "GoDr",
   "condition": {},
   "miniprogramRoot": "miniprogram/",

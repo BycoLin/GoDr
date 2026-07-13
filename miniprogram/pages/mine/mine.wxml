@@ -8,7 +8,7 @@
           <view class="a-smile"></view>
         </view>
       </view>
-      <view class="avatar-tag">小博士</view>
+      <view class="avatar-tag">叭叭</view>
     </view>
     <view class="brand">我的练习记录</view>
     <view class="slogan">多练习，记得更牢！</view>
@@ -58,7 +58,7 @@
   </view>
 
   <view class="about">
-    <view>GoDr 小博士练习 · v{{version}}</view>
+    <view>闯关叭叭 · v{{version}}</view>
     <view class="about-desc">免费本地练习工具：语文、数学、英语趣味自测，记录学习进度。</view>
   </view>
 </view>

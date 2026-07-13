@@ -12,7 +12,7 @@
   ],
   "window": {
     "navigationBarBackgroundColor": "#22B8A8",
-    "navigationBarTitleText": "小博士练习",
+    "navigationBarTitleText": "闯关叭叭",
     "navigationBarTextStyle": "white",
     "backgroundColor": "#FFF8EF",
     "backgroundTextStyle": "dark"
@@ -50,5 +50,6 @@
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }
