@@ -364,7 +364,10 @@ export function gradeAnswer(
     question.type === 'fillBlank' ||
     question.type === 'mathCalc' ||
     question.type === 'mathCompare' ||
-    question.type === 'mathMissing'
+    question.type === 'mathMissing' ||
+    question.type === 'enWordMean' ||
+    question.type === 'enMeanWord' ||
+    question.type === 'enSpell'
   ) {
     return typeof payload === 'string' && payload === question.answerId;
   }
@@ -408,6 +411,9 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   mathCalc: '速算闯关',
   mathCompare: '比大小',
   mathMissing: '填空达人',
+  enWordMean: '看词选义',
+  enMeanWord: '看义选词',
+  enSpell: '缺字母闯关',
   boss: '错题 Boss',
   daily: '每日限时',
 };

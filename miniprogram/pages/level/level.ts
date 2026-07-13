@@ -1,4 +1,10 @@
-import { getItemsByGrade, getPackManifest, isMath, isPoetry } from '../../utils/registry';
+import {
+  getItemsByGrade,
+  getPackManifest,
+  isEnglish,
+  isMath,
+  isPoetry,
+} from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
 import type { KnowledgeItem } from '../../utils/types';
 
@@ -28,12 +34,13 @@ Page({
     const grade = Number(query.grade || 1);
     const manifest = getPackManifest(packId);
     const subject = manifest?.subject || '';
+    const unitLabel = subject === '语文' ? '首' : '关';
     this.setData({
       packId,
       grade,
       packTitle: manifest?.title || '',
       subject,
-      unitLabel: subject === '数学' ? '关' : '首',
+      unitLabel,
     });
     wx.setNavigationBarTitle({
       title: `${grade} 年级 · ${subject || '关卡'}`,
@@ -46,18 +53,25 @@ Page({
 
   refreshLevels() {
     const { packId, grade, subject } = this.data;
-    const items = getItemsByGrade(packId, grade).filter(
-      (item) => (subject === '数学' ? isMath(item) : isPoetry(item)),
-    ) as KnowledgeItem[];
+    const items = getItemsByGrade(packId, grade).filter((item) => {
+      if (subject === '数学') return isMath(item);
+      if (subject === '英语') return isEnglish(item);
+      return isPoetry(item);
+    }) as KnowledgeItem[];
     const progress = loadPackProgress(packId);
 
     const levels: LevelRow[] = items.map((item, index) => {
       const itemProg = progress.items[item.id];
       const prevCleared =
         index === 0 || Boolean(progress.items[items[index - 1].id]?.cleared);
-      const meta = isMath(item)
-        ? item.subtitle || item.tags?.join(' · ') || '数学闯关'
-        : `${item.dynasty || ''} · ${item.author}`.replace(/^\s·\s/, '');
+      let meta = '';
+      if (isMath(item)) {
+        meta = item.subtitle || item.tags?.join(' · ') || '数学闯关';
+      } else if (isEnglish(item)) {
+        meta = item.meaning + (item.phonetic ? ` · ${item.phonetic}` : '');
+      } else if (isPoetry(item)) {
+        meta = `${item.dynasty || ''} · ${item.author}`.replace(/^\s·\s/, '');
+      }
       return {
         id: item.id,
         title: item.title,

@@ -2,7 +2,7 @@
   <view class="top">
     <view class="hud">
       <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
-      <view class="poem-tag" wx:elif="{{isMathPack}}">{{poemTitle}} · {{poemAuthor}}</view>
+      <view class="poem-tag" wx:elif="{{isMathPack || isEnglishPack}}">{{poemTitle}} · {{poemAuthor}}</view>
       <view class="poem-tag" wx:else>《{{poemTitle}}》 · {{poemAuthor}}</view>
       <view class="hud-right">
         <view class="combo {{comboPulse ? 'pulse' : ''}}" wx:if="{{combo >= 2}}">连击 x{{combo}}</view>
@@ -19,7 +19,7 @@
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
       class="card q-card"
-      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing'}}"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
     >
       <view class="q-type">
         <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
@@ -27,12 +27,15 @@
         <block wx:elif="{{current.type === 'mathCalc'}}">速算</block>
         <block wx:elif="{{current.type === 'mathCompare'}}">比大小</block>
         <block wx:elif="{{current.type === 'mathMissing'}}">填空</block>
+        <block wx:elif="{{current.type === 'enWordMean'}}">看词选义</block>
+        <block wx:elif="{{current.type === 'enMeanWord'}}">看义选词</block>
+        <block wx:elif="{{current.type === 'enSpell'}}">缺字母</block>
         <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
       </view>
       <view class="q-prompt">{{current.prompt}}</view>
-      <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' ? 'options-chars' : ''}}">
+      <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'options-chars' : ''}}">
         <view
-          class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
           wx:for="{{current.options}}"
           wx:key="id"
           data-id="{{item.id}}"
@@ -43,7 +46,7 @@
 
     <!-- matchPair -->
     <view class="card q-card" wx:if="{{current.type === 'matchPair'}}">
-      <view class="q-type">上下句配对</view>
+      <view class="q-type">{{isEnglishPack ? '中英配对' : '上下句配对'}}</view>
       <view class="q-prompt">点选左边一句，再点右边对应的下一句</view>
       <view class="match-board">
         <view class="match-col">

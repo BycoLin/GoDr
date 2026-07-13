@@ -23,6 +23,9 @@ const QUIZ_TYPE_LABELS: Record<QuizType, string> = {
   mathCalc: '速算',
   mathCompare: '比大小',
   mathMissing: '数学填空',
+  enWordMean: '看词选义',
+  enMeanWord: '看义选词',
+  enSpell: '缺字母',
 };
 
 export function quizTypeLabel(type: QuizType): string {

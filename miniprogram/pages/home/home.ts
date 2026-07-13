@@ -19,15 +19,17 @@ Page({
   onShow() {
     try {
       const packs: PackCard[] = listPacks().map((pack) => {
-        const isMath = pack.subject === '数学';
+        const kind =
+          pack.subject === '数学' ? 'math' : pack.subject === '英语' ? 'english' : 'cn';
         return {
           ...pack,
           gradeLabel:
             pack.grades.length > 1
               ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级`
               : `${pack.grades[0]} 年级`,
-          toneClass: isMath ? 'pack-math' : 'pack-cn',
-          iconText: isMath ? '算' : '诗',
+          toneClass:
+            kind === 'math' ? 'pack-math' : kind === 'english' ? 'pack-en' : 'pack-cn',
+          iconText: kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗',
         };
       });
 

@@ -1,6 +1,6 @@
 /** 知识包 / 条目 / 题目类型定义 */
 
-export type KnowledgeType = 'poetry' | 'math' | string;
+export type KnowledgeType = 'poetry' | 'math' | 'english' | string;
 
 export interface PackManifest {
   id: string;
@@ -38,7 +38,20 @@ export interface MathItem {
   tags?: string[];
 }
 
-export type KnowledgeItem = PoetryItem | MathItem;
+/** 英语单词关卡 */
+export interface EnglishItem {
+  id: string;
+  type: 'english';
+  grade: number;
+  title: string;
+  word: string;
+  meaning: string;
+  phonetic?: string;
+  category?: string;
+  tags?: string[];
+}
+
+export type KnowledgeItem = PoetryItem | MathItem | EnglishItem;
 
 /** 关卡混合 / 游戏厅专项玩法 */
 export type PoetryQuizType =
@@ -50,7 +63,9 @@ export type PoetryQuizType =
 
 export type MathQuizType = 'mathCalc' | 'mathCompare' | 'mathMissing';
 
-export type QuizType = PoetryQuizType | MathQuizType;
+export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
+
+export type QuizType = PoetryQuizType | MathQuizType | EnglishQuizType;
 
 /** 游戏厅模式（含混合随机 / Boss / 每日） */
 export type ArcadeMode = QuizType | 'mixed' | 'boss' | 'daily';
@@ -120,13 +135,24 @@ export interface MathChoiceQuestion {
   answerId: string;
 }
 
+/** 英语选择题（看词选义 / 看义选词 / 缺字母）共用 */
+export interface EnglishChoiceQuestion {
+  id: string;
+  type: EnglishQuizType;
+  itemId: string;
+  prompt: string;
+  options: ChoiceOption[];
+  answerId: string;
+}
+
 export type Question =
   | FillNextQuestion
   | MatchPairQuestion
   | TitleAuthorQuestion
   | OrderLinesQuestion
   | FillBlankQuestion
-  | MathChoiceQuestion;
+  | MathChoiceQuestion
+  | EnglishChoiceQuestion;
 
 export interface SessionAnswer {
   questionId: string;

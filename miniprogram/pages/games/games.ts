@@ -1,4 +1,4 @@
-import { listPacks, isMathPack } from '../../utils/registry';
+import { listPacks, getPackSubjectKind } from '../../utils/registry';
 import { countActiveWrongs } from '../../utils/wrongbook';
 import { loadDailyRecord, DAILY_LIMIT_SEC } from '../../utils/daily';
 import type { ArcadeMode, PackManifest } from '../../utils/types';
@@ -27,9 +27,44 @@ const MATH_GAMES: GameCard[] = [
   { mode: 'mathMissing', title: '填空达人', desc: '找出算式里缺的数', tag: '填空', toneClass: 'tone-0' },
 ];
 
+const ENGLISH_GAMES: GameCard[] = [
+  { mode: 'mixed', title: '英语混合', desc: '选义、选词、缺字母、配对一起练', tag: '综合', toneClass: 'tone-0' },
+  { mode: 'enWordMean', title: '看词选义', desc: '看见英文，选出中文意思', tag: '词汇', toneClass: 'tone-1' },
+  { mode: 'enMeanWord', title: '看义选词', desc: '看见中文，选出正确英文', tag: '记忆', toneClass: 'tone-2' },
+  { mode: 'enSpell', title: '缺字母闯关', desc: '补全单词里缺的字母', tag: '拼写', toneClass: 'tone-0' },
+  { mode: 'matchPair', title: '中英配对', desc: '把英文和中文一对一对上', tag: '配对', toneClass: 'tone-1' },
+];
+
+function gamesForPack(packId: string): {
+  games: GameCard[];
+  campaignTitle: string;
+  campaignDesc: string;
+} {
+  const kind = getPackSubjectKind(packId);
+  if (kind === 'math') {
+    return {
+      games: MATH_GAMES,
+      campaignTitle: '数学闯关',
+      campaignDesc: '按关卡练口算，通关攒星星',
+    };
+  }
+  if (kind === 'english') {
+    return {
+      games: ENGLISH_GAMES,
+      campaignTitle: '英语闯关',
+      campaignDesc: '按单词逐个解锁，通关攒星星',
+    };
+  }
+  return {
+    games: POETRY_GAMES,
+    campaignTitle: '诗词闯关',
+    campaignDesc: '按诗逐首解锁，通关攒星星',
+  };
+}
+
 Page({
   data: {
-    packs: [] as Array<PackManifest & { label: string }>,
+    packs: [] as Array<{ id: string; subject: string }>,
     grades: [1, 2] as number[],
     grade: 1,
     packId: 'poetry-g1-g2',
@@ -52,24 +87,24 @@ Page({
   },
 
   applyPack(pack: PackManifest) {
-    const math = isMathPack(pack.id);
     const grade = pack.grades.includes(this.data.grade)
       ? this.data.grade
       : pack.grades[0];
     const wrongCount = countActiveWrongs(pack.id);
     const daily = loadDailyRecord();
+    const { games, campaignTitle, campaignDesc } = gamesForPack(pack.id);
     this.setData({
       packs: listPacks().map((p) => ({
-        ...p,
-        label: p.subject === '数学' ? '数学闯关' : '诗词闯关',
+        id: p.id,
+        subject: p.subject,
       })),
       packId: pack.id,
       packSubject: pack.subject,
       grades: pack.grades,
       grade,
-      games: math ? MATH_GAMES : POETRY_GAMES,
-      campaignTitle: math ? '数学闯关' : '诗词闯关',
-      campaignDesc: math ? '按关卡练口算，通关攒星星' : '按诗逐首解锁，通关攒星星',
+      games,
+      campaignTitle,
+      campaignDesc,
       wrongCount,
       wrongTip: wrongCount > 0 ? `${wrongCount} 个薄弱点待攻克` : '暂无错题，继续闯关',
       dailyDone: Boolean(daily?.completed),
@@ -81,7 +116,7 @@ Page({
 
   onSelectPack(e: WechatMiniprogram.TouchEvent) {
     const packId = e.currentTarget.dataset.id as string;
-    const pack = this.data.packs.find((p) => p.id === packId);
+    const pack = listPacks().find((p) => p.id === packId);
     if (!pack) return;
     this.applyPack(pack);
   },

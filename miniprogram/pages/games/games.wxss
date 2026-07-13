@@ -42,15 +42,16 @@
 .pack-chip {
   padding: 14rpx 28rpx;
   border-radius: 999rpx;
-  background: #fff;
-  color: var(--color-muted);
-  font-size: 26rpx;
+  background: #ffffff;
+  color: #5a5268;
+  font-size: 28rpx;
   font-weight: 800;
   box-shadow: 0 6rpx 0 rgba(43, 37, 64, 0.06);
+  line-height: 1.2;
 }
 
 .pack-chip.on {
-  color: #fff;
+  color: #ffffff;
   background: linear-gradient(135deg, #7aa7ff, #5b8cff);
   box-shadow: 0 8rpx 0 #4470e0;
 }

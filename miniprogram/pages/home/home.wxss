@@ -347,6 +347,10 @@
   background: linear-gradient(145deg, #eef4ff, #ffffff 50%);
 }
 
+.pack-en {
+  background: linear-gradient(145deg, #e8fff4, #ffffff 50%);
+}
+
 .pack-icon {
   width: 88rpx;
   height: 88rpx;
@@ -367,6 +371,10 @@
 
 .pack-math .pack-icon {
   background: linear-gradient(145deg, #7aa7ff, #5b8cff);
+}
+
+.pack-en .pack-icon {
+  background: linear-gradient(145deg, #3ecf8e, #22b8a8);
 }
 
 .pack-body {

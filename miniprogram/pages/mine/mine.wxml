@@ -59,6 +59,6 @@
 
   <view class="about">
     <view>GoDr 闯关小博士 · v{{version}}</view>
-    <view class="about-desc">学知识像打怪一样有趣，语文数学一起闯！</view>
+    <view class="about-desc">学知识像打怪一样有趣，语文数学英语一起闯！</view>
   </view>
 </view>

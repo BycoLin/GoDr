@@ -1,4 +1,12 @@
-import { getItemById, getItemsByGrade, getPackItems, isMath, isMathPack, isPoetry } from '../../utils/registry';
+import {
+  getItemById,
+  getItemsByGrade,
+  getPackItems,
+  getPackSubjectKind,
+  isEnglish,
+  isMath,
+  isPoetry,
+} from '../../utils/registry';
 import {
   ARCADE_MODE_LABELS,
   buildArcadeQuiz,
@@ -16,6 +24,13 @@ import {
   MATH_ARCADE_MODE_LABELS,
   nextMathAdaptiveQuestion,
 } from '../../utils/quiz-math';
+import {
+  buildEnglishArcadeQuiz,
+  buildEnglishBossQuiz,
+  buildEnglishQuizForItem,
+  ENGLISH_ARCADE_MODE_LABELS,
+  nextEnglishAdaptiveQuestion,
+} from '../../utils/quiz-english';
 import { saveLastSession } from '../../utils/progress';
 import { pickBossPool, recordFix, recordWrong } from '../../utils/wrongbook';
 import { pointsForCorrect } from '../../utils/wallet';
@@ -27,6 +42,7 @@ import {
 } from '../../utils/daily';
 import type {
   ArcadeMode,
+  EnglishItem,
   KnowledgeItem,
   MathItem,
   PoetryItem,
@@ -34,6 +50,7 @@ import type {
   QuizType,
   SessionAnswer,
 } from '../../utils/types';
+import type { PackSubjectKind } from '../../utils/registry';
 
 
 interface MatchState {
@@ -63,6 +80,7 @@ Page({
     poemTitle: '',
     poemAuthor: '',
     isMathPack: false,
+    isEnglishPack: false,
     questions: [] as Question[],
     index: 0,
     total: 0,
@@ -94,7 +112,7 @@ Page({
   finished: false,
   lastType: undefined as QuizType | undefined,
   lastCorrect: true,
-  subjectMath: false,
+  subjectKind: 'poetry' as PackSubjectKind,
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
@@ -107,15 +125,17 @@ Page({
     const limitSec = Number(query.limitSec || (daily ? DAILY_LIMIT_SEC : 0));
     const arcade = boss || daily || query.arcade === '1' || !itemId;
     const rolling = arcade;
-    const subjectMath = isMathPack(packId);
-    this.subjectMath = subjectMath;
+    const subjectKind = getPackSubjectKind(packId);
+    this.subjectKind = subjectKind;
 
     let pool = getItemsByGrade(packId, grade);
     if (daily && !pool.length) {
       pool = getPackItems(packId);
     }
-    if (subjectMath) {
+    if (subjectKind === 'math') {
       pool = pool.filter(isMath);
+    } else if (subjectKind === 'english') {
+      pool = pool.filter(isEnglish);
     } else {
       pool = pool.filter(isPoetry);
     }
@@ -141,6 +161,7 @@ Page({
     let targetTotal = 5;
     const mathPool = pool.filter(isMath) as MathItem[];
     const poetryPool = pool.filter(isPoetry) as PoetryItem[];
+    const englishPool = pool.filter(isEnglish) as EnglishItem[];
 
     if (boss) {
       if (!wrongHints.length) {
@@ -148,9 +169,13 @@ Page({
         setTimeout(() => wx.navigateBack(), 900);
         return;
       }
-      questions = subjectMath
-        ? buildMathBossQuiz(wrongHints, mathPool, 1)
-        : buildBossQuiz(wrongHints, poetryPool, 1);
+      if (subjectKind === 'math') {
+        questions = buildMathBossQuiz(wrongHints, mathPool, 1);
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishBossQuiz(wrongHints, englishPool, 1);
+      } else {
+        questions = buildBossQuiz(wrongHints, poetryPool, 1);
+      }
       targetTotal = ROLLING_TARGET;
       poemTitle = '错题 Boss';
       poemAuthor = `${wrongHints.length} 个薄弱点`;
@@ -163,11 +188,19 @@ Page({
       for (let i = 0; i < Math.min(DAILY_QUESTION_COUNT, seededPool.length * 2); i += 1) {
         rotated.push(seededPool[pickSeededIndex(seed, i, seededPool.length)]);
       }
-      if (subjectMath) {
+      if (subjectKind === 'math') {
         questions = buildMathArcadeQuiz(
           (rotated.filter(isMath) as MathItem[]).length
             ? (rotated.filter(isMath) as MathItem[])
             : mathPool,
+          'mixed',
+          1,
+        );
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishArcadeQuiz(
+          (rotated.filter(isEnglish) as EnglishItem[]).length
+            ? (rotated.filter(isEnglish) as EnglishItem[])
+            : englishPool,
           'mixed',
           1,
         );
@@ -186,14 +219,17 @@ Page({
       modeLabel = '每日限时';
       wx.setNavigationBarTitle({ title: '每日限时' });
     } else if (arcade) {
-      questions = subjectMath
-        ? buildMathArcadeQuiz(mathPool, mode, 1)
-        : buildArcadeQuiz(poetryPool, mode, 1);
+      if (subjectKind === 'math') {
+        questions = buildMathArcadeQuiz(mathPool, mode, 1);
+        poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味闯关';
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishArcadeQuiz(englishPool, mode, 1);
+        poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味闯关';
+      } else {
+        questions = buildArcadeQuiz(poetryPool, mode, 1);
+        poemTitle = ARCADE_MODE_LABELS[mode] || '趣味闯关';
+      }
       targetTotal = ROLLING_TARGET;
-      poemTitle =
-        (subjectMath ? MATH_ARCADE_MODE_LABELS[mode] : ARCADE_MODE_LABELS[mode]) ||
-        ARCADE_MODE_LABELS[mode] ||
-        '趣味闯关';
       poemAuthor = `${grade} 年级`;
       modeLabel = poemTitle;
       wx.setNavigationBarTitle({ title: poemTitle });
@@ -210,6 +246,12 @@ Page({
         poemAuthor = item.subtitle || '数学闯关';
         modeLabel = '数学闯关';
         wx.setNavigationBarTitle({ title: item.title });
+      } else if (isEnglish(item)) {
+        questions = buildEnglishQuizForItem(item, englishPool, 5);
+        poemTitle = item.word;
+        poemAuthor = item.meaning;
+        modeLabel = '英语闯关';
+        wx.setNavigationBarTitle({ title: item.word });
       } else if (isPoetry(item)) {
         questions = buildQuizForItem(item, poetryPool, { count: 5, rampHard: true });
         poemTitle = item.title;
@@ -244,7 +286,8 @@ Page({
       modeLabel,
       poemTitle,
       poemAuthor,
-      isMathPack: subjectMath,
+      isMathPack: subjectKind === 'math',
+      isEnglishPack: subjectKind === 'english',
       questions,
       total: targetTotal,
       index: 0,
@@ -378,7 +421,10 @@ Page({
         current.type !== 'fillBlank' &&
         current.type !== 'mathCalc' &&
         current.type !== 'mathCompare' &&
-        current.type !== 'mathMissing')
+        current.type !== 'mathMissing' &&
+        current.type !== 'enWordMean' &&
+        current.type !== 'enMeanWord' &&
+        current.type !== 'enSpell')
     ) {
       return;
     }
@@ -473,27 +519,41 @@ Page({
 
     let nextQuestions = questions;
     if (this.data.rolling && nextIndex < total && nextIndex >= questions.length) {
-      const q = this.subjectMath
-        ? nextMathAdaptiveQuestion(
-            this.poolCache.filter(isMath) as MathItem[],
-            this.data.mode,
-            {
-              combo: this.data.combo,
-              lastCorrect: this.lastCorrect,
-              lastType: this.lastType,
-            },
-            this.wrongHints,
-          )
-        : nextAdaptiveQuestion(
-            this.poolCache.filter(isPoetry) as PoetryItem[],
-            this.data.mode,
-            {
-              combo: this.data.combo,
-              lastCorrect: this.lastCorrect,
-              lastType: this.lastType,
-            },
-            this.wrongHints,
-          );
+      let q: Question | null = null;
+      if (this.subjectKind === 'math') {
+        q = nextMathAdaptiveQuestion(
+          this.poolCache.filter(isMath) as MathItem[],
+          this.data.mode,
+          {
+            combo: this.data.combo,
+            lastCorrect: this.lastCorrect,
+            lastType: this.lastType,
+          },
+          this.wrongHints,
+        );
+      } else if (this.subjectKind === 'english') {
+        q = nextEnglishAdaptiveQuestion(
+          this.poolCache.filter(isEnglish) as EnglishItem[],
+          this.data.mode,
+          {
+            combo: this.data.combo,
+            lastCorrect: this.lastCorrect,
+            lastType: this.lastType,
+          },
+          this.wrongHints,
+        );
+      } else {
+        q = nextAdaptiveQuestion(
+          this.poolCache.filter(isPoetry) as PoetryItem[],
+          this.data.mode,
+          {
+            combo: this.data.combo,
+            lastCorrect: this.lastCorrect,
+            lastType: this.lastType,
+          },
+          this.wrongHints,
+        );
+      }
       if (q) {
         nextQuestions = questions.concat([q]);
       } else {

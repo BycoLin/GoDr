@@ -12,7 +12,7 @@
       wx:key="id"
       data-id="{{item.id}}"
       bindtap="onSelectPack"
-    >{{item.label}}</view>
+    >{{item.subject}}</view>
   </view>
 
   <view class="grade-row">
