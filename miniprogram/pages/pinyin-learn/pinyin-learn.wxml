@@ -1,0 +1,75 @@
+<view class="safe-pad learn" wx:if="{{current}}">
+  <view class="top-row">
+    <view class="lesson">汉语拼音 · {{initial}}</view>
+    <view class="progress">{{index + 1}} / {{total}}</view>
+  </view>
+
+  <view class="mode-row">
+    <view class="mode {{mode === 'card' ? 'on' : ''}}" data-mode="card" bindtap="onMode">卡片模式</view>
+    <view class="mode {{mode === 'fill' ? 'on' : ''}}" data-mode="fill" bindtap="onMode">填拼音</view>
+    <view class="mode {{mode === 'list' ? 'on' : ''}}" data-mode="list" bindtap="onMode">列表模式</view>
+  </view>
+
+  <!-- 卡片模式 -->
+  <block wx:if="{{mode === 'card'}}">
+    <view class="hint">跟读拼音，观察拼读过程</view>
+    <view class="card main-card">
+      <view class="formula">
+        <text class="ini">{{current.initial}}</text>
+        <text class="op"> + </text>
+        <text>{{current.final}}</text>
+        <text class="op"> = </text>
+        <text class="full">{{current.pinyin}}</text>
+      </view>
+      <view class="big-row">
+        <view class="big-pinyin">
+          <text class="ini">{{current.initial}}</text><text>{{current.final}}</text>
+        </view>
+        <view class="speak" bindtap="onSpeak">读</view>
+      </view>
+      <view class="char-box">{{current.char}}</view>
+    </view>
+    <view class="nav-row">
+      <button class="btn btn-ghost nav-btn" bindtap="onPrev" disabled="{{index <= 0}}">上一条</button>
+      <button class="btn btn-primary nav-btn play" bindtap="onSpeak">播放</button>
+      <button class="btn btn-ghost nav-btn" bindtap="onNext" disabled="{{index >= total - 1}}">下一条</button>
+    </view>
+  </block>
+
+  <!-- 填拼音 -->
+  <block wx:elif="{{mode === 'fill'}}">
+    <view class="hint">看汉字，选出正确拼音</view>
+    <view class="card main-card">
+      <view class="char-box big">{{current.char}}</view>
+      <view class="fill-feedback ok" wx:if="{{fillFeedback === 'ok'}}">答对啦！</view>
+      <view class="fill-feedback bad" wx:elif="{{fillFeedback === 'bad'}}">再选一次～</view>
+    </view>
+    <view class="fill-opts">
+      <view
+        class="fill-opt {{fillFeedback === 'ok' && item === current.pinyin ? 'correct' : ''}}"
+        wx:for="{{fillOptions}}"
+        wx:key="*this"
+        data-pinyin="{{item}}"
+        bindtap="onFill"
+      >{{item}}</view>
+    </view>
+  </block>
+
+  <!-- 列表 -->
+  <block wx:else>
+    <view class="hint">点选任意字词，进入卡片学习</view>
+    <view class="list-grid">
+      <view
+        class="list-item {{index === idx ? 'on' : ''}}"
+        wx:for="{{items}}"
+        wx:for-index="idx"
+        wx:key="pinyin"
+        data-index="{{idx}}"
+        bindtap="onPickList"
+      >
+        <view class="list-py">{{item.pinyin}}</view>
+        <view class="list-ch">{{item.char}}</view>
+      </view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,19 @@
+<view class="safe-pad pinyin">
+  <view class="banner">
+    <view class="banner-title">拼读学习</view>
+    <view class="banner-desc">点一个声母，开始拼一拼</view>
+  </view>
+
+  <view class="grid">
+    <view
+      class="tile {{item.toneClass}}"
+      wx:for="{{initials}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onTapInitial"
+    >
+      <view class="letter">{{item.id}}</view>
+      <view class="tip">{{item.tip}}</view>
+    </view>
+  </view>
+</view>

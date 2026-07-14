@@ -94,6 +94,104 @@
   margin-bottom: 14rpx;
 }
 
+.feature-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14rpx;
+  margin-bottom: 22rpx;
+}
+
+.play-tile {
+  min-height: 200rpx;
+  padding: 24rpx 20rpx 28rpx;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.play-tile::after {
+  content: '';
+  position: absolute;
+  right: -30rpx;
+  bottom: -40rpx;
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.tile-tag {
+  display: inline-block;
+  font-size: 20rpx;
+  font-weight: 900;
+  padding: 6rpx 12rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.28);
+  margin-bottom: 14rpx;
+}
+
+.tile-title {
+  font-size: 34rpx;
+  font-weight: 900;
+  position: relative;
+  z-index: 1;
+}
+
+.tile-desc {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  line-height: 1.4;
+  font-weight: 700;
+  opacity: 0.92;
+  position: relative;
+  z-index: 1;
+}
+
+.f-duel {
+  background: linear-gradient(145deg, #5b8cff 0%, #3d6ef5 100%);
+  box-shadow: 0 10rpx 0 #2f57c8;
+}
+
+.f-sprint {
+  background: linear-gradient(145deg, #ff9f1c 0%, #ff7a18 100%);
+  box-shadow: 0 10rpx 0 #d96a10;
+}
+
+.f-exam {
+  background: linear-gradient(145deg, #22b8a8 0%, #159f90 100%);
+  box-shadow: 0 10rpx 0 #0f8f82;
+}
+
+.f-flash {
+  background: linear-gradient(145deg, #a78bfa 0%, #8b5cf6 100%);
+  box-shadow: 0 10rpx 0 #6d3fd4;
+}
+
+.extra-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-bottom: 22rpx;
+}
+
+.extra-item {
+  display: none;
+}
+
+.tools-foot {
+  margin: 8rpx 0 12rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #5b8cff;
+}
+
+.tools-foot.soft {
+  margin-bottom: 28rpx;
+  color: #9a93a8;
+  font-size: 24rpx;
+}
+
 .feature-card {
   flex: 1;
   padding: 24rpx 20rpx;

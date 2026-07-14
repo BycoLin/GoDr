@@ -6,7 +6,7 @@
   </view>
 
   <view wx:if="{{!rows.length}}" class="empty">
-    <view class="empty-tip">去循序练习或趣味练习里练一练吧</view>
+    <view class="empty-tip">先去主线闯关练一练，或到加练里复习</view>
   </view>
 
   <view class="row" wx:for="{{rows}}" wx:key="key">

@@ -1,0 +1,13 @@
+<view class="keypad">
+  <view
+    class="key {{item === 'clear' || item === 'ok' ? 'key-action' : ''}} {{item === 'ok' ? 'key-ok' : ''}} {{item === 'clear' ? 'key-clear' : ''}}"
+    wx:for="{{keys}}"
+    wx:key="*this"
+    data-key="{{item}}"
+    bindtap="onTap"
+  >
+    <block wx:if="{{item === 'clear'}}">清除</block>
+    <block wx:elif="{{item === 'ok'}}">确定</block>
+    <block wx:else>{{item}}</block>
+  </view>
+</view>

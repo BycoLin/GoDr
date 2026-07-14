@@ -1,11 +1,11 @@
 <view class="safe-pad home">
   <view class="hero">
     <view class="hero-copy">
-      <view class="hello-chip">Hi 小朋友</view>
+      <view class="hello-chip">GO GO GO</view>
       <view class="brand">闯关叭叭</view>
-      <view class="tagline">语文 · 数学 · 英语，趣味自测记牢一点</view>
+      <view class="tagline">趣味棋盘走走答，一关关练，集小星星！</view>
     </view>
-    <view class="mascot">
+    <view class="mascot bob">
       <view class="mascot-body">
         <view class="mascot-face">
           <view class="eye eye-l"></view>
@@ -16,7 +16,7 @@
         </view>
         <view class="mascot-hat">叭</view>
       </view>
-      <view class="sticker s1">练</view>
+      <view class="sticker s1">闯</view>
       <view class="sticker s2">GO</view>
       <view class="dot d1"></view>
       <view class="dot d2"></view>
@@ -24,25 +24,29 @@
     </view>
   </view>
 
-  <view wx:if="{{continueTip}}" class="card continue" bindtap="onContinue">
-    <view class="continue-badge">继续练</view>
-    <view class="continue-label">你上次练到这里</view>
-    <view class="continue-text">{{continueTip}}</view>
-    <view class="continue-go">接着练习 →</view>
-  </view>
-
-  <view class="card games-entry" bindtap="onGoGames">
-    <view class="game-art">
-      <view class="orb orb-a"></view>
-      <view class="orb orb-b"></view>
+  <view class="card mono-entry" bindtap="onGoMono">
+    <view class="mono-badge">推荐</view>
+    <view class="mono-art">
+      <view class="mono-dice">★</view>
+      <view class="mono-piece bounce">叭</view>
     </view>
-    <view class="games-entry-label">趣味练习</view>
-    <view class="games-entry-title">换种方式练一练</view>
-    <view class="games-entry-desc">诗词默写 · 口算自测 · 单词认读 · 错题复习</view>
-    <view class="go-pill">去练习</view>
+    <view class="mono-label">趣味棋盘</view>
+    <view class="mono-title">走走答 · 练一练</view>
+    <view class="mono-desc">走到格子就答题，答对得星星，边玩边记知识点。</view>
+    <view class="mono-go">开始练习</view>
   </view>
 
-  <view class="section-title">选择学习内容</view>
+  <view wx:if="{{continueTip}}" class="card continue" bindtap="onContinue">
+    <view class="continue-badge">接着打</view>
+    <view class="continue-label">上次停在这里哦</view>
+    <view class="continue-text">{{continueTip}}</view>
+    <view class="continue-go">继续闯关 →</view>
+  </view>
+
+  <view class="section-head">
+    <view class="section-title">练习小岛</view>
+    <view class="section-hint">想按关卡循序练，选一座岛出发</view>
+  </view>
   <view class="pack-list">
     <view
       class="card pack-card {{item.toneClass}}"
@@ -53,11 +57,25 @@
     >
       <view class="pack-icon">{{item.iconText}}</view>
       <view class="pack-body">
-        <view class="pack-subject">{{item.subject}}练习</view>
+        <view class="pack-subject">{{item.worldName}}</view>
         <view class="pack-title">{{item.title}}</view>
-        <view class="pack-desc">{{item.description}}</view>
-        <view class="pack-meta">{{item.gradeLabel}} · 开始练习</view>
+        <view class="pack-desc">{{item.funDesc}}</view>
+        <view class="pack-meta">{{item.gradeLabel}} · 出发！</view>
       </view>
+      <view class="pack-go">GO</view>
+    </view>
+  </view>
+
+  <view class="side-links">
+    <view class="side-link play" bindtap="onGoGames">
+      <view class="side-emoji">玩</view>
+      <view class="side-title">趣味加练</view>
+      <view class="side-desc">对练 · 冲刺 · 自测</view>
+    </view>
+    <view class="side-link soft" bindtap="onGoTools">
+      <view class="side-emoji">宝</view>
+      <view class="side-title">趣味宝箱</view>
+      <view class="side-desc">拼音 · 看图算</view>
     </view>
   </view>
 </view>

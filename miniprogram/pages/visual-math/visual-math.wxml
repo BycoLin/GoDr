@@ -1,0 +1,33 @@
+<view class="safe-pad visual">
+  <view class="head">
+    <view class="title">{{total}}以内减法</view>
+    <view class="desc">拿走一些，还剩多少？观察总数和拿走的数量，点出剩下的答案</view>
+  </view>
+
+  <view class="meta">
+    <view class="streak" wx:if="{{streak >= 2}}">连对 x{{streak}}</view>
+    <view class="answer-box {{feedback === 'ok' ? 'ok' : ''}} {{feedback === 'bad' ? 'bad' : ''}}">
+      {{input || '答案?'}}
+    </view>
+  </view>
+
+  <view class="card stage">
+    <view class="fruit-row">
+      <view class="fruit {{item.gone ? 'gone' : ''}}" wx:for="{{icons}}" wx:key="id">
+        {{fruit}}
+      </view>
+    </view>
+    <view class="equation">
+      <view class="num">{{total}}</view>
+      <view class="op">-</view>
+      <view class="num">{{take}}</view>
+      <view class="op">=</view>
+      <view class="num ans">{{input || '?'}}</view>
+    </view>
+  </view>
+
+  <view class="tip ok" wx:if="{{feedback === 'ok'}}">答对啦！超棒！</view>
+  <view class="tip bad" wx:elif="{{feedback === 'bad'}}">再数一数～</view>
+
+  <num-keypad bind:key="onKey" />
+</view>

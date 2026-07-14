@@ -218,7 +218,14 @@ export function buildMathArcadeQuiz(
     let type: MathQuizType;
     if (mode === 'mathCalc' || mode === 'mathCompare' || mode === 'mathMissing') {
       type = mode;
-    } else if (mode === 'mixed' || mode === 'boss' || mode === 'daily') {
+    } else if (
+      mode === 'mixed' ||
+      mode === 'boss' ||
+      mode === 'daily' ||
+      mode === 'duel' ||
+      mode === 'sprint' ||
+      mode === 'exam'
+    ) {
       const all: MathQuizType[] = ['mathCalc', 'mathCompare', 'mathMissing'];
       type = all[questions.length % all.length];
     } else {
@@ -291,4 +298,7 @@ export const MATH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
   mathMissing: '算式填空',
   boss: '错题复习',
   daily: '每日自测',
+  duel: '趣味对练',
+  sprint: '口算冲刺',
+  exam: '模拟小测',
 };

@@ -1,8 +1,8 @@
 <view class="safe-pad games">
   <view class="intro">
-    <view class="intro-badge">今日练习</view>
-    <view class="intro-title">想练哪一块？</view>
-    <view class="intro-desc">选科目、选年级，开始趣味自测</view>
+    <view class="intro-badge">加练</view>
+    <view class="intro-title">趣味加练</view>
+    <view class="intro-desc">关卡累了？来这儿换种方式练一练</view>
   </view>
 
   <view class="pack-row">
@@ -16,7 +16,7 @@
   </view>
 
   <view class="grade-row">
-    <view class="grade-label">年级</view>
+    <view class="grade-label">地图</view>
     <view
       class="grade-chip {{grade === item ? 'on' : ''}}"
       wx:for="{{grades}}"
@@ -26,29 +26,44 @@
     >{{item}} 年级</view>
   </view>
 
-  <view class="feature-row">
-    <view class="card feature-card boss" bindtap="onTapBoss">
-      <view class="feature-emoji">复习</view>
-      <view class="feature-title">错题复习</view>
-      <view class="feature-desc">{{wrongTip}}</view>
-    </view>
-    <view class="card feature-card daily" bindtap="onTapDaily">
-      <view class="feature-emoji">限时</view>
-      <view class="feature-title">每日自测</view>
-      <view class="feature-desc">{{dailyTip}}</view>
-    </view>
-  </view>
-
   <view class="card campaign" bindtap="onTapCampaign">
-    <view class="campaign-badge">主线</view>
-    <view class="campaign-tag">按关卡循序练习</view>
+    <view class="campaign-badge">回地图</view>
+    <view class="campaign-tag">继续主线闯关</view>
     <view class="campaign-title">{{campaignTitle}}</view>
     <view class="campaign-desc">{{campaignDesc}}</view>
   </view>
 
-  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">去错题本看看 →</view>
+  <view class="section-title">今日挑战</view>
+  <view class="feature-row">
+    <view class="card feature-card boss" bindtap="onTapBoss">
+      <view class="feature-emoji">巩固</view>
+      <view class="feature-title">错题再练</view>
+      <view class="feature-desc">{{wrongTip}}</view>
+    </view>
+    <view class="card feature-card daily" bindtap="onTapDaily">
+      <view class="feature-emoji">限时</view>
+      <view class="feature-title">每日限时练</view>
+      <view class="feature-desc">{{dailyTip}}</view>
+    </view>
+  </view>
+  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">打开错题本 →</view>
 
-  <view class="section-title">{{packSubject}}趣味练习</view>
+  <view class="section-title">热门玩法</view>
+  <view class="feature-grid">
+    <view
+      class="card play-tile {{item.tone}}"
+      wx:for="{{features}}"
+      wx:key="id"
+      data-action="{{item.action}}"
+      bindtap="onTapFeature"
+    >
+      <view class="tile-tag">{{item.tag}}</view>
+      <view class="tile-title">{{item.title}}</view>
+      <view class="tile-desc">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <view class="section-title">{{packSubject}}小关卡</view>
   <view class="game-list">
     <view
       class="card game-card {{item.toneClass}}"
@@ -60,7 +75,10 @@
       <view class="game-tag">{{item.tag}}</view>
       <view class="game-title">{{item.title}}</view>
       <view class="game-desc">{{item.desc}}</view>
-      <view class="game-go">练</view>
+      <view class="game-go">GO</view>
     </view>
   </view>
+
+  <view class="tools-foot" bindtap="onTapMono">趣味棋盘：走走答练一练 →</view>
+  <view class="tools-foot soft" bindtap="onTapTools">趣味宝箱：拼音 / 看图算 / 数字排队 →</view>
 </view>

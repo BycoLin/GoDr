@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "看图口算",
+  "usingComponents": {
+    "num-keypad": "/components/num-keypad/num-keypad"
+  }
+}

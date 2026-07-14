@@ -8,6 +8,7 @@
       <text class="star {{stars >= 3 ? 'on' : ''}}">★</text>
     </view>
     <view class="score">{{ratioText}}</view>
+    <view class="duel-note" wx:if="{{duel}}">你 {{userScore}} · 练习伙伴 {{rivalScore}}</view>
     <view class="points-row">+{{points}} 分<text wx:if="{{bestCombo >= 2}}"> · 最高连对 x{{bestCombo}}</text></view>
     <view class="encourage">{{encouragement}}</view>
     <view class="badge-new" wx:if="{{newBadges.length}}">
@@ -16,9 +17,9 @@
     </view>
   </view>
 
-  <button class="btn btn-primary" bindtap="onRetry">再练一次</button>
+  <button class="btn btn-primary" bindtap="onRetry">再闯一次</button>
   <button class="btn btn-secondary" bindtap="onBackLevels">
-    {{boss ? '返回错题本' : (arcade ? '返回练习' : '返回关卡')}}
+    {{boss ? '回错题本' : (arcade ? '回趣味加练' : '回关卡地图')}}
   </button>
-  <button class="btn btn-ghost" bindtap="onHome">回到首页</button>
+  <button class="btn btn-ghost" bindtap="onHome">回首页</button>
 </view>

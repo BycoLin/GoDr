@@ -1,0 +1,37 @@
+<view class="safe-pad number">
+  <view class="head">
+    <view class="title">数字宝宝排好队</view>
+    <view class="desc">观察数字顺序，把空缺的位置补充完整</view>
+  </view>
+
+  <view class="level-row">
+    <view
+      class="level {{levelId === item.id ? 'on' : ''}}"
+      wx:for="{{levels}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onSelectLevel"
+    >{{item.title}}</view>
+  </view>
+
+  <view class="card stage">
+    <view class="seq">
+      <view
+        class="slot {{item.show ? 'show' : 'blank'}} {{!item.show && focusIndex === index ? 'focus' : ''}}"
+        wx:for="{{slots}}"
+        wx:key="index"
+        data-index="{{index}}"
+        bindtap="onTapBlank"
+      >
+        <block wx:if="{{item.show}}">{{item.value}}</block>
+        <block wx:else>{{item.filled || '?'}}</block>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip ok" wx:if="{{feedback === 'ok'}}">排对啦！</view>
+  <view class="tip bad" wx:elif="{{feedback === 'bad'}}">再观察一下顺序～</view>
+  <view class="link" bindtap="onGoVisual">也去看图口算 →</view>
+
+  <num-keypad bind:key="onKey" />
+</view>

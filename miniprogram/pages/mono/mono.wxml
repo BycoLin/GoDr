@@ -1,0 +1,74 @@
+<view class="safe-pad mono">
+  <view class="top-bar">
+    <view class="title-wrap">
+      <view class="badge">趣味棋盘</view>
+      <view class="title">走走答 · 练一练</view>
+    </view>
+    <view class="hud">
+      <view class="hud-item">★ {{stars}}</view>
+      <view class="hud-item">圈 {{laps}}</view>
+    </view>
+  </view>
+
+  <view class="pack-row">
+    <view
+      class="pack-chip {{packId === item.id ? 'on' : ''}}"
+      wx:for="{{packs}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="onSelectPack"
+    >{{item.subject}}</view>
+  </view>
+  <view class="grade-row">
+    <view
+      class="grade-chip {{grade === item ? 'on' : ''}}"
+      wx:for="{{grades}}"
+      wx:key="*this"
+      data-grade="{{item}}"
+      bindtap="onSelectGrade"
+    >{{item}} 年级</view>
+  </view>
+
+  <view class="board-wrap {{celebrate ? 'celebrate' : ''}} {{sad ? 'sad' : ''}}">
+    <view class="board">
+      <view
+        class="cell {{item.tone}} {{item.active ? 'active' : ''}}"
+        wx:for="{{cells}}"
+        wx:key="id"
+        style="grid-row: {{item.r}}; grid-column: {{item.c}};"
+      >
+        <view class="cell-label">{{item.label}}</view>
+        <view class="piece {{pieceHop ? 'hop' : ''}}" wx:if="{{item.active}}">叭</view>
+      </view>
+
+      <view class="center">
+        <view class="dice {{diceRolling ? 'rolling' : ''}}">{{dice}}</view>
+        <view class="dice-tip">步数</view>
+        <button class="btn btn-primary roll-btn" bindtap="onRoll" disabled="{{busy || showQuiz}}">
+          {{diceRolling ? '摇一摇' : '摇一摇前进'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip-card">{{tip}}</view>
+
+  <view class="quiz-mask" wx:if="{{showQuiz && current}}">
+    <view class="quiz-panel">
+      <view class="quiz-head">走到这里，答一题吧</view>
+      <view class="quiz-prompt">{{current.prompt}}</view>
+      <view class="quiz-opts">
+        <view
+          class="quiz-opt {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          wx:for="{{current.options}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onChoose"
+        >{{item.text}}</view>
+      </view>
+      <view class="quiz-fb ok" wx:if="{{feedback === 'ok'}}">答对啦！继续加油～</view>
+      <view class="quiz-fb bad" wx:elif="{{feedback === 'bad'}}">再想一想哦</view>
+      <view class="quiz-skip" bindtap="onCloseQuiz" wx:if="{{!locked}}">先跳过 ›</view>
+    </view>
+  </view>
+</view>

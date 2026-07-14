@@ -1,6 +1,11 @@
 <view class="safe-pad mine">
   <view class="card profile">
-    <view class="avatar-wrap">
+    <view class="profile-top">
+      <view class="profile-copy">
+        <view class="hero-badge">我的</view>
+        <view class="brand">练习记录</view>
+        <view class="slogan">多练一点，记得更牢</view>
+      </view>
       <view class="avatar">
         <view class="avatar-face">
           <view class="a-eye a-l"></view>
@@ -8,10 +13,8 @@
           <view class="a-smile"></view>
         </view>
       </view>
-      <view class="avatar-tag">叭叭</view>
     </view>
-    <view class="brand">我的练习记录</view>
-    <view class="slogan">多练习，记得更牢！</view>
+
     <view class="stats">
       <view class="stat">
         <view class="stat-num">{{points}}</view>
@@ -26,25 +29,50 @@
         <view class="stat-label">连对</view>
       </view>
     </view>
+
     <view class="daily-tip">{{dailyTip}}</view>
   </view>
 
-  <view class="section-title">练习成就</view>
-  <view class="badge-grid">
-    <view class="badge-item {{item.unlocked ? 'on' : ''}}" wx:for="{{badges}}" wx:key="id">
-      <view class="badge-seal">{{item.unlocked ? '亮' : '？'}}</view>
-      <view class="badge-title">{{item.title}}</view>
-      <view class="badge-desc">{{item.desc}}</view>
+  <view class="card badge-card">
+    <view class="badge-head" bindtap="onToggleBadges">
+      <view>
+        <view class="hero-badge soft">成就</view>
+        <view class="badge-summary">{{badgeSummary}}</view>
+      </view>
+      <view class="link-more">{{badgesExpanded ? '收起' : '展开'}} ›</view>
+    </view>
+
+    <view class="bar">
+      <view class="bar-fill" style="width: {{badgePercent}}%;"></view>
+    </view>
+
+    <view class="badge-preview" wx:if="{{!badgesExpanded}}">
+      <text wx:if="{{previewText}}">{{previewText}}</text>
+      <text wx:else>还没有点亮成就，去练一练吧</text>
+    </view>
+
+    <view class="badge-list" wx:else>
+      <view class="badge-row {{item.unlocked ? 'on' : ''}}" wx:for="{{badges}}" wx:key="id">
+        <view class="row-dot">{{item.unlocked ? '★' : '○'}}</view>
+        <view class="row-body">
+          <view class="row-title">{{item.title}}</view>
+          <view class="row-desc">{{item.desc}}</view>
+        </view>
+      </view>
     </view>
   </view>
 
   <view class="menu card">
+    <view class="menu-item" bindtap="onToggleSfx">
+      <text>{{sfxLabel}}</text>
+      <text class="arrow">›</text>
+    </view>
     <view class="menu-item" bindtap="onGoWrongbook">
       <text>{{wrongbookLabel}}</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoGames">
-      <text>去趣味练习</text>
+      <text>去趣味加练</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onGoProgress">
@@ -59,6 +87,6 @@
 
   <view class="about">
     <view>闯关叭叭 · v{{version}}</view>
-    <view class="about-desc">免费本地练习工具：语文、数学、英语趣味自测，记录学习进度。</view>
+    <view class="about-desc">免费练习工具：语文、数学、英语趣味自测，记录学习进度。</view>
   </view>
 </view>

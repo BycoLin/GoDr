@@ -67,8 +67,15 @@ export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
 
 export type QuizType = PoetryQuizType | MathQuizType | EnglishQuizType;
 
-/** 游戏厅模式（含混合随机 / Boss / 每日） */
-export type ArcadeMode = QuizType | 'mixed' | 'boss' | 'daily';
+/** 游戏厅模式（含混合随机 / Boss / 每日 / 对练 / 冲刺 / 模拟卷） */
+export type ArcadeMode =
+  | QuizType
+  | 'mixed'
+  | 'boss'
+  | 'daily'
+  | 'duel'
+  | 'sprint'
+  | 'exam';
 
 export interface ChoiceOption {
   id: string;

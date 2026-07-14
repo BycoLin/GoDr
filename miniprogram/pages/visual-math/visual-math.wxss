@@ -1,0 +1,138 @@
+.visual {
+  min-height: 100vh;
+}
+
+.head .title {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.head .desc {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+  line-height: 1.5;
+}
+
+.meta {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12rpx;
+  margin: 18rpx 0 12rpx;
+}
+
+.streak {
+  font-size: 22rpx;
+  font-weight: 900;
+  color: #fff;
+  background: #ff6f61;
+  padding: 8rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+.answer-box {
+  min-width: 140rpx;
+  text-align: center;
+  padding: 12rpx 18rpx;
+  border-radius: 16rpx;
+  background: #fff;
+  border: 4rpx solid #22b8a8;
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #0f8f82;
+}
+
+.answer-box.ok {
+  background: #e8fff8;
+}
+
+.answer-box.bad {
+  border-color: #e84b6a;
+  color: #e84b6a;
+  background: #fff0f3;
+}
+
+.stage {
+  margin-bottom: 12rpx;
+  background: linear-gradient(180deg, #e8fff8, #fff);
+}
+
+.fruit-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  justify-content: center;
+  min-height: 160rpx;
+  align-content: center;
+}
+
+.fruit {
+  font-size: 52rpx;
+  line-height: 1;
+}
+
+.fruit.gone {
+  opacity: 0.35;
+  position: relative;
+}
+
+.fruit.gone::after {
+  content: '/';
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%) rotate(-28deg);
+  font-size: 56rpx;
+  color: #1a1430;
+  font-weight: 900;
+}
+
+.equation {
+  margin-top: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.num {
+  min-width: 72rpx;
+  height: 72rpx;
+  border-radius: 14rpx;
+  background: #f3f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  font-weight: 900;
+}
+
+.num.ans {
+  background: #22b8a8;
+  color: #fff;
+  min-width: 88rpx;
+}
+
+.op {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.tip {
+  text-align: center;
+  font-size: 28rpx;
+  font-weight: 900;
+  margin-bottom: 8rpx;
+}
+
+.tip.ok {
+  color: #2fbf7e;
+}
+
+.tip.bad {
+  color: #e84b6a;
+}

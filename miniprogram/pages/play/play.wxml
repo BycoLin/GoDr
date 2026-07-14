@@ -9,7 +9,21 @@
         <view class="timer {{remainSec <= 10 ? 'urgent' : ''}}" wx:if="{{timed}}">{{remainSec}}s</view>
       </view>
     </view>
-    <view class="progress-text">第 {{index + 1}} / {{total}} 题 · 攒了 {{sessionPoints}} 分</view>
+
+    <view class="duel-board" wx:if="{{duel}}">
+      <view class="duel-side {{duelLead === 'win' ? 'lead' : ''}}">
+        <view class="duel-name">我</view>
+        <view class="duel-score">{{userScore}}</view>
+      </view>
+      <view class="duel-vs">VS</view>
+      <view class="duel-side rival {{duelLead === 'lose' ? 'lead' : ''}}">
+        <view class="duel-name">伙伴</view>
+        <view class="duel-score">{{rivalScore}}</view>
+      </view>
+    </view>
+
+    <view class="progress-text" wx:if="{{!duel}}">第 {{index + 1}} / {{total}} 题 · 攒了 {{sessionPoints}} 分</view>
+    <view class="progress-text" wx:else>先得 {{total}} 分获胜 · 已答 {{index + 1}} 题</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{total ? ((index + 1) / total * 100) : 0}}%;"></view>
     </view>

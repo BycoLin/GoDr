@@ -40,6 +40,7 @@ import {
   pickSeededIndex,
   todayKey,
 } from '../../utils/daily';
+import { playAnswerSfx } from '../../utils/sfx';
 import type {
   ArcadeMode,
   EnglishItem,
@@ -62,6 +63,31 @@ interface MatchState {
 }
 
 const ROLLING_TARGET = 8;
+const SPRINT_LIMIT_SEC = 60;
+const SPRINT_TARGET = 20;
+const EXAM_COUNT = 10;
+const DUEL_TARGET = 8;
+const DUEL_LIMIT_SEC = 90;
+const DUEL_RIVAL_MS = 3800;
+
+/** 特殊玩法落到实际出题模式 */
+function subjectQuizMode(
+  kind: PackSubjectKind,
+  mode: ArcadeMode,
+  sprint: boolean,
+): ArcadeMode {
+  if (
+    mode === 'duel' ||
+    mode === 'sprint' ||
+    mode === 'exam' ||
+    mode === 'daily' ||
+    mode === 'boss'
+  ) {
+    if (sprint && kind === 'math') return 'mathCalc';
+    return 'mixed';
+  }
+  return mode;
+}
 
 Page({
   data: {
@@ -72,6 +98,9 @@ Page({
     rolling: false,
     boss: false,
     daily: false,
+    duel: false,
+    sprint: false,
+    exam: false,
     timed: false,
     limitSec: 0,
     remainSec: 0,
@@ -93,6 +122,9 @@ Page({
     bestCombo: 0,
     sessionPoints: 0,
     comboPulse: false,
+    userScore: 0,
+    rivalScore: 0,
+    duelLead: '' as '' | 'win' | 'lose' | 'tie',
     match: {
       selectedLeft: '',
       selectedRight: '',
@@ -109,10 +141,12 @@ Page({
   poolCache: [] as KnowledgeItem[],
   wrongHints: [] as Array<{ itemId: string; quizType: QuizType }>,
   timerId: 0 as number,
+  rivalTimerId: 0 as number,
   finished: false,
   lastType: undefined as QuizType | undefined,
   lastCorrect: true,
   subjectKind: 'poetry' as PackSubjectKind,
+  quizMode: 'mixed' as ArcadeMode,
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
@@ -121,12 +155,22 @@ Page({
     const mode = (query.mode || 'mixed') as ArcadeMode;
     const boss = mode === 'boss' || query.boss === '1';
     const daily = mode === 'daily' || query.daily === '1';
-    const timed = query.timed === '1' || daily;
-    const limitSec = Number(query.limitSec || (daily ? DAILY_LIMIT_SEC : 0));
-    const arcade = boss || daily || query.arcade === '1' || !itemId;
-    const rolling = arcade;
+    const duel = mode === 'duel' || query.duel === '1';
+    const sprint = mode === 'sprint' || query.sprint === '1';
+    const exam = mode === 'exam' || query.exam === '1';
+    const timed =
+      query.timed === '1' || daily || duel || sprint;
+    const limitSec = Number(
+      query.limitSec ||
+        (daily ? DAILY_LIMIT_SEC : duel ? DUEL_LIMIT_SEC : sprint ? SPRINT_LIMIT_SEC : 0),
+    );
+    const arcade =
+      boss || daily || duel || sprint || exam || query.arcade === '1' || !itemId;
+    const rolling = arcade && !exam && !duel;
     const subjectKind = getPackSubjectKind(packId);
+    const quizMode = subjectQuizMode(subjectKind, mode, sprint);
     this.subjectKind = subjectKind;
+    this.quizMode = quizMode;
 
     let pool = getItemsByGrade(packId, grade);
     if (daily && !pool.length) {
@@ -218,15 +262,59 @@ Page({
       poemAuthor = `${limitSec} 秒自测`;
       modeLabel = '每日自测';
       wx.setNavigationBarTitle({ title: '每日自测' });
+    } else if (duel) {
+      const seedCount = DUEL_TARGET;
+      if (subjectKind === 'math') {
+        questions = buildMathArcadeQuiz(mathPool, quizMode, seedCount);
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishArcadeQuiz(englishPool, quizMode, seedCount);
+      } else {
+        questions = buildArcadeQuiz(poetryPool, quizMode, seedCount);
+      }
+      targetTotal = DUEL_TARGET;
+      poemTitle = '趣味对练';
+      poemAuthor = '你 vs 练习伙伴';
+      modeLabel = '趣味对练';
+      wx.setNavigationBarTitle({ title: '趣味对练' });
+    } else if (sprint) {
+      if (subjectKind === 'math') {
+        questions = buildMathArcadeQuiz(mathPool, quizMode, 1);
+        poemTitle = '口算冲刺';
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishArcadeQuiz(englishPool, quizMode, 1);
+        poemTitle = '单词冲刺';
+      } else {
+        questions = buildArcadeQuiz(poetryPool, quizMode, 1);
+        poemTitle = '诗词冲刺';
+      }
+      targetTotal = SPRINT_TARGET;
+      poemAuthor = `${limitSec} 秒比手速`;
+      modeLabel = poemTitle;
+      wx.setNavigationBarTitle({ title: poemTitle });
+    } else if (exam) {
+      if (subjectKind === 'math') {
+        questions = buildMathArcadeQuiz(mathPool, quizMode, EXAM_COUNT);
+        poemTitle = '数学模拟小测';
+      } else if (subjectKind === 'english') {
+        questions = buildEnglishArcadeQuiz(englishPool, quizMode, EXAM_COUNT);
+        poemTitle = '英语模拟小测';
+      } else {
+        questions = buildArcadeQuiz(poetryPool, quizMode, EXAM_COUNT);
+        poemTitle = '诗词模拟小测';
+      }
+      targetTotal = questions.length || EXAM_COUNT;
+      poemAuthor = `${targetTotal} 题一次测`;
+      modeLabel = '模拟小测';
+      wx.setNavigationBarTitle({ title: '模拟小测' });
     } else if (arcade) {
       if (subjectKind === 'math') {
-        questions = buildMathArcadeQuiz(mathPool, mode, 1);
+        questions = buildMathArcadeQuiz(mathPool, quizMode, 1);
         poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else if (subjectKind === 'english') {
-        questions = buildEnglishArcadeQuiz(englishPool, mode, 1);
+        questions = buildEnglishArcadeQuiz(englishPool, quizMode, 1);
         poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else {
-        questions = buildArcadeQuiz(poetryPool, mode, 1);
+        questions = buildArcadeQuiz(poetryPool, quizMode, 1);
         poemTitle = ARCADE_MODE_LABELS[mode] || '趣味练习';
       }
       targetTotal = ROLLING_TARGET;
@@ -271,6 +359,18 @@ Page({
       return;
     }
 
+    const resolvedMode: ArcadeMode = boss
+      ? 'boss'
+      : daily
+        ? 'daily'
+        : duel
+          ? 'duel'
+          : sprint
+            ? 'sprint'
+            : exam
+              ? 'exam'
+              : mode;
+
     this.setData({
       packId,
       grade,
@@ -279,10 +379,13 @@ Page({
       rolling,
       boss,
       daily,
+      duel,
+      sprint,
+      exam,
       timed,
       limitSec,
       remainSec: limitSec,
-      mode: boss ? 'boss' : daily ? 'daily' : mode,
+      mode: resolvedMode,
       modeLabel,
       poemTitle,
       poemAuthor,
@@ -296,6 +399,9 @@ Page({
       combo: 0,
       bestCombo: 0,
       sessionPoints: 0,
+      userScore: 0,
+      rivalScore: 0,
+      duelLead: '',
     });
     this.resetMatchState(questions[0]);
     this.resetOrderState(questions[0]);
@@ -303,10 +409,14 @@ Page({
     if (timed && limitSec > 0) {
       this.startTimer();
     }
+    if (duel) {
+      this.startRivalTimer();
+    }
   },
 
   onUnload() {
     this.clearTimer();
+    this.clearRivalTimer();
   },
 
   startTimer() {
@@ -331,6 +441,36 @@ Page({
     if (this.timerId) {
       clearInterval(this.timerId);
       this.timerId = 0;
+    }
+  },
+
+  startRivalTimer() {
+    this.clearRivalTimer();
+    this.rivalTimerId = setInterval(() => {
+      if (this.finished || !this.data.duel) {
+        this.clearRivalTimer();
+        return;
+      }
+      if (Math.random() < 0.65) {
+        const rivalScore = this.data.rivalScore + 1;
+        const duelLead =
+          this.data.userScore > rivalScore
+            ? 'win'
+            : this.data.userScore < rivalScore
+              ? 'lose'
+              : 'tie';
+        this.setData({ rivalScore, duelLead });
+        if (rivalScore >= this.data.total) {
+          this.finish(this.data.answers, false);
+        }
+      }
+    }, DUEL_RIVAL_MS) as unknown as number;
+  },
+
+  clearRivalTimer() {
+    if (this.rivalTimerId) {
+      clearInterval(this.rivalTimerId);
+      this.rivalTimerId = 0;
     }
   },
 
@@ -385,9 +525,18 @@ Page({
     const nextCombo = correct ? combo + 1 : 0;
     const gained = correct ? pointsForCorrect(nextCombo) : 0;
     const nextAnswers = answers.concat([{ questionId: current.id, correct }]);
+    const userScore = this.data.duel && correct ? this.data.userScore + 1 : this.data.userScore;
+    const duelLead = this.data.duel
+      ? userScore > this.data.rivalScore
+        ? 'win'
+        : userScore < this.data.rivalScore
+          ? 'lose'
+          : 'tie'
+      : '';
 
     this.lastCorrect = correct;
     this.lastType = quizType;
+    playAnswerSfx(correct);
 
     this.setData({
       locked: true,
@@ -402,10 +551,16 @@ Page({
       bestCombo: Math.max(bestCombo, nextCombo),
       sessionPoints: sessionPoints + gained,
       comboPulse: correct && nextCombo >= 2,
+      userScore,
+      duelLead,
     });
 
     setTimeout(() => {
       this.setData({ comboPulse: false });
+      if (this.data.duel && userScore >= total) {
+        this.finish(nextAnswers, false);
+        return;
+      }
       this.advance(nextAnswers, index, questions, total);
     }, correct ? 700 : 800);
   },
@@ -519,11 +674,12 @@ Page({
 
     let nextQuestions = questions;
     if (this.data.rolling && nextIndex < total && nextIndex >= questions.length) {
+      const adaptMode = this.quizMode || this.data.mode;
       let q: Question | null = null;
       if (this.subjectKind === 'math') {
         q = nextMathAdaptiveQuestion(
           this.poolCache.filter(isMath) as MathItem[],
-          this.data.mode,
+          adaptMode,
           {
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
@@ -534,7 +690,7 @@ Page({
       } else if (this.subjectKind === 'english') {
         q = nextEnglishAdaptiveQuestion(
           this.poolCache.filter(isEnglish) as EnglishItem[],
-          this.data.mode,
+          adaptMode,
           {
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
@@ -545,7 +701,7 @@ Page({
       } else {
         q = nextAdaptiveQuestion(
           this.poolCache.filter(isPoetry) as PoetryItem[],
-          this.data.mode,
+          adaptMode,
           {
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
@@ -589,6 +745,7 @@ Page({
     if (this.finished) return;
     this.finished = true;
     this.clearTimer();
+    this.clearRivalTimer();
 
     const {
       packId,
@@ -600,12 +757,20 @@ Page({
       mode,
       boss,
       daily,
+      duel,
+      sprint,
+      exam,
       sessionPoints,
       bestCombo,
       total,
+      userScore,
+      rivalScore,
     } = this.data;
     const correct = answers.filter((a) => a.correct).length;
-    const answeredTotal = Math.max(answers.length, questions.length ? Math.min(questions.length, total) : answers.length);
+    const answeredTotal = Math.max(
+      answers.length,
+      questions.length ? Math.min(questions.length, total) : answers.length,
+    );
     const stars = starsFromScore(correct, Math.max(answeredTotal, 1));
     const session = {
       packId,
@@ -627,7 +792,7 @@ Page({
     saveLastSession(session);
     const title = encodeURIComponent(poemTitle);
     wx.redirectTo({
-      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}`,
+      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}`,
     });
   },
 });

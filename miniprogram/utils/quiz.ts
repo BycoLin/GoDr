@@ -219,7 +219,14 @@ function resolvePreferModes(ctx: AdaptiveContext, baseMode: ArcadeMode): QuizTyp
   if (ctx.preferModes?.length) return ctx.preferModes;
   if (!ctx.lastCorrect && ctx.lastType) return [ctx.lastType];
   if (ctx.combo >= 3) return HARD_MODES;
-  if (baseMode === 'mixed' || baseMode === 'boss' || baseMode === 'daily') {
+  if (
+    baseMode === 'mixed' ||
+    baseMode === 'boss' ||
+    baseMode === 'daily' ||
+    baseMode === 'duel' ||
+    baseMode === 'sprint' ||
+    baseMode === 'exam'
+  ) {
     return [...EASY_MODES, ...HARD_MODES];
   }
   if (baseMode === 'fillNext' || baseMode === 'matchPair' || baseMode === 'titleAuthor' || baseMode === 'orderLines' || baseMode === 'fillBlank') {
@@ -274,7 +281,14 @@ export function buildArcadeQuiz(
     let quizType: QuizType;
     if (preferModes?.length) {
       quizType = preferModes[questions.length % preferModes.length];
-    } else if (mode === 'mixed' || mode === 'boss' || mode === 'daily') {
+    } else if (
+      mode === 'mixed' ||
+      mode === 'boss' ||
+      mode === 'daily' ||
+      mode === 'duel' ||
+      mode === 'sprint' ||
+      mode === 'exam'
+    ) {
       const all: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
       quizType = all[questions.length % all.length];
     } else {
@@ -416,4 +430,7 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   enSpell: '缺字母练习',
   boss: '错题复习',
   daily: '每日自测',
+  duel: '趣味对练',
+  sprint: '限时冲刺',
+  exam: '模拟小测',
 };

@@ -8,7 +8,14 @@
     "pages/level/level",
     "pages/play/play",
     "pages/result/result",
-    "pages/wrongbook/wrongbook"
+    "pages/wrongbook/wrongbook",
+    "pages/flashcard/flashcard",
+    "pages/tools/tools",
+    "pages/pinyin/pinyin",
+    "pages/pinyin-learn/pinyin-learn",
+    "pages/visual-math/visual-math",
+    "pages/number-line/number-line",
+    "pages/mono/mono"
   ],
   "window": {
     "navigationBarBackgroundColor": "#22B8A8",
@@ -25,19 +32,19 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "首页",
+        "text": "闯关",
         "iconPath": "assets/tab/home-normal.png",
         "selectedIconPath": "assets/tab/home-active.png"
       },
       {
         "pagePath": "pages/games/games",
-        "text": "练习",
+        "text": "加练",
         "iconPath": "assets/tab/games-normal.png",
         "selectedIconPath": "assets/tab/games-active.png"
       },
       {
         "pagePath": "pages/progress/progress",
-        "text": "进度",
+        "text": "星星",
         "iconPath": "assets/tab/progress-normal.png",
         "selectedIconPath": "assets/tab/progress-active.png"
       },

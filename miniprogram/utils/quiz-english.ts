@@ -186,7 +186,14 @@ export function buildEnglishArcadeQuiz(
       mode === 'matchPair'
     ) {
       type = mode;
-    } else if (mode === 'mixed' || mode === 'boss' || mode === 'daily') {
+    } else if (
+      mode === 'mixed' ||
+      mode === 'boss' ||
+      mode === 'daily' ||
+      mode === 'duel' ||
+      mode === 'sprint' ||
+      mode === 'exam'
+    ) {
       type = preferredType(questions.length);
     } else {
       type = preferredType(questions.length);
@@ -271,4 +278,7 @@ export const ENGLISH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
   matchPair: '中英配对',
   boss: '错题复习',
   daily: '每日自测',
+  duel: '趣味对练',
+  sprint: '限时冲刺',
+  exam: '模拟小测',
 };

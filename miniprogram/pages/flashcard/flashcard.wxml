@@ -1,0 +1,34 @@
+<view class="safe-pad flash">
+  <block wx:if="{{!done && current}}">
+    <view class="meta">第 {{index + 1}} / {{total}} 张 · 点卡片翻转</view>
+    <view class="card flash-card {{flipped ? 'flipped' : ''}}" bindtap="onFlip">
+      <view class="face front" wx:if="{{!flipped}}">
+        <view class="hint">正面</view>
+        <view class="main">{{current.front}}</view>
+        <view class="sub">{{current.sub}}</view>
+      </view>
+      <view class="face back" wx:else>
+        <view class="hint">背面</view>
+        <view class="main" wx:if="{{current.back}}">{{current.back}}</view>
+        <view class="lines" wx:else>
+          <view class="line" wx:for="{{current.backLines}}" wx:key="*this">{{item}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="actions">
+      <button class="btn btn-ghost" bindtap="onFuzzy">再看看</button>
+      <button class="btn btn-primary" bindtap="onKnow">记得了</button>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="card done-card">
+      <view class="done-title">本轮认读完成</view>
+      <view class="done-score">记得 {{known}} · 再看看 {{fuzzy}}</view>
+      <view class="done-desc">熟悉了可以马上自测，不熟就再翻一轮</view>
+    </view>
+    <button class="btn btn-primary" bindtap="onQuiz">开始自测</button>
+    <button class="btn btn-secondary" bindtap="onRestart">再翻一轮</button>
+    <button class="btn btn-ghost" bindtap="onBack">返回</button>
+  </block>
+</view>

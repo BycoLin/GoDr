@@ -1,4 +1,4 @@
-import { listPacks, getPackManifest } from '../../utils/registry';
+import { listPacks } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
 import type { PackManifest } from '../../utils/types';
 
@@ -6,6 +6,8 @@ interface PackCard extends PackManifest {
   gradeLabel: string;
   toneClass: string;
   iconText: string;
+  worldName: string;
+  funDesc: string;
 }
 
 Page({
@@ -25,11 +27,19 @@ Page({
           ...pack,
           gradeLabel:
             pack.grades.length > 1
-              ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级`
-              : `${pack.grades[0]} 年级`,
+              ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级地图`
+              : `${pack.grades[0]} 年级地图`,
           toneClass:
             kind === 'math' ? 'pack-math' : kind === 'english' ? 'pack-en' : 'pack-cn',
           iconText: kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗',
+          worldName:
+            kind === 'math' ? '数学岛' : kind === 'english' ? '英语岛' : '诗词岛',
+          funDesc:
+            kind === 'math'
+              ? '口算关卡，一关关练熟练！'
+              : kind === 'english'
+                ? '单词关卡，记住就能通关！'
+                : '古诗关卡，背一句闯一关！',
         };
       });
 
@@ -40,8 +50,13 @@ Page({
       for (const pack of packs) {
         const progress = loadPackProgress(pack.id);
         if (progress.lastItemId && progress.lastGrade) {
-          const manifest = getPackManifest(pack.id);
-          continueTip = `继续练习：${manifest?.title || pack.title} · ${progress.lastGrade} 年级`;
+          const world =
+            pack.subject === '数学'
+              ? '数学岛'
+              : pack.subject === '英语'
+                ? '英语岛'
+                : '诗词岛';
+          continueTip = `${world} · ${progress.lastGrade} 年级地图`;
           continuePackId = pack.id;
           continueGrade = progress.lastGrade;
           break;
@@ -51,7 +66,7 @@ Page({
       this.setData({ packs, continueTip, continuePackId, continueGrade });
     } catch (err) {
       console.error('home onShow failed', err);
-      wx.showToast({ title: '首页加载失败', icon: 'none' });
+      wx.showToast({ title: '加载失败，再试一次', icon: 'none' });
     }
   },
 
@@ -70,5 +85,13 @@ Page({
 
   onGoGames() {
     wx.switchTab({ url: '/pages/games/games' });
+  },
+
+  onGoTools() {
+    wx.navigateTo({ url: '/pages/tools/tools' });
+  },
+
+  onGoMono() {
+    wx.navigateTo({ url: '/pages/mono/mono' });
   },
 });
