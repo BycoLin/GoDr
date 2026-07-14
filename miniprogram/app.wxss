@@ -1,10 +1,10 @@
 page {
   --color-bg: #fff8ef;
   --color-surface: #ffffff;
-  --color-ink: #2b2540;
-  --color-muted: #7a7390;
+  --color-ink: #1a1430;
+  --color-muted: #4a4458;
   --color-primary: #22b8a8;
-  --color-primary-deep: #11998a;
+  --color-primary-deep: #0f8f82;
   --color-primary-soft: #d6f8f2;
   --color-accent: #ff6f61;
   --color-accent-soft: #ffe2de;
@@ -12,18 +12,14 @@ page {
   --color-sky-soft: #e2ebff;
   --color-sun: #ffc93c;
   --color-sun-soft: #fff3c4;
-  --color-danger: #ff5a7a;
-  --color-ok: #3ecf8e;
-  --radius: 36rpx;
-  --shadow: 0 12rpx 0 rgba(43, 37, 64, 0.08);
+  --color-danger: #e84b6a;
+  --color-ok: #2fbf7e;
+  --radius: 32rpx;
+  --shadow: 0 10rpx 0 rgba(26, 20, 48, 0.1);
 }
 
 page {
-  background:
-    radial-gradient(circle at 12% 8%, rgba(255, 201, 60, 0.35) 0%, transparent 28%),
-    radial-gradient(circle at 88% 12%, rgba(91, 140, 255, 0.28) 0%, transparent 26%),
-    radial-gradient(circle at 80% 78%, rgba(34, 184, 168, 0.22) 0%, transparent 30%),
-    linear-gradient(180deg, #fff4e2 0%, #f3fbff 45%, #eafff6 100%);
+  background: #fff8ef;
   color: var(--color-ink);
   font-size: 30rpx;
   min-height: 100vh;
@@ -49,21 +45,21 @@ page {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #42d6c5 0%, #22b8a8 100%);
+  background: #22b8a8;
   color: #fff;
-  box-shadow: 0 10rpx 0 #11998a;
+  box-shadow: 0 10rpx 0 #0f8f82;
 }
 
 .btn-primary:active {
-  transform: translateY(4rpx);
-  box-shadow: 0 6rpx 0 #11998a;
+  opacity: 0.92;
+  box-shadow: 0 6rpx 0 #0f8f82;
 }
 
 .btn-secondary {
   background: #fff;
   color: var(--color-primary-deep);
-  border: 4rpx solid #b8efe7;
-  box-shadow: 0 8rpx 0 rgba(17, 153, 138, 0.15);
+  border: 4rpx solid #9ee5db;
+  box-shadow: 0 8rpx 0 rgba(15, 143, 130, 0.18);
 }
 
 .btn-ghost {
@@ -72,11 +68,11 @@ page {
 }
 
 .card {
-  background: var(--color-surface);
+  background: #ffffff;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 32rpx;
-  border: 4rpx solid #fff;
+  border: 3rpx solid #ece7df;
   position: relative;
 }
 
@@ -97,8 +93,8 @@ page {
 
 .section-title::before {
   content: '';
-  width: 18rpx;
-  height: 18rpx;
+  width: 16rpx;
+  height: 16rpx;
   border-radius: 50%;
   background: var(--color-sun);
   box-shadow: 8rpx 0 0 var(--color-accent), 16rpx 0 0 var(--color-sky);

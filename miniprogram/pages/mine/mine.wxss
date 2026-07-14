@@ -4,7 +4,7 @@
 
 .profile {
   margin-bottom: 24rpx;
-  background: linear-gradient(150deg, #e8fff8 0%, #ffffff 48%, #fff0d8 100%);
+  background: #ffffff;
   text-align: center;
   overflow: hidden;
 }
@@ -20,10 +20,9 @@
   width: 120rpx;
   height: 120rpx;
   border-radius: 46% 54% 50% 50%;
-  background: linear-gradient(160deg, #7cf0df, #22b8a8);
-  box-shadow: 0 10rpx 0 rgba(17, 153, 138, 0.25);
+  background: #22b8a8;
+  box-shadow: 0 10rpx 0 #0f8f82;
   position: relative;
-  animation: popIn 0.5s ease;
 }
 
 .avatar-face {
@@ -39,7 +38,7 @@
   top: 10rpx;
   width: 12rpx;
   height: 18rpx;
-  background: #2b2540;
+  background: #1a1430;
   border-radius: 50%;
 }
 
@@ -58,7 +57,7 @@
   width: 28rpx;
   height: 14rpx;
   margin-left: -14rpx;
-  border: 3rpx solid #2b2540;
+  border: 3rpx solid #1a1430;
   border-top: 0;
   border-radius: 0 0 30rpx 30rpx;
 }
@@ -66,7 +65,7 @@
 .avatar-tag {
   margin-top: 10rpx;
   background: var(--color-sun);
-  color: #6a5000;
+  color: #5a4300;
   font-size: 20rpx;
   font-weight: 900;
   padding: 4rpx 14rpx;
@@ -76,14 +75,14 @@
 .brand {
   font-size: 36rpx;
   font-weight: 900;
-  color: #1f1a33;
+  color: #1a1430;
 }
 
 .slogan {
   margin-top: 8rpx;
   font-size: 26rpx;
-  color: var(--color-muted);
-  font-weight: 600;
+  color: #4a4458;
+  font-weight: 700;
 }
 
 .stats {
@@ -95,30 +94,30 @@
 .stat {
   flex: 1;
   text-align: center;
-  background: rgba(255, 255, 255, 0.9);
+  background: #f7f4ee;
   border-radius: 24rpx;
   padding: 16rpx 8rpx;
-  box-shadow: 0 6rpx 0 rgba(43, 37, 64, 0.05);
+  border: 2rpx solid #ece7df;
 }
 
 .stat-num {
   font-size: 36rpx;
   font-weight: 900;
-  color: var(--color-primary-deep);
+  color: #0f8f82;
 }
 
 .stat-label {
   margin-top: 4rpx;
   font-size: 22rpx;
-  color: var(--color-muted);
+  color: #4a4458;
   font-weight: 700;
 }
 
 .daily-tip {
   margin-top: 18rpx;
   font-size: 24rpx;
-  color: var(--color-muted);
-  font-weight: 600;
+  color: #4a4458;
+  font-weight: 700;
 }
 
 .badge-grid {
@@ -129,27 +128,25 @@
 }
 
 .badge-item {
-  background: rgba(255, 255, 255, 0.75);
+  background: #f7f4ee;
   border-radius: 28rpx;
   padding: 20rpx 16rpx;
-  opacity: 0.55;
-  border: 4rpx dashed #d7dbe6;
+  border: 3rpx solid #ece7df;
   position: relative;
 }
 
 .badge-item.on {
-  opacity: 1;
   background: #fff;
-  border: 4rpx solid #fff;
-  box-shadow: 0 10rpx 0 rgba(43, 37, 64, 0.07);
+  border: 3rpx solid #ece7df;
+  box-shadow: 0 10rpx 0 rgba(26, 20, 48, 0.1);
 }
 
 .badge-seal {
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  background: #e8eef8;
-  color: #9aa3b5;
+  background: #e8e3da;
+  color: #7a7390;
   font-size: 22rpx;
   font-weight: 900;
   display: flex;
@@ -159,19 +156,20 @@
 }
 
 .badge-item.on .badge-seal {
-  background: linear-gradient(145deg, #ffc93c, #ff9f1c);
-  color: #fff;
+  background: #ffc93c;
+  color: #5a4300;
 }
 
 .badge-title {
   font-size: 26rpx;
   font-weight: 900;
+  color: #1a1430;
 }
 
 .badge-desc {
   margin-top: 6rpx;
   font-size: 22rpx;
-  color: var(--color-muted);
+  color: #4a4458;
   line-height: 1.35;
   font-weight: 600;
 }
@@ -179,6 +177,7 @@
 .menu {
   padding: 0 28rpx;
   overflow: hidden;
+  background: #ffffff;
 }
 
 .menu-item {
@@ -186,9 +185,10 @@
   justify-content: space-between;
   align-items: center;
   padding: 32rpx 0;
-  border-bottom: 2rpx dashed #e8eef5;
+  border-bottom: 2rpx solid #ece7df;
   font-size: 30rpx;
   font-weight: 800;
+  color: #1a1430;
 }
 
 .menu-item:last-child {
@@ -200,7 +200,7 @@
 }
 
 .arrow {
-  color: #a8b5c6;
+  color: #7a7390;
   font-size: 36rpx;
 }
 
@@ -208,23 +208,12 @@
   margin-top: 40rpx;
   text-align: center;
   font-size: 24rpx;
-  color: var(--color-muted);
+  color: #4a4458;
   line-height: 1.6;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .about-desc {
   margin-top: 10rpx;
   padding: 0 24rpx;
-}
-
-@keyframes popIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
