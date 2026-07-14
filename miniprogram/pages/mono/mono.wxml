@@ -10,15 +10,6 @@
     </view>
   </view>
 
-  <view class="pack-row">
-    <view
-      class="pack-chip {{packId === item.id ? 'on' : ''}}"
-      wx:for="{{packs}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="onSelectPack"
-    >{{item.subject}}</view>
-  </view>
   <view class="grade-row">
     <view
       class="grade-chip {{grade === item ? 'on' : ''}}"
@@ -28,6 +19,7 @@
       bindtap="onSelectGrade"
     >{{item}} 年级</view>
   </view>
+  <view class="subject-line">当前：{{subjectLabel}}（首页可切换）</view>
 
   <view class="board-wrap {{celebrate ? 'celebrate' : ''}} {{sad ? 'sad' : ''}}">
     <view class="board">

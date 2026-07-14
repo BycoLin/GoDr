@@ -98,6 +98,14 @@
   font-weight: 800;
 }
 
+.progress-note {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #4a4458;
+  line-height: 1.4;
+}
+
 @keyframes softPulse {
   from {
     transform: scale(0.8);

@@ -1,85 +1,152 @@
-import { listPacks } from '../../utils/registry';
+import { getPackItems, getPackManifest } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
-import type { PackManifest } from '../../utils/types';
-
-interface PackCard extends PackManifest {
-  gradeLabel: string;
-  toneClass: string;
-  iconText: string;
-  worldName: string;
-  funDesc: string;
-}
+import {
+  getActiveGrade,
+  getActivePackId,
+  getActiveSubject,
+  setActiveGrade,
+  setActivePackId,
+} from '../../utils/active-subject';
+import { getRankInfo } from '../../utils/rank';
+import { loadStreak } from '../../utils/streak';
+import { getReviewSummary } from '../../utils/review';
 
 Page({
   data: {
-    packs: [] as PackCard[],
+    packId: 'poetry-g1-g2',
+    subject: '语文',
+    worldName: '诗词岛',
+    toneClass: 'tone-cn',
+    iconText: '诗',
+    packTitle: '',
+    grades: [1, 2] as number[],
+    grade: 1,
     continueTip: '',
-    continuePackId: '',
-    continueGrade: 0,
+    continueShort: '',
+    clearedCount: 0,
+    totalCount: 0,
+    percent: 0,
+    barWidth: '0%',
+    rankTitle: '新芽',
+    rankTip: '',
+    streakDays: 0,
+    reviewTotal: 0,
+    reviewTip: '',
+    reviewWrongs: 0,
   },
 
+  refreshing: false,
+
   onShow() {
+    if (this.refreshing) return;
+    this.refreshing = true;
     try {
-      const packs: PackCard[] = listPacks().map((pack) => {
-        const kind =
-          pack.subject === '数学' ? 'math' : pack.subject === '英语' ? 'english' : 'cn';
-        return {
-          ...pack,
-          gradeLabel:
-            pack.grades.length > 1
-              ? `${pack.grades[0]}～${pack.grades[pack.grades.length - 1]} 年级地图`
-              : `${pack.grades[0]} 年级地图`,
-          toneClass:
-            kind === 'math' ? 'pack-math' : kind === 'english' ? 'pack-en' : 'pack-cn',
-          iconText: kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗',
-          worldName:
-            kind === 'math' ? '数学岛' : kind === 'english' ? '英语岛' : '诗词岛',
-          funDesc:
-            kind === 'math'
-              ? '口算关卡，一关关练熟练！'
-              : kind === 'english'
-                ? '单词关卡，记住就能通关！'
-                : '古诗关卡，背一句闯一关！',
-        };
-      });
+      this.refresh();
+    } finally {
+      this.refreshing = false;
+    }
+  },
+
+  refresh() {
+    try {
+      const packId = getActivePackId();
+      const active = getActiveSubject();
+      const manifest = getPackManifest(packId);
+      const grade = getActiveGrade(packId);
+      const grades = manifest?.grades?.length ? [...manifest.grades] : [1];
+      const kind = active.kind;
+      const toneClass =
+        kind === 'math' ? 'tone-math' : kind === 'english' ? 'tone-en' : 'tone-cn';
+      const iconText = kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗';
+
+      const progress = loadPackProgress(packId);
+      const totalCount = getPackItems(packId).length;
+      const clearedCount = (progress.clearedIds || []).length;
+      const percent = totalCount ? Math.round((clearedCount / totalCount) * 100) : 0;
 
       let continueTip = '';
-      let continuePackId = '';
-      let continueGrade = 0;
-
-      for (const pack of packs) {
-        const progress = loadPackProgress(pack.id);
-        if (progress.lastItemId && progress.lastGrade) {
-          const world =
-            pack.subject === '数学'
-              ? '数学岛'
-              : pack.subject === '英语'
-                ? '英语岛'
-                : '诗词岛';
-          continueTip = `${world} · ${progress.lastGrade} 年级地图`;
-          continuePackId = pack.id;
-          continueGrade = progress.lastGrade;
-          break;
-        }
+      let continueShort = '';
+      if (progress.lastItemId && progress.lastGrade) {
+        continueTip = `${active.worldName} · ${progress.lastGrade} 年级地图`;
+        continueShort = `${progress.lastGrade}年级`;
       }
 
-      this.setData({ packs, continueTip, continuePackId, continueGrade });
+      const rank = getRankInfo();
+      const streak = loadStreak();
+      const review = getReviewSummary(packId);
+
+      this.setData({
+        packId,
+        subject: active.subject,
+        worldName: active.worldName,
+        toneClass,
+        iconText,
+        packTitle: manifest?.title || active.worldName,
+        grades,
+        grade: grades.indexOf(grade) >= 0 ? grade : grades[0],
+        continueTip,
+        continueShort,
+        clearedCount,
+        totalCount,
+        percent,
+        barWidth: `${percent}%`,
+        rankTitle: rank.title,
+        rankTip: rank.tip,
+        streakDays: streak.current,
+        reviewTotal: review.total,
+        reviewTip: review.tip,
+        reviewWrongs: review.wrongs,
+      });
     } catch (err) {
-      console.error('home onShow failed', err);
+      console.error('home refresh failed', err);
       wx.showToast({ title: '加载失败，再试一次', icon: 'none' });
     }
   },
 
-  onTapPack(e: WechatMiniprogram.TouchEvent) {
-    const packId = e.currentTarget.dataset.packId as string;
-    wx.navigateTo({ url: `/pages/pack/pack?packId=${packId}` });
+  onSelectSubject(e: WechatMiniprogram.TouchEvent) {
+    const packId = String(e.currentTarget.dataset.packId || '');
+    if (!packId || packId === this.data.packId) return;
+    setActivePackId(packId);
+    this.refresh();
+  },
+
+  onSelectGrade(e: WechatMiniprogram.TouchEvent) {
+    const grade = Number(e.currentTarget.dataset.grade);
+    setActiveGrade(this.data.packId, grade);
+    this.setData({ grade });
+  },
+
+  onEnterMap() {
+    const { packId, grade } = this.data;
+    wx.navigateTo({
+      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
+    });
   },
 
   onContinue() {
-    const { continuePackId, continueGrade } = this.data;
-    if (!continuePackId || !continueGrade) return;
+    const { packId, continueTip } = this.data;
+    if (!continueTip) return;
+    const progress = loadPackProgress(packId);
+    const grade = progress.lastGrade || this.data.grade;
     wx.navigateTo({
-      url: `/pages/level/level?packId=${continuePackId}&grade=${continueGrade}`,
+      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
+    });
+  },
+
+  onTapReview() {
+    const { packId, grade, reviewWrongs, reviewTotal } = this.data;
+    if (reviewTotal <= 0) {
+      wx.showToast({ title: '暂无待复习', icon: 'none' });
+      return;
+    }
+    if (reviewWrongs > 0) {
+      wx.navigateTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=boss&boss=1&arcade=1`,
+      });
+      return;
+    }
+    wx.navigateTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=mixed&arcade=1`,
     });
   },
 

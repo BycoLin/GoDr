@@ -1,5 +1,6 @@
-import { getPackItems, getPackManifest, listPacks } from '../../utils/registry';
+import { getPackItems, getPackManifest } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
+import { getActivePackId, getActiveSubject } from '../../utils/active-subject';
 
 interface ProgressRow {
   id: string;
@@ -20,16 +21,9 @@ interface GradeGroup {
   items: ProgressRow[];
 }
 
-interface PackOption {
-  id: string;
-  title: string;
-  subject: string;
-}
-
 Page({
   data: {
     packId: '',
-    packs: [] as PackOption[],
     packTitle: '',
     subject: '',
     unitLabel: '首',
@@ -43,16 +37,8 @@ Page({
   },
 
   onShow() {
-    const packs = listPacks().map((p) => ({
-      id: p.id,
-      title: p.title,
-      subject: p.subject,
-    }));
-    const packId =
-      this.data.packId && packs.some((p) => p.id === this.data.packId)
-        ? this.data.packId
-        : packs[0]?.id || '';
-    this.setData({ packs, packId });
+    const packId = getActivePackId();
+    this.setData({ packId });
     this.refresh();
   },
 
@@ -62,6 +48,7 @@ Page({
     const manifest = getPackManifest(packId);
     const items = getPackItems(packId);
     const progress = loadPackProgress(packId);
+    const active = getActiveSubject();
 
     const rows: ProgressRow[] = items.map((item) => {
       const p = progress.items[item.id];
@@ -80,7 +67,7 @@ Page({
     const starSum = rows.reduce((sum, r) => sum + r.stars, 0);
     const unitLabel = manifest?.subject === '语文' ? '首' : '关';
 
-    let cheerText = '还没开始？选一关练习吧！';
+    let cheerText = '还没开始？去闯关页进入地图练吧！';
     if (percent >= 100) cheerText = '全部练完啦，真棒！';
     else if (percent >= 60) cheerText = '进度不错，再练几关更熟！';
     else if (percent > 0) cheerText = '已经开始练了，继续加油！';
@@ -120,8 +107,8 @@ Page({
       });
 
     this.setData({
-      packTitle: manifest?.title || '',
-      subject: manifest?.subject || '',
+      packTitle: manifest?.title || active.worldName,
+      subject: active.subject,
       unitLabel,
       clearedCount,
       totalCount,
@@ -130,12 +117,6 @@ Page({
       cheerText,
       groups,
     });
-  },
-
-  onSelectPack(e: WechatMiniprogram.TouchEvent) {
-    const packId = e.currentTarget.dataset.id as string;
-    this.setData({ packId, filter: 'all' });
-    this.refresh();
   },
 
   onSelectFilter(e: WechatMiniprogram.TouchEvent) {
@@ -164,7 +145,7 @@ Page({
   onClearAll() {
     wx.showModal({
       title: '清空进度？',
-      content: '将清除本知识包的本地练习记录',
+      content: '将清除本学科的本地闯关记录',
       success: (res) => {
         if (!res.confirm) return;
         wx.removeStorageSync(`progress:${this.data.packId}`);

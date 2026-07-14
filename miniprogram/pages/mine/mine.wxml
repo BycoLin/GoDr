@@ -4,7 +4,7 @@
       <view class="profile-copy">
         <view class="hero-badge">我的</view>
         <view class="brand">练习记录</view>
-        <view class="slogan">多练一点，记得更牢</view>
+        <view class="slogan">当前学科：{{subjectLabel}}（首页可切换）</view>
       </view>
       <view class="avatar">
         <view class="avatar-face">
@@ -14,6 +14,16 @@
         </view>
       </view>
     </view>
+
+    <view class="rank-row">
+      <view class="rank-chip">段位 {{rankTitle}}</view>
+      <view class="rank-chip soft">连练 {{streakDays}} 天 · 最佳 {{streakBest}}</view>
+    </view>
+    <view class="rank-tip">{{rankTip}}</view>
+    <view class="bar">
+      <view class="bar-fill" style="width: {{rankPercent}}%;"></view>
+    </view>
+    <view class="review-tip">{{reviewTip}}</view>
 
     <view class="stats">
       <view class="stat">

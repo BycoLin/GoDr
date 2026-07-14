@@ -2,11 +2,15 @@
   min-height: 100vh;
 }
 
+.subject-line {
+  margin-bottom: 16rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+}
+
 .pack-tabs {
-  display: flex;
-  gap: 12rpx;
-  flex-wrap: wrap;
-  margin-bottom: 18rpx;
+  display: none;
 }
 
 .pack-tab {

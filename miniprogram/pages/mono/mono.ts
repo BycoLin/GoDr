@@ -1,16 +1,22 @@
 import {
   getItemsByGrade,
+  getPackManifest,
   getPackSubjectKind,
   isEnglish,
   isMath,
   isPoetry,
-  listPacks,
 } from '../../utils/registry';
 import { buildArcadeQuiz, gradeAnswer } from '../../utils/quiz';
 import { buildMathArcadeQuiz } from '../../utils/quiz-math';
 import { buildEnglishArcadeQuiz } from '../../utils/quiz-english';
 import { playAnswerSfx, playOkSfx } from '../../utils/sfx';
 import { randRange } from '../../utils/random';
+import {
+  getActiveGrade,
+  getActivePackId,
+  getActiveSubject,
+  setActiveGrade,
+} from '../../utils/active-subject';
 import type {
   EnglishItem,
   MathItem,
@@ -58,8 +64,8 @@ const CELL_POS = [
 
 Page({
   data: {
-    packs: [] as Array<{ id: string; subject: string }>,
-    packId: 'math-g1-g2',
+    packId: 'poetry-g1-g2',
+    subjectLabel: '语文',
     grade: 1,
     grades: [1, 2] as number[],
     cells: [] as Array<BoardCell & { r: number; c: number; active: boolean }>,
@@ -82,10 +88,22 @@ Page({
   moveTimer: 0 as number,
 
   onLoad() {
-    const packs = listPacks().map((p) => ({ id: p.id, subject: p.subject }));
-    const packId = packs.find((p) => p.id.includes('math'))?.id || packs[0]?.id || 'math-g1-g2';
-    this.setData({ packs, packId });
     this.refreshBoard(0);
+  },
+
+  onShow() {
+    const packId = getActivePackId();
+    const active = getActiveSubject();
+    const manifest = getPackManifest(packId);
+    const grade = getActiveGrade(packId);
+    this.setData({
+      packId,
+      subjectLabel: active.subject,
+      grade,
+      grades: manifest?.grades || [1],
+      tip: `当前${active.subject}题库，摇一摇前进吧！`,
+    });
+    this.refreshBoard(this.data.pos);
   },
 
   onUnload() {
@@ -101,24 +119,11 @@ Page({
     this.setData({ cells, pos });
   },
 
-  onSelectPack(e: WechatMiniprogram.TouchEvent) {
-    if (this.data.busy || this.data.showQuiz) return;
-    const packId = e.currentTarget.dataset.id as string;
-    const pack = listPacks().find((p) => p.id === packId);
-    const grade = pack?.grades.includes(this.data.grade)
-      ? this.data.grade
-      : pack?.grades[0] || 1;
-    this.setData({
-      packId,
-      grade,
-      grades: pack?.grades || [1, 2],
-      tip: `已切换到${pack?.subject || ''}，继续摇一摇前进吧！`,
-    });
-  },
-
   onSelectGrade(e: WechatMiniprogram.TouchEvent) {
     if (this.data.busy || this.data.showQuiz) return;
-    this.setData({ grade: Number(e.currentTarget.dataset.grade) });
+    const grade = Number(e.currentTarget.dataset.grade);
+    setActiveGrade(this.data.packId, grade);
+    this.setData({ grade });
   },
 
   onRoll() {

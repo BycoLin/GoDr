@@ -5,6 +5,10 @@ import { listBadgesWithState, clearBadges } from '../../utils/badges';
 import { clearAllWrongBooks, countActiveWrongs } from '../../utils/wrongbook';
 import { clearDailyRecords, loadDailyRecord } from '../../utils/daily';
 import { isSfxMuted, setSfxMuted, playOkSfx } from '../../utils/sfx';
+import { getActivePackId, getActiveSubject } from '../../utils/active-subject';
+import { getRankInfo } from '../../utils/rank';
+import { clearStreak, loadStreak } from '../../utils/streak';
+import { getReviewSummary } from '../../utils/review';
 
 Page({
   data: {
@@ -22,29 +26,42 @@ Page({
     badgesExpanded: false,
     version: '1.0.0',
     packId: 'poetry-g1-g2',
+    subjectLabel: '语文',
     sfxMuted: false,
     sfxLabel: '叭叭音效：开',
+    rankTitle: '新芽',
+    rankTip: '',
+    rankPercent: 0,
+    streakDays: 0,
+    streakBest: 0,
+    reviewTip: '',
   },
 
   onShow() {
     const packs = listPacks();
+    const packId = getActivePackId();
+    const active = getActiveSubject();
     let clearedTotal = 0;
-    let wrongCount = 0;
     packs.forEach((pack) => {
       clearedTotal += loadPackProgress(pack.id).clearedIds.length;
-      wrongCount += countActiveWrongs(pack.id);
     });
+    const wrongCount = countActiveWrongs(packId);
     const wallet = loadWallet();
     const daily = loadDailyRecord();
     const sfxMuted = isSfxMuted();
     const badges = listBadgesWithState();
     const unlocked = badges.filter((b) => b.unlocked);
+    const rank = getRankInfo();
+    const streak = loadStreak();
+    const review = getReviewSummary(packId);
     this.setData({
       packCount: packs.length,
-      packId: packs[0]?.id || 'poetry-g1-g2',
+      packId,
+      subjectLabel: active.subject,
       clearedTotal,
       wrongCount,
-      wrongbookLabel: wrongCount > 0 ? `错题本（${wrongCount}）` : '错题本',
+      wrongbookLabel:
+        wrongCount > 0 ? `${active.subject}错题本（${wrongCount}）` : `${active.subject}错题本`,
       points: wallet.points,
       bestCombo: wallet.bestCombo,
       badges,
@@ -63,6 +80,12 @@ Page({
         : '今日限时尚未自测',
       sfxMuted,
       sfxLabel: sfxMuted ? '叭叭音效：关' : '叭叭音效：开',
+      rankTitle: rank.title,
+      rankTip: rank.tip,
+      rankPercent: rank.percent,
+      streakDays: streak.current,
+      streakBest: streak.best,
+      reviewTip: review.tip,
     });
   },
 
@@ -109,6 +132,7 @@ Page({
         clearWallet();
         clearBadges();
         clearDailyRecords();
+        clearStreak();
         wx.removeStorageSync('lastPlaySession');
         this.onShow();
         wx.showToast({ title: '已清空', icon: 'success' });

@@ -2,7 +2,7 @@
   <view class="summary card">
     <view class="summary-badge">关卡地图</view>
     <view class="summary-title">{{grade}} 年级 · {{subject}}练习</view>
-    <view class="summary-progress">已通关 {{clearedCount}} / {{totalCount}} {{unitLabel}}，星星等你来集！</view>
+    <view class="summary-progress">已通关 {{clearedCount}} / {{totalCount}} {{unitLabel}} · 通关涨星解锁下一关</view>
     <view class="bar">
       <view class="bar-fill" style="width: {{totalCount ? (clearedCount / totalCount * 100) : 0}}%;"></view>
     </view>

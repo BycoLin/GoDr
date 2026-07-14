@@ -5,6 +5,7 @@ import { unlockBadges } from '../../utils/badges';
 import { recordDailyResult } from '../../utils/daily';
 import { countActiveWrongs } from '../../utils/wrongbook';
 import { getPackSubjectKind } from '../../utils/registry';
+import { markPracticeDay } from '../../utils/streak';
 
 Page({
   data: {
@@ -32,6 +33,7 @@ Page({
     bestCombo: 0,
     timedOut: false,
     newBadges: [] as Array<{ id: string; title: string }>,
+    progressNote: '',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -66,6 +68,8 @@ Page({
     if (daily) {
       recordDailyResult(correct, total, sessionPoints);
     }
+
+    markPracticeDay();
 
     const wallet = applySessionReward({
       correct,
@@ -126,6 +130,12 @@ Page({
         : '先缓缓，再练一关会更好！';
     }
 
+    const progressNote = arcade
+      ? '本局是自由加练，未计入小岛关卡进度'
+      : itemId
+        ? '本局已计入关卡进度，可涨星解锁'
+        : '';
+
     this.setData({
       packId,
       grade,
@@ -136,6 +146,7 @@ Page({
       stars,
       ratioText,
       encouragement,
+      progressNote,
       arcade,
       isMath,
       isEnglish,

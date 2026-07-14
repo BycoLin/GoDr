@@ -1,84 +1,75 @@
 <view class="safe-pad games">
-  <view class="intro">
-    <view class="intro-badge">加练</view>
-    <view class="intro-title">趣味加练</view>
-    <view class="intro-desc">关卡累了？来这儿换种方式练一练</view>
-  </view>
-
-  <view class="pack-row">
-    <view
-      class="pack-chip {{packId === item.id ? 'on' : ''}}"
-      wx:for="{{packs}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="onSelectPack"
-    >{{item.subject}}</view>
-  </view>
-
-  <view class="grade-row">
-    <view class="grade-label">地图</view>
-    <view
-      class="grade-chip {{grade === item ? 'on' : ''}}"
-      wx:for="{{grades}}"
-      wx:key="*this"
-      data-grade="{{item}}"
-      bindtap="onSelectGrade"
-    >{{item}} 年级</view>
-  </view>
-
-  <view class="card campaign" bindtap="onTapCampaign">
-    <view class="campaign-badge">回地图</view>
-    <view class="campaign-tag">继续主线闯关</view>
-    <view class="campaign-title">{{campaignTitle}}</view>
-    <view class="campaign-desc">{{campaignDesc}}</view>
-  </view>
-
-  <view class="section-title">今日挑战</view>
-  <view class="feature-row">
-    <view class="card feature-card boss" bindtap="onTapBoss">
-      <view class="feature-emoji">巩固</view>
-      <view class="feature-title">错题再练</view>
-      <view class="feature-desc">{{wrongTip}}</view>
+  <view class="top-bar">
+    <view class="subject-line">
+      <text class="subject-now">当前：{{packSubject}}</text>
+      <text class="subject-note">自由练习，不推进小岛关卡</text>
     </view>
-    <view class="card feature-card daily" bindtap="onTapDaily">
-      <view class="feature-emoji">限时</view>
-      <view class="feature-title">每日限时练</view>
-      <view class="feature-desc">{{dailyTip}}</view>
+    <view class="chip-row grade">
+      <view
+        class="chip soft {{grade === item ? 'on' : ''}}"
+        wx:for="{{grades}}"
+        wx:key="*this"
+        data-grade="{{item}}"
+        bindtap="onSelectGrade"
+      >{{item}}年</view>
     </view>
   </view>
-  <view class="link-wrong" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">打开错题本 →</view>
 
-  <view class="section-title">热门玩法</view>
-  <view class="feature-grid">
+  <view class="hero-card {{heroTone}}" bindtap="onTapHero">
+    <view class="hero-badge">{{heroBadge}}</view>
+    <view class="hero-art">{{heroArt}}</view>
+    <view class="hero-label">今日推荐</view>
+    <view class="hero-title">{{heroTitle}}</view>
+    <view class="hero-desc">{{heroDesc}}</view>
+    <view class="hero-go">{{heroGo}}</view>
+  </view>
+
+  <view class="alt-bar" bindtap="onTapAlt" wx:if="{{altTitle}}">
+    <view class="alt-left">
+      <text class="alt-tag">{{altTag}}</text>
+      <text class="alt-title">{{altTitle}}</text>
+    </view>
+    <text class="alt-desc">{{altDesc}}</text>
+  </view>
+
+  <view class="quick-row">
     <view
-      class="card play-tile {{item.tone}}"
+      class="quick-card {{item.tone}}"
       wx:for="{{features}}"
       wx:key="id"
       data-action="{{item.action}}"
       bindtap="onTapFeature"
     >
-      <view class="tile-tag">{{item.tag}}</view>
-      <view class="tile-title">{{item.title}}</view>
-      <view class="tile-desc">{{item.desc}}</view>
+      <view class="quick-tag">{{item.tag}}</view>
+      <view class="quick-title">{{item.title}}</view>
+      <view class="quick-desc">{{item.desc}}</view>
     </view>
   </view>
 
-  <view class="section-title">{{packSubject}}小关卡</view>
-  <view class="game-list">
+  <view class="more-toggle" bindtap="onToggleModes">
+    <text>{{modesExpanded ? '收起专项题型' : '更多专项题型'}}</text>
+    <text class="more-arrow">{{modesExpanded ? '▴' : '▾'}}</text>
+  </view>
+
+  <view class="mode-grid" wx:if="{{modesExpanded}}">
     <view
-      class="card game-card {{item.toneClass}}"
+      class="mode-card tone-{{index % 3}}"
       wx:for="{{games}}"
       wx:key="mode"
       data-mode="{{item.mode}}"
       bindtap="onTapGame"
     >
-      <view class="game-tag">{{item.tag}}</view>
-      <view class="game-title">{{item.title}}</view>
-      <view class="game-desc">{{item.desc}}</view>
-      <view class="game-go">GO</view>
+      <view class="mode-tag">{{item.tag}}</view>
+      <view class="mode-title">{{item.title}}</view>
+      <view class="mode-desc">{{item.desc}}</view>
     </view>
   </view>
 
-  <view class="tools-foot" bindtap="onTapMono">趣味棋盘：走走答练一练 →</view>
-  <view class="tools-foot soft" bindtap="onTapTools">趣味宝箱：拼音 / 看图算 / 数字排队 →</view>
+  <view class="foot-links">
+    <view class="foot-link" bindtap="onTapMono">趣味棋盘</view>
+    <view class="foot-dot">·</view>
+    <view class="foot-link" bindtap="onTapTools">趣味宝箱</view>
+    <view class="foot-dot" wx:if="{{wrongCount > 0}}">·</view>
+    <view class="foot-link" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">错题本</view>
+  </view>
 </view>

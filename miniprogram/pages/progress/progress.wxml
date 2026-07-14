@@ -1,13 +1,5 @@
 <view class="safe-pad progress-page">
-  <view class="pack-tabs" wx:if="{{packs.length > 1}}">
-    <view
-      class="pack-tab {{packId === item.id ? 'on' : ''}}"
-      wx:for="{{packs}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      bindtap="onSelectPack"
-    >{{item.subject}}</view>
-  </view>
+  <view class="subject-line">当前学科：{{subject}}（首页可切换）</view>
 
   <view class="card hero">
     <view class="hero-top">

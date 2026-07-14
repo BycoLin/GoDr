@@ -46,6 +46,35 @@
   font-weight: 700;
 }
 
+.rank-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 20rpx;
+}
+
+.rank-chip {
+  font-size: 22rpx;
+  font-weight: 900;
+  padding: 8rpx 16rpx;
+  border-radius: 999rpx;
+  background: #ffc93c;
+  color: #5a4300;
+}
+
+.rank-chip.soft {
+  background: #d6f8f2;
+  color: #0f8f82;
+}
+
+.rank-tip,
+.review-tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+}
+
 .avatar {
   width: 96rpx;
   height: 96rpx;

@@ -1,6 +1,8 @@
 import { listPacks } from './registry';
 import { loadPackProgress } from './progress';
 import type { Wallet } from './wallet';
+import { loadStreak } from './streak';
+import { sumAllStars } from './rank';
 
 export interface BadgeDef {
   id: string;
@@ -14,8 +16,12 @@ export const BADGE_DEFS: BadgeDef[] = [
   { id: 'combo_5', title: '连对高手', desc: '单局连续答对达到 5' },
   { id: 'boss_clear', title: '错题清零', desc: '完成一次错题复习' },
   { id: 'daily_clear', title: '每日打卡', desc: '完成一次每日自测' },
-  { id: 'master_5', title: '诗词新秀', desc: '完成 5 首诗词练习' },
-  { id: 'master_10', title: '诗词小达人', desc: '完成 10 首诗词练习' },
+  { id: 'master_5', title: '通关新秀', desc: '累计完成 5 关' },
+  { id: 'master_10', title: '通关小达人', desc: '累计完成 10 关' },
+  { id: 'streak_3', title: '三日坚持', desc: '连续练习 3 天' },
+  { id: 'streak_7', title: '一周达人', desc: '连续练习 7 天' },
+  { id: 'rank_qinxxue', title: '勤学少年', desc: '段位升到勤学' },
+  { id: 'rank_xueba', title: '学霸登场', desc: '段位升到学霸' },
 ];
 
 const KEY = 'badges';
@@ -69,6 +75,14 @@ export function unlockBadges(ctx: BadgeCheckContext): BadgeDef[] {
   const mastered = totalCleared();
   if (mastered >= 5) tryUnlock('master_5');
   if (mastered >= 10) tryUnlock('master_10');
+
+  const streak = loadStreak().current;
+  if (streak >= 3) tryUnlock('streak_3');
+  if (streak >= 7) tryUnlock('streak_7');
+
+  const stars = sumAllStars();
+  if (stars >= 10) tryUnlock('rank_qinxxue');
+  if (stars >= 60) tryUnlock('rank_xueba');
 
   if (newly.length) saveBadgeIds(next);
   return newly;
