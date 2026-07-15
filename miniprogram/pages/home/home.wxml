@@ -5,11 +5,7 @@
 
   <view class="status-row">
     <view class="avatar">
-      <view class="avatar-face">
-        <view class="a-eye a-l"></view>
-        <view class="a-eye a-r"></view>
-        <view class="a-smile"></view>
-      </view>
+      <image class="avatar-img" src="/assets/miniprogram-avatar.png" mode="aspectFill" />
     </view>
     <view class="status-mid">
       <view class="hello">你好，小朋友</view>

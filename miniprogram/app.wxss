@@ -1,5 +1,5 @@
 page {
-  --color-bg: #fff8ef;
+  --color-bg: #e6fff6;
   --color-surface: #ffffff;
   --color-ink: #1a1430;
   --color-muted: #4a4458;
@@ -27,7 +27,13 @@ page {
 }
 
 page {
-  background: #fff8ef;
+  background:
+    radial-gradient(circle at 48% 100%, rgba(255, 176, 160, 0.42) 0%, transparent 42%),
+    radial-gradient(circle at 8% 88%, rgba(255, 210, 120, 0.3) 0%, transparent 30%),
+    radial-gradient(circle at 92% 92%, rgba(255, 190, 170, 0.26) 0%, transparent 28%),
+    radial-gradient(circle at 16% 6%, rgba(64, 200, 180, 0.28) 0%, transparent 34%),
+    radial-gradient(circle at 84% 4%, rgba(120, 210, 200, 0.22) 0%, transparent 30%),
+    linear-gradient(180deg, #e6fff6 0%, #eef3ff 48%, #ffe8dc 100%);
   color: var(--color-ink);
   font-size: var(--font-body);
   min-height: 100vh;

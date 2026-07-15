@@ -21,7 +21,7 @@
     "navigationBarBackgroundColor": "#22B8A8",
     "navigationBarTitleText": "闯关叭叭",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#FFF8EF",
+    "backgroundColor": "#E6FFF6",
     "backgroundTextStyle": "dark"
   },
   "tabBar": {
