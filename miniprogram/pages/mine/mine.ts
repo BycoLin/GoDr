@@ -15,6 +15,17 @@ import {
   getWeekReport,
 } from '../../utils/practice-log';
 import type { WeekDayDot } from '../../utils/practice-log';
+import {
+  clearFavorites,
+  listFavorites,
+  removeFavorite,
+  type FavoriteEntry,
+} from '../../utils/favorites';
+
+interface FavoriteRow extends FavoriteEntry {
+  key: string;
+  subjectShort: string;
+}
 
 Page({
   data: {
@@ -52,6 +63,34 @@ Page({
     weekCleared: 0,
     weekTip: '',
     weekDays: [] as WeekDayDot[],
+    favorites: [] as FavoriteRow[],
+    visibleFavorites: [] as FavoriteRow[],
+    favoriteCount: 0,
+    favoritesExpanded: false,
+    favCanExpand: false,
+  },
+
+  buildFavoriteRows() {
+    return listFavorites().map((e) => ({
+      ...e,
+      key: `${e.packId}::${e.itemId}`,
+      subjectShort: (e.subject || '').slice(0, 1) || '关',
+    }));
+  },
+
+  applyFavorites(favorites: FavoriteRow[], expandedFlag?: boolean) {
+    const favoriteCount = favorites.length;
+    const favCanExpand = favoriteCount > 3;
+    const wantExpand =
+      typeof expandedFlag === 'boolean' ? expandedFlag : this.data.favoritesExpanded;
+    const favoritesExpanded = favCanExpand && wantExpand;
+    this.setData({
+      favorites,
+      favoriteCount,
+      favoritesExpanded,
+      favCanExpand,
+      visibleFavorites: favoritesExpanded ? favorites : favorites.slice(0, 3),
+    });
   },
 
   onShow() {
@@ -73,6 +112,7 @@ Page({
     const review = getReviewSummary(packId);
     const goal = getTodayGoal();
     const week = getWeekReport();
+    const favorites = this.buildFavoriteRows();
     this.setData({
       packCount: packs.length,
       packId,
@@ -117,6 +157,12 @@ Page({
       weekTip: week.tip,
       weekDays: week.days,
     });
+    this.applyFavorites(favorites, this.data.favoritesExpanded);
+  },
+
+  onToggleFavorites() {
+    if (!this.data.favCanExpand) return;
+    this.applyFavorites(this.data.favorites, !this.data.favoritesExpanded);
   },
 
   onToggleBadges() {
@@ -140,10 +186,29 @@ Page({
     wx.navigateTo({ url: `/pages/wrongbook/wrongbook?packId=${this.data.packId}` });
   },
 
+  onPlayFavorite(e: WechatMiniprogram.TouchEvent) {
+    const packId = String(e.currentTarget.dataset.packId || '');
+    const itemId = String(e.currentTarget.dataset.itemId || '');
+    const grade = Number(e.currentTarget.dataset.grade || 1);
+    if (!packId || !itemId) return;
+    wx.navigateTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&itemId=${itemId}`,
+    });
+  },
+
+  onRemoveFavorite(e: WechatMiniprogram.TouchEvent) {
+    const packId = String(e.currentTarget.dataset.packId || '');
+    const itemId = String(e.currentTarget.dataset.itemId || '');
+    if (!packId || !itemId) return;
+    removeFavorite(packId, itemId);
+    this.applyFavorites(this.buildFavoriteRows(), this.data.favoritesExpanded);
+    wx.showToast({ title: '已取消收藏', icon: 'none' });
+  },
+
   onClearAll() {
     wx.showModal({
       title: '清空全部进度？',
-      content: '将清除练习进度、错题本、积分、成就、每日自测与周报记录，不可恢复',
+      content: '将清除练习进度、错题本、积分、成就、每日自测、周报与收藏关，不可恢复',
       success: (res) => {
         if (!res.confirm) return;
         const ids = listPacks().map((p) => p.id);
@@ -156,6 +221,7 @@ Page({
         clearDailyRecords();
         clearStreak();
         clearPracticeLog();
+        clearFavorites();
         wx.removeStorageSync('lastPlaySession');
         this.onShow();
         wx.showToast({ title: '已清空', icon: 'success' });

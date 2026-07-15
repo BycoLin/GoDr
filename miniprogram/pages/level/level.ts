@@ -6,6 +6,7 @@ import {
   isPoetry,
 } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
+import { isFavorite, toggleFavorite } from '../../utils/favorites';
 import type { KnowledgeItem } from '../../utils/types';
 
 interface LevelRow {
@@ -15,6 +16,7 @@ interface LevelRow {
   stars: number;
   cleared: boolean;
   unlocked: boolean;
+  favorited: boolean;
 }
 
 Page({
@@ -117,6 +119,7 @@ Page({
         stars: itemProg?.stars || 0,
         cleared: Boolean(itemProg?.cleared),
         unlocked: prevCleared,
+        favorited: isFavorite(packId, item.id),
       };
     });
 
@@ -141,6 +144,34 @@ Page({
     }
     const focus = this.data.levels.find((l) => l.id === id) || null;
     this.applyFocus(focus);
+  },
+
+  onToggleFavorite(e: WechatMiniprogram.TouchEvent) {
+    const id = String(e.currentTarget.dataset.id || '');
+    const { packId, grade, subject, levels } = this.data;
+    const row = levels.find((l) => l.id === id);
+    if (!row) return;
+
+    const on = toggleFavorite({
+      packId,
+      itemId: id,
+      grade,
+      title: row.title,
+      subject: subject || '',
+    });
+
+    const next = levels.map((l) =>
+      l.id === id ? { ...l, favorited: on } : l,
+    );
+    this.setData({ levels: next });
+    wx.showToast({
+      title: on ? '已收藏，可在「我的」再练' : '已取消收藏',
+      icon: 'none',
+    });
+  },
+
+  onLongPressLevel(e: WechatMiniprogram.TouchEvent) {
+    this.onToggleFavorite(e);
   },
 
   onStartFocus() {

@@ -121,9 +121,38 @@
   background: #fff;
   border-radius: 32rpx;
   border: 4rpx solid #ece7df;
-  padding: 24rpx 22rpx;
+  padding: 24rpx 16rpx 24rpx 22rpx;
   box-shadow: 0 10rpx 0 rgba(26, 20, 48, 0.06);
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.node-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.fav-btn {
+  width: 72rpx;
+  height: 72rpx;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #c8c2d4;
+  font-weight: 900;
+  border-radius: 50%;
+}
+
+.fav-btn.on {
+  color: #ffc93c;
+}
+
+.fav-btn:active {
+  transform: scale(0.9);
 }
 
 .node.focus .node-card {

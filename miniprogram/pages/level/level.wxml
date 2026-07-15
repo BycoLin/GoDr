@@ -2,7 +2,7 @@
   <view class="top-bar">
     <view class="top-left">
       <view class="top-title">{{grade}} 年级 · {{subject}}</view>
-      <view class="top-sub">已通关 {{clearedCount}}/{{totalCount}} {{unitLabel}}</view>
+      <view class="top-sub">已通关 {{clearedCount}}/{{totalCount}} {{unitLabel}} · 点☆可收藏</view>
     </view>
     <view class="top-star">★ {{starSum}}</view>
   </view>
@@ -16,6 +16,7 @@
         data-id="{{item.id}}"
         data-unlocked="{{item.unlocked ? 1 : 0}}"
         bindtap="onTapLevel"
+        bindlongpress="onLongPressLevel"
       >
         <view class="rail" wx:if="{{index < levels.length - 1}}"></view>
         <view class="node-dot">
@@ -24,13 +25,20 @@
           <text wx:else>{{index + 1}}</text>
         </view>
         <view class="node-card">
-          <view class="node-title">第 {{index + 1}} 关 · {{item.title}}</view>
-          <view class="node-meta">{{item.meta}}</view>
-          <view class="stars">
-            <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
-            <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
-            <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
+          <view class="node-main">
+            <view class="node-title">第 {{index + 1}} 关 · {{item.title}}</view>
+            <view class="node-meta">{{item.meta}}</view>
+            <view class="stars">
+              <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
+              <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
+              <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
+            </view>
           </view>
+          <view
+            class="fav-btn {{item.favorited ? 'on' : ''}}"
+            data-id="{{item.id}}"
+            catchtap="onToggleFavorite"
+          >{{item.favorited ? '★' : '☆'}}</view>
         </view>
       </view>
     </view>

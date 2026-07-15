@@ -75,6 +75,41 @@
 
   <view class="tip">{{dailyTip}} · {{reviewTip}}</view>
 
+  <view class="sec-title" bindtap="onToggleFavorites">
+    <text>收藏关{{favoriteCount > 0 ? ' ' + favoriteCount : ''}}</text>
+    <text class="sec-more" wx:if="{{favCanExpand}}">{{favoritesExpanded ? '收起' : '展开'}}</text>
+  </view>
+  <view class="fav-box" wx:if="{{favoriteCount > 0}}">
+    <view
+      class="fav-row"
+      wx:for="{{visibleFavorites}}"
+      wx:key="key"
+      data-pack-id="{{item.packId}}"
+      data-item-id="{{item.itemId}}"
+      data-grade="{{item.grade}}"
+      bindtap="onPlayFavorite"
+    >
+      <view class="fav-mark">{{item.subjectShort}}</view>
+      <view class="fav-body">
+        <view class="fav-title">{{item.title}}</view>
+        <view class="fav-meta">{{item.subject}} · {{item.grade}} 年级</view>
+      </view>
+      <view class="fav-go">练</view>
+      <view
+        class="fav-del"
+        data-pack-id="{{item.packId}}"
+        data-item-id="{{item.itemId}}"
+        catchtap="onRemoveFavorite"
+      >×</view>
+    </view>
+    <view
+      class="fav-more"
+      wx:if="{{favCanExpand && !favoritesExpanded}}"
+      bindtap="onToggleFavorites"
+    >还有 {{favoriteCount - 3}} 个，点开看全部</view>
+  </view>
+  <view class="fav-empty" wx:else>关卡页点☆可收藏难关，方便再练</view>
+
   <view class="sec-title" bindtap="onToggleBadges">
     <text>成就 {{badgeSummary}}</text>
     <text class="sec-more">{{badgesExpanded ? '收起' : '展开'}}</text>
