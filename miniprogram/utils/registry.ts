@@ -45,7 +45,8 @@ export function getPackItems(packId: string): KnowledgeItem[] {
 }
 
 export function getItemsByGrade(packId: string, grade: number): KnowledgeItem[] {
-  return getPackItems(packId).filter((item) => item.grade === grade);
+  const g = Number(grade);
+  return getPackItems(packId).filter((item) => Number(item.grade) === g);
 }
 
 export function getItemById(packId: string, itemId: string): KnowledgeItem | undefined {

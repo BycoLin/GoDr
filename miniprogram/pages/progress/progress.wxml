@@ -1,83 +1,71 @@
 <view class="safe-pad progress-page">
-  <view class="subject-line">当前学科：{{subject}}（首页可切换）</view>
-
-  <view class="card hero">
-    <view class="hero-top">
-      <view class="hero-copy">
-        <view class="hero-badge">{{subject}}进度</view>
-        <view class="hero-title">{{packTitle}}</view>
-        <view class="hero-cheer">{{cheerText}}</view>
-      </view>
-      <view class="ring">
-        <view class="ring-num">{{percent}}%</view>
-        <view class="ring-label">完成度</view>
-      </view>
+  <view class="top-bar">
+    <view>
+      <view class="page-kicker">星星收集</view>
+      <view class="page-title">{{worldName}}</view>
+      <view class="page-sub">{{subject}} · {{grade}} 年级 · 闯关页可切换</view>
     </view>
-
-    <view class="stat-row">
-      <view class="stat">
-        <view class="stat-num">{{clearedCount}}</view>
-        <view class="stat-label">已完成</view>
-      </view>
-      <view class="stat">
-        <view class="stat-num">{{totalCount - clearedCount}}</view>
-        <view class="stat-label">还差{{unitLabel}}</view>
-      </view>
-      <view class="stat">
-        <view class="stat-num">{{starSum}}</view>
-        <view class="stat-label">星星</view>
-      </view>
-    </view>
-
-    <view class="bar">
-      <view class="bar-fill" style="width: {{percent}}%;"></view>
-    </view>
-
-    <button class="btn btn-primary continue-btn" bindtap="onContinue">继续练习</button>
+    <view class="star-badge">★ {{starSum}}</view>
   </view>
 
-  <view class="filter-row">
-    <view class="filter-chip {{filter === 'all' ? 'on' : ''}}" data-filter="all" bindtap="onSelectFilter">全部</view>
-    <view class="filter-chip {{filter === 'done' ? 'on' : ''}}" data-filter="done" bindtap="onSelectFilter">已完成</view>
-    <view class="filter-chip {{filter === 'todo' ? 'on' : ''}}" data-filter="todo" bindtap="onSelectFilter">未完成</view>
+  <view class="hero-banner {{toneClass}}">
+    <view class="hero-copy">
+      <view class="hero-label">闯关进度</view>
+      <view class="hero-title">{{percent}}%</view>
+      <view class="hero-desc">{{cheerText}}</view>
+      <view class="hero-btn" bindtap="onContinue">继续闯关</view>
+    </view>
+    <view class="hero-ring">
+      <view class="ring-num">{{clearedCount}}</view>
+      <view class="ring-label">已通关</view>
+    </view>
   </view>
 
-  <view class="section-title">按年级看看</view>
+  <view class="stat-row">
+    <view class="stat-card">
+      <view class="stat-num">{{clearedCount}}</view>
+      <view class="stat-label">已完成</view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-num">{{todoCount}}</view>
+      <view class="stat-label">还差{{unitLabel}}</view>
+    </view>
+    <view class="stat-card sun">
+      <view class="stat-num">{{starSum}}</view>
+      <view class="stat-label">星星</view>
+    </view>
+  </view>
 
-  <view class="grade-card" wx:for="{{groups}}" wx:key="grade">
-    <view class="grade-head" data-grade="{{item.grade}}" bindtap="onToggleGrade">
-      <view class="grade-left">
-        <view class="grade-dot">{{item.grade}}</view>
-        <view>
-          <view class="grade-title">{{item.title}}</view>
-          <view class="grade-meta">完成 {{item.cleared}}/{{item.total}} · 星 {{item.starSum}}</view>
-        </view>
-      </view>
-      <view class="grade-right">
-        <view class="grade-percent">{{item.percent}}%</view>
-        <view class="grade-arrow {{item.open ? 'up' : ''}}">›</view>
+  <view class="block">
+    <view class="block-head">
+      <view class="block-title">关卡星星</view>
+      <view class="filter-row">
+        <view class="filter-chip {{filter === 'all' ? 'on' : ''}}" data-filter="all" bindtap="onSelectFilter">全部</view>
+        <view class="filter-chip {{filter === 'done' ? 'on' : ''}}" data-filter="done" bindtap="onSelectFilter">已完成</view>
+        <view class="filter-chip {{filter === 'todo' ? 'on' : ''}}" data-filter="todo" bindtap="onSelectFilter">未完成</view>
       </view>
     </view>
 
-    <view class="grade-bar">
-      <view class="grade-bar-fill" style="width: {{item.percent}}%;"></view>
-    </view>
-
-    <view class="grade-body" wx:if="{{item.open}}">
-      <view wx:if="{{!item.items.length}}" class="empty-tip">这里暂时没有符合筛选的关卡</view>
-      <view class="item-row" wx:for="{{item.items}}" wx:for-item="row" wx:key="id">
+    <view class="level-list">
+      <view wx:if="{{!items.length}}" class="empty-tip">这里暂时没有符合筛选的关卡</view>
+      <view
+        class="item-row {{item.cleared ? 'done' : ''}}"
+        wx:for="{{items}}"
+        wx:key="id"
+        bindtap="onTapGradeMap"
+      >
         <view class="item-main">
-          <view class="item-title">{{row.title}}</view>
-          <view class="item-status {{row.cleared ? 'ok' : ''}}">{{row.cleared ? '已完成' : '未完成'}}</view>
+          <view class="item-title">{{item.title}}</view>
+          <view class="item-status">{{item.cleared ? '已通关 · 去再练' : '未通关 · 去地图'}}</view>
         </view>
         <view class="stars">
-          <text class="star {{row.stars >= 1 ? 'on' : ''}}">★</text>
-          <text class="star {{row.stars >= 2 ? 'on' : ''}}">★</text>
-          <text class="star {{row.stars >= 3 ? 'on' : ''}}">★</text>
+          <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
+          <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
+          <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
         </view>
       </view>
     </view>
   </view>
 
-  <button class="btn btn-ghost clear-btn" bindtap="onClearAll">清空本包进度</button>
+  <view class="foot-link" bindtap="onClearAll">清空本学科闯关进度</view>
 </view>

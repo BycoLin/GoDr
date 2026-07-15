@@ -12,30 +12,39 @@ page {
   --color-sky-soft: #e2ebff;
   --color-sun: #ffc93c;
   --color-sun-soft: #fff3c4;
+  --color-grass: #5ecf7b;
   --color-danger: #e84b6a;
   --color-ok: #2fbf7e;
-  --radius: 32rpx;
-  --shadow: 0 10rpx 0 rgba(26, 20, 48, 0.1);
+  --radius: 36rpx;
+  --radius-lg: 48rpx;
+  --shadow: 0 12rpx 0 rgba(26, 20, 48, 0.1);
+  --gap: 28rpx;
+  --tap-min: 120rpx;
+  --font-hero: 48rpx;
+  --font-title: 36rpx;
+  --font-body: 32rpx;
+  --font-sub: 26rpx;
 }
 
 page {
   background: #fff8ef;
   color: var(--color-ink);
-  font-size: 30rpx;
+  font-size: var(--font-body);
   min-height: 100vh;
   box-sizing: border-box;
   line-height: 1.45;
+  font-family: "PingFang SC", "Noto Sans SC", "Microsoft YaHei", sans-serif;
 }
 
 .btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 92rpx;
-  padding: 0 40rpx;
+  min-height: var(--tap-min);
+  padding: 0 48rpx;
   border-radius: 999rpx;
-  font-size: 32rpx;
-  font-weight: 800;
+  font-size: var(--font-title);
+  font-weight: 900;
   border: none;
   line-height: 1.2;
 }
@@ -47,19 +56,32 @@ page {
 .btn-primary {
   background: #22b8a8;
   color: #fff;
-  box-shadow: 0 10rpx 0 #0f8f82;
+  box-shadow: 0 12rpx 0 #0f8f82;
 }
 
 .btn-primary:active {
-  opacity: 0.92;
+  transform: translateY(6rpx);
   box-shadow: 0 6rpx 0 #0f8f82;
+}
+
+.btn-cta {
+  width: 80%;
+  margin: 0 auto;
+  min-height: 140rpx;
+  font-size: 40rpx;
+  letter-spacing: 2rpx;
 }
 
 .btn-secondary {
   background: #fff;
   color: var(--color-primary-deep);
   border: 4rpx solid #9ee5db;
-  box-shadow: 0 8rpx 0 rgba(15, 143, 130, 0.18);
+  box-shadow: 0 10rpx 0 rgba(15, 143, 130, 0.18);
+}
+
+.btn-secondary:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 6rpx 0 rgba(15, 143, 130, 0.18);
 }
 
 .btn-ghost {
@@ -77,18 +99,18 @@ page {
 }
 
 .safe-pad {
-  padding: 28rpx 28rpx;
-  padding-bottom: calc(56rpx + env(safe-area-inset-bottom));
+  padding: 32rpx 32rpx;
+  padding-bottom: calc(64rpx + env(safe-area-inset-bottom));
 }
 
 .section-title {
   display: flex;
   align-items: center;
   gap: 12rpx;
-  font-size: 30rpx;
+  font-size: var(--font-title);
   color: var(--color-ink);
-  margin: 8rpx 0 18rpx;
-  font-weight: 800;
+  margin: 8rpx 0 20rpx;
+  font-weight: 900;
 }
 
 .section-title::before {
@@ -98,4 +120,10 @@ page {
   border-radius: 50%;
   background: var(--color-sun);
   box-shadow: 8rpx 0 0 var(--color-accent), 16rpx 0 0 var(--color-sky);
+}
+
+/* 按压反馈通用 */
+.pressable:active {
+  transform: translateY(4rpx);
+  opacity: 0.96;
 }

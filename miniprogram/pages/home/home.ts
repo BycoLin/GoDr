@@ -1,4 +1,4 @@
-import { getPackItems, getPackManifest } from '../../utils/registry';
+import { getItemsByGrade, getPackManifest, getPackSubjectKind } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
 import {
   getActiveGrade,
@@ -10,6 +10,46 @@ import {
 import { getRankInfo } from '../../utils/rank';
 import { loadStreak } from '../../utils/streak';
 import { getReviewSummary } from '../../utils/review';
+
+interface FeaturePlay {
+  id: string;
+  title: string;
+  desc: string;
+  tag: string;
+  tone: string;
+  action: 'duel' | 'sprint' | 'exam' | 'flash' | 'pinyin' | 'puzzle' | 'visual';
+}
+
+function featuresForPack(packId: string): FeaturePlay[] {
+  const kind = getPackSubjectKind(packId);
+  if (kind === 'math') {
+    return [
+      { id: 'sprint', title: '限时冲刺', desc: '60 秒练手速', tag: '冲刺', tone: 'q-sprint', action: 'sprint' },
+      { id: 'duel', title: '趣味对练', desc: '比一比谁更快', tag: '对练', tone: 'q-duel', action: 'duel' },
+      { id: 'puzzle', title: '数字排队', desc: '排一排', tag: '数', tone: 'q-duel', action: 'puzzle' },
+      { id: 'visual', title: '看图口算', desc: '算一算', tag: '算', tone: 'q-coral', action: 'visual' },
+    ];
+  }
+  if (kind === 'english') {
+    return [
+      { id: 'flash', title: '翻翻看', desc: '翻一翻记一记', tag: '认读', tone: 'q-flash', action: 'flash' },
+      { id: 'duel', title: '趣味对练', desc: '比一比谁更快', tag: '对练', tone: 'q-duel', action: 'duel' },
+    ];
+  }
+  return [
+    { id: 'flash', title: '翻翻看', desc: '先读一读再练', tag: '认读', tone: 'q-flash', action: 'flash' },
+    { id: 'duel', title: '趣味对练', desc: '比一比默写', tag: '对练', tone: 'q-duel', action: 'duel' },
+    { id: 'pinyin', title: '拼音练习', desc: '声母韵母', tag: '拼', tone: 'q-teal', action: 'pinyin' },
+  ];
+}
+
+function sumGradeStars(packId: string, grade: number): number {
+  const progress = loadPackProgress(packId);
+  const ids = new Set(getItemsByGrade(packId, grade).map((item) => item.id));
+  return Object.entries(progress.stars || {}).reduce((s, [id, n]) => {
+    return ids.has(id) ? s + (n || 0) : s;
+  }, 0);
+}
 
 Page({
   data: {
@@ -27,12 +67,14 @@ Page({
     totalCount: 0,
     percent: 0,
     barWidth: '0%',
+    starSum: 0,
     rankTitle: '新芽',
     rankTip: '',
     streakDays: 0,
     reviewTotal: 0,
     reviewTip: '',
     reviewWrongs: 0,
+    features: [] as FeaturePlay[],
   },
 
   refreshing: false,
@@ -60,8 +102,10 @@ Page({
       const iconText = kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗';
 
       const progress = loadPackProgress(packId);
-      const totalCount = getPackItems(packId).length;
-      const clearedCount = (progress.clearedIds || []).length;
+      const gradeItems = getItemsByGrade(packId, grade);
+      const totalCount = gradeItems.length;
+      const clearedIdSet = new Set(progress.clearedIds || []);
+      const clearedCount = gradeItems.filter((item) => clearedIdSet.has(item.id)).length;
       const percent = totalCount ? Math.round((clearedCount / totalCount) * 100) : 0;
 
       let continueTip = '';
@@ -83,19 +127,21 @@ Page({
         iconText,
         packTitle: manifest?.title || active.worldName,
         grades,
-        grade: grades.indexOf(grade) >= 0 ? grade : grades[0],
+        grade: grades.map(Number).includes(grade) ? grade : grades[0],
         continueTip,
         continueShort,
         clearedCount,
         totalCount,
         percent,
         barWidth: `${percent}%`,
+        starSum: sumGradeStars(packId, grade),
         rankTitle: rank.title,
         rankTip: rank.tip,
         streakDays: streak.current,
         reviewTotal: review.total,
         reviewTip: review.tip,
         reviewWrongs: review.wrongs,
+        features: featuresForPack(packId),
       });
     } catch (err) {
       console.error('home refresh failed', err);
@@ -150,12 +196,44 @@ Page({
     });
   },
 
-  onGoGames() {
-    wx.switchTab({ url: '/pages/games/games' });
-  },
-
-  onGoTools() {
-    wx.navigateTo({ url: '/pages/tools/tools' });
+  onTapFeature(e: WechatMiniprogram.TouchEvent) {
+    const action = e.currentTarget.dataset.action as FeaturePlay['action'];
+    const { packId, grade } = this.data;
+    if (action === 'flash') {
+      wx.navigateTo({
+        url: `/pages/flashcard/flashcard?packId=${packId}&grade=${grade}`,
+      });
+      return;
+    }
+    if (action === 'duel') {
+      wx.navigateTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=duel&duel=1&arcade=1`,
+      });
+      return;
+    }
+    if (action === 'sprint') {
+      wx.navigateTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=sprint&sprint=1&arcade=1`,
+      });
+      return;
+    }
+    if (action === 'exam') {
+      wx.navigateTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=exam&exam=1&arcade=1`,
+      });
+      return;
+    }
+    if (action === 'pinyin') {
+      wx.navigateTo({ url: '/pages/pinyin/pinyin' });
+      return;
+    }
+    if (action === 'visual') {
+      wx.navigateTo({ url: '/pages/visual-math/visual-math' });
+      return;
+    }
+    if (action === 'puzzle') {
+      wx.navigateTo({ url: '/pages/number-line/number-line' });
+    }
   },
 
   onGoMono() {

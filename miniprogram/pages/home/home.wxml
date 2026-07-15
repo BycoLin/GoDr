@@ -1,142 +1,105 @@
 <view class="safe-pad home">
-  <view class="top-bar">
-    <view class="top-left">
-      <view class="avatar bob">
-        <view class="avatar-face">
-          <view class="a-eye a-l"></view>
-          <view class="a-eye a-r"></view>
-          <view class="a-smile"></view>
-        </view>
-      </view>
-      <view class="hello-wrap">
-        <view class="hello">你好，小朋友</view>
-        <view class="hello-sub">闯关叭叭 · {{subject}}</view>
+  <view class="deco deco-cloud a"></view>
+  <view class="deco deco-cloud b"></view>
+  <view class="deco deco-star"></view>
+
+  <view class="status-row">
+    <view class="avatar">
+      <view class="avatar-face">
+        <view class="a-eye a-l"></view>
+        <view class="a-eye a-r"></view>
+        <view class="a-smile"></view>
       </view>
     </view>
-    <view class="top-right">
-      <view class="pill rank">{{rankTitle}}</view>
-      <view class="pill streak">连练 {{streakDays}} 天</view>
+    <view class="status-mid">
+      <view class="hello">你好，小朋友</view>
+      <view class="hello-sub">{{rankTitle}}</view>
+    </view>
+    <view class="status-chips">
+      <view class="chip">★ {{starSum}}</view>
+      <view class="chip fire" wx:if="{{streakDays > 0}}">连练 {{streakDays}}</view>
     </view>
   </view>
 
-  <view class="cat-row">
+  <view class="subject-pills">
     <view
-      class="cat {{packId === 'poetry-g1-g2' ? 'on' : ''}}"
+      class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
       data-pack-id="poetry-g1-g2"
       bindtap="onSelectSubject"
-    >
-      <view class="cat-icon tone-cn">诗</view>
-      <view class="cat-name">语文</view>
-    </view>
+    >语文</view>
     <view
-      class="cat {{packId === 'math-g1-g2' ? 'on' : ''}}"
+      class="sp {{packId === 'math-g1-g2' ? 'on math' : ''}}"
       data-pack-id="math-g1-g2"
       bindtap="onSelectSubject"
-    >
-      <view class="cat-icon tone-math">算</view>
-      <view class="cat-name">数学</view>
-    </view>
+    >数学</view>
     <view
-      class="cat {{packId === 'english-g1-g2' ? 'on' : ''}}"
+      class="sp {{packId === 'english-g1-g2' ? 'on en' : ''}}"
       data-pack-id="english-g1-g2"
       bindtap="onSelectSubject"
+    >英语</view>
+  </view>
+
+  <view class="grade-pills">
+    <view
+      class="gp {{grade === item ? 'on' : ''}}"
+      wx:for="{{grades}}"
+      wx:key="*this"
+      data-grade="{{item}}"
+      bindtap="onSelectGrade"
+    >{{item}} 年级</view>
+  </view>
+
+  <view class="scene-card {{toneClass}}">
+    <view class="scene-mark">{{iconText}}</view>
+    <view class="scene-title">{{worldName}}</view>
+    <view class="scene-desc">已通关 {{clearedCount}}/{{totalCount}}</view>
+    <view class="scene-bar">
+      <view class="scene-fill" style="width: {{barWidth}};"></view>
+    </view>
+    <view class="scene-pct">{{percent}}%</view>
+  </view>
+
+  <view class="cta-wrap">
+    <view class="cta-bubble" wx:if="{{continueTip}}">接着练 · {{continueShort}}</view>
+    <view class="cta-bubble soft" wx:else>打开地图，一关一关闯</view>
+    <view class="btn btn-cta cta-btn {{toneClass}}" bindtap="onEnterMap">开始冒险</view>
+    <view class="cta-sub" bindtap="onContinue" wx:if="{{continueTip}}">或继续上次地图</view>
+  </view>
+
+  <view class="sec-title">趣味玩法</view>
+  <view class="feature-list">
+    <view
+      class="feature-item {{item.tone}} pressable"
+      wx:for="{{features}}"
+      wx:key="id"
+      data-action="{{item.action}}"
+      bindtap="onTapFeature"
     >
-      <view class="cat-icon tone-en">A</view>
-      <view class="cat-name">英语</view>
+      <view class="feature-icon">{{item.tag}}</view>
+      <view class="feature-body">
+        <view class="feature-name">{{item.title}}</view>
+        <view class="feature-tip">{{item.desc}}</view>
+      </view>
+      <view class="feature-go">开</view>
     </view>
   </view>
 
-  <view class="banner {{toneClass}}" bindtap="onGoMono">
-    <view class="banner-copy">
-      <view class="banner-kicker">今日推荐</view>
-      <view class="banner-title">走走答</view>
-      <view class="banner-desc">趣味棋盘 · {{subject}}题库</view>
-      <view class="banner-btn">去练习</view>
+  <view class="more-list">
+    <view class="more-item e-review pressable" bindtap="onTapReview" wx:if="{{reviewTotal > 0}}">
+      <view class="more-icon">复</view>
+      <view class="more-body">
+        <view class="more-name">智能复习</view>
+        <view class="more-tip">{{reviewTip}}</view>
+      </view>
+      <view class="more-go">去</view>
     </view>
-    <view class="banner-art">
-      <view class="banner-dice">★</view>
-      <view class="banner-piece">叭</view>
-    </view>
-  </view>
-
-  <view class="block">
-    <view class="block-title">今日推荐</view>
-    <view class="reco-row">
-      <view class="reco-card r-review" bindtap="onTapReview" wx:if="{{reviewTotal > 0}}">
-        <view class="reco-tag">复习</view>
-        <view class="reco-icon">复</view>
-        <view class="reco-title">智能复习</view>
-        <view class="reco-desc">{{reviewTip}}</view>
+    <view class="more-item e-mono pressable" bindtap="onGoMono">
+      <view class="more-icon">棋</view>
+      <view class="more-body">
+        <view class="more-name">趣味棋盘</view>
+        <view class="more-tip">走走答</view>
       </view>
-      <view class="reco-card r-map" bindtap="onEnterMap">
-        <view class="reco-tag">闯关</view>
-        <view class="reco-icon">{{iconText}}</view>
-        <view class="reco-title">{{worldName}}</view>
-        <view class="reco-desc">通关涨星</view>
-      </view>
-      <view class="reco-card r-cont" bindtap="onContinue" wx:if="{{continueTip}}">
-        <view class="reco-tag">接着打</view>
-        <view class="reco-icon">续</view>
-        <view class="reco-title">继续闯关</view>
-        <view class="reco-desc">{{continueShort}}</view>
-      </view>
-      <view class="reco-card r-games" bindtap="onGoGames">
-        <view class="reco-tag">加练</view>
-        <view class="reco-icon">玩</view>
-        <view class="reco-title">趣味加练</view>
-        <view class="reco-desc">自由练不涨星</view>
-      </view>
-      <view class="reco-card r-tools" bindtap="onGoTools">
-        <view class="reco-tag">宝箱</view>
-        <view class="reco-icon">宝</view>
-        <view class="reco-title">趣味宝箱</view>
-        <view class="reco-desc">拼音 · 看图算</view>
-      </view>
-    </view>
-  </view>
-
-  <view class="block">
-    <view class="block-title">闯关计划</view>
-    <view class="plan-card" bindtap="onEnterMap">
-      <view class="plan-left">
-        <view class="plan-badge">{{worldName}}</view>
-        <view class="plan-title">{{packTitle}}</view>
-        <view class="plan-meta">已通关 {{clearedCount}}/{{totalCount}} · {{percent}}%</view>
-        <view class="plan-bar">
-          <view class="plan-bar-fill" style="width: {{barWidth}};"></view>
-        </view>
-        <view class="grade-mini">
-          <view
-            class="g-chip {{grade === item ? 'on' : ''}}"
-            wx:for="{{grades}}"
-            wx:key="*this"
-            data-grade="{{item}}"
-            catchtap="onSelectGrade"
-          >{{item}}年</view>
-        </view>
-      </view>
-      <view class="plan-go">GO</view>
-    </view>
-  </view>
-
-  <view class="block">
-    <view class="block-title">趣味活动</view>
-    <view class="act-row">
-      <view class="act-card a-mono" bindtap="onGoMono">
-        <view class="act-icon">棋</view>
-        <view class="act-title">趣味棋盘</view>
-        <view class="act-desc">走走答</view>
-      </view>
-      <view class="act-card a-play" bindtap="onGoGames">
-        <view class="act-icon">练</view>
-        <view class="act-title">趣味加练</view>
-        <view class="act-desc">对练冲刺</view>
-      </view>
-      <view class="act-card a-box" bindtap="onGoTools">
-        <view class="act-icon">宝</view>
-        <view class="act-title">趣味宝箱</view>
-        <view class="act-desc">小工具</view>
-      </view>
+      <view class="more-go">去</view>
     </view>
   </view>
 </view>

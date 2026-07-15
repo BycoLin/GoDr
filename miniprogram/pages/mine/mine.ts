@@ -106,14 +106,6 @@ Page({
     });
   },
 
-  onGoGames() {
-    wx.switchTab({ url: '/pages/games/games' });
-  },
-
-  onGoProgress() {
-    wx.switchTab({ url: '/pages/progress/progress' });
-  },
-
   onGoWrongbook() {
     wx.navigateTo({ url: `/pages/wrongbook/wrongbook?packId=${this.data.packId}` });
   },

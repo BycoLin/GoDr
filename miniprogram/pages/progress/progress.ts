@@ -1,6 +1,10 @@
 import { getPackItems, getPackManifest } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
-import { getActivePackId, getActiveSubject } from '../../utils/active-subject';
+import {
+  getActiveGrade,
+  getActivePackId,
+  getActiveSubject,
+} from '../../utils/active-subject';
 
 interface ProgressRow {
   id: string;
@@ -10,112 +14,87 @@ interface ProgressRow {
   cleared: boolean;
 }
 
-interface GradeGroup {
-  grade: number;
-  title: string;
-  cleared: number;
-  total: number;
-  percent: number;
-  starSum: number;
-  open: boolean;
-  items: ProgressRow[];
-}
-
 Page({
   data: {
     packId: '',
     packTitle: '',
     subject: '',
+    worldName: '',
+    grade: 1,
+    toneClass: 'tone-cn',
     unitLabel: '首',
     clearedCount: 0,
+    todoCount: 0,
     totalCount: 0,
     percent: 0,
     starSum: 0,
     cheerText: '',
     filter: 'all' as 'all' | 'done' | 'todo',
-    groups: [] as GradeGroup[],
+    items: [] as ProgressRow[],
   },
 
   onShow() {
-    const packId = getActivePackId();
-    this.setData({ packId });
     this.refresh();
   },
 
   refresh() {
-    const { packId, filter } = this.data;
+    const packId = getActivePackId();
+    const filter = this.data.filter;
     if (!packId) return;
     const manifest = getPackManifest(packId);
-    const items = getPackItems(packId);
     const progress = loadPackProgress(packId);
     const active = getActiveSubject();
+    const grade = getActiveGrade(packId);
 
-    const rows: ProgressRow[] = items.map((item) => {
-      const p = progress.items[item.id];
-      return {
-        id: item.id,
-        title: item.title,
-        grade: item.grade,
-        stars: p?.stars || 0,
-        cleared: Boolean(p?.cleared),
-      };
-    });
-
-    const clearedCount = rows.filter((r) => r.cleared).length;
-    const totalCount = rows.length;
-    const percent = totalCount ? Math.round((clearedCount / totalCount) * 100) : 0;
-    const starSum = rows.reduce((sum, r) => sum + r.stars, 0);
-    const unitLabel = manifest?.subject === '语文' ? '首' : '关';
-
-    let cheerText = '还没开始？去闯关页进入地图练吧！';
-    if (percent >= 100) cheerText = '全部练完啦，真棒！';
-    else if (percent >= 60) cheerText = '进度不错，再练几关更熟！';
-    else if (percent > 0) cheerText = '已经开始练了，继续加油！';
-
-    const gradeMap = new Map<number, ProgressRow[]>();
-    rows.forEach((row) => {
-      const list = gradeMap.get(row.grade) || [];
-      list.push(row);
-      gradeMap.set(row.grade, list);
-    });
-
-    const prevOpen = new Map(
-      (this.data.groups || []).map((g) => [g.grade, g.open] as const),
-    );
-
-    const groups: GradeGroup[] = Array.from(gradeMap.keys())
-      .sort((a, b) => a - b)
-      .map((grade) => {
-        const all = gradeMap.get(grade) || [];
-        const filtered =
-          filter === 'done'
-            ? all.filter((i) => i.cleared)
-            : filter === 'todo'
-              ? all.filter((i) => !i.cleared)
-              : all;
-        const cleared = all.filter((i) => i.cleared).length;
+    const rows: ProgressRow[] = getPackItems(packId)
+      .filter((item) => Number(item.grade) === grade)
+      .map((item) => {
+        const p = progress.items[item.id];
         return {
-          grade,
-          title: `${grade} 年级`,
-          cleared,
-          total: all.length,
-          percent: all.length ? Math.round((cleared / all.length) * 100) : 0,
-          starSum: all.reduce((s, i) => s + i.stars, 0),
-          open: prevOpen.get(grade) ?? false,
-          items: filtered,
+          id: item.id,
+          title: item.title,
+          grade: Number(item.grade),
+          stars: p?.stars || 0,
+          cleared: Boolean(p?.cleared),
         };
       });
 
+    const clearedCount = rows.filter((r) => r.cleared).length;
+    const totalCount = rows.length;
+    const todoCount = Math.max(0, totalCount - clearedCount);
+    const percent = totalCount ? Math.round((clearedCount / totalCount) * 100) : 0;
+    const starSum = rows.reduce((sum, r) => sum + r.stars, 0);
+    const unitLabel = manifest?.subject === '语文' ? '首' : '关';
+    const toneClass =
+      active.kind === 'math' ? 'tone-math' : active.kind === 'english' ? 'tone-en' : 'tone-cn';
+
+    let cheerText = '还没开始？去地图闯第一关吧！';
+    if (percent >= 100) cheerText = '全部通关啦，星星收齐！';
+    else if (percent >= 60) cheerText = '进度不错，再闯几关更熟！';
+    else if (percent > 0) cheerText = '已经在路上了，继续加油！';
+
+    const items =
+      filter === 'done'
+        ? rows.filter((i) => i.cleared)
+        : filter === 'todo'
+          ? rows.filter((i) => !i.cleared)
+          : rows;
+
     this.setData({
+      packId,
       packTitle: manifest?.title || active.worldName,
       subject: active.subject,
+      worldName: active.worldName,
+      grade,
+      toneClass,
       unitLabel,
       clearedCount,
+      todoCount,
       totalCount,
       percent,
       starSum,
       cheerText,
-      groups,
+      items,
     });
   },
 
@@ -125,27 +104,25 @@ Page({
     this.refresh();
   },
 
-  onToggleGrade(e: WechatMiniprogram.TouchEvent) {
-    const grade = Number(e.currentTarget.dataset.grade);
-    const groups = this.data.groups.map((g) =>
-      g.grade === grade ? { ...g, open: !g.open } : g,
-    );
-    this.setData({ groups });
+  onTapGradeMap() {
+    const { packId, grade } = this.data;
+    if (!packId || !grade) return;
+    wx.navigateTo({
+      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
+    });
   },
 
   onContinue() {
-    const { packId, groups } = this.data;
-    const openGrade = groups.find((g) => g.cleared < g.total) || groups[0];
-    if (!openGrade) return;
+    const { packId, grade } = this.data;
     wx.navigateTo({
-      url: `/pages/level/level?packId=${packId}&grade=${openGrade.grade}`,
+      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
     });
   },
 
   onClearAll() {
     wx.showModal({
       title: '清空进度？',
-      content: '将清除本学科的本地闯关记录',
+      content: '将清除本学科的本地闯关记录与星星',
       success: (res) => {
         if (!res.confirm) return;
         wx.removeStorageSync(`progress:${this.data.packId}`);

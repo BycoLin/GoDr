@@ -27,6 +27,11 @@ Page({
     levels: [] as LevelRow[],
     clearedCount: 0,
     totalCount: 0,
+    starSum: 0,
+    focusId: '',
+    focusUnlocked: false,
+    focusCleared: false,
+    goalText: '选一关，开始冒险吧',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -51,8 +56,41 @@ Page({
     this.refreshLevels();
   },
 
+  pickFocus(levels: LevelRow[], preferId?: string): LevelRow | null {
+    if (!levels.length) return null;
+    if (preferId) {
+      const found = levels.find((l) => l.id === preferId && l.unlocked);
+      if (found) return found;
+    }
+    const next = levels.find((l) => l.unlocked && !l.cleared);
+    if (next) return next;
+    const lastCleared = [...levels].reverse().find((l) => l.cleared);
+    return lastCleared || levels[0];
+  },
+
+  applyFocus(focus: LevelRow | null) {
+    if (!focus) {
+      this.setData({
+        focusId: '',
+        focusUnlocked: false,
+        focusCleared: false,
+        goalText: '暂无关卡',
+      });
+      return;
+    }
+    const goal = focus.cleared
+      ? `再闯「${focus.title}」，冲更高星`
+      : `本关目标：掌握「${focus.title}」`;
+    this.setData({
+      focusId: focus.id,
+      focusUnlocked: focus.unlocked,
+      focusCleared: focus.cleared,
+      goalText: goal,
+    });
+  },
+
   refreshLevels() {
-    const { packId, grade, subject } = this.data;
+    const { packId, grade, subject, focusId } = this.data;
     const items = getItemsByGrade(packId, grade).filter((item) => {
       if (subject === '数学') return isMath(item);
       if (subject === '英语') return isEnglish(item);
@@ -82,23 +120,37 @@ Page({
       };
     });
 
+    const starSum = levels.reduce((s, l) => s + (l.stars || 0), 0);
+    const focus = this.pickFocus(levels, focusId);
+
     this.setData({
       levels,
       clearedCount: levels.filter((l) => l.cleared).length,
       totalCount: levels.length,
+      starSum,
     });
+    this.applyFocus(focus);
   },
 
   onTapLevel(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
+    const id = String(e.currentTarget.dataset.id || '');
     const unlocked = Number(e.currentTarget.dataset.unlocked) === 1;
     if (!unlocked) {
-      wx.showToast({ title: '请先完成上一关', icon: 'none' });
+      wx.showToast({ title: '先闯过上一关哦', icon: 'none' });
       return;
     }
-    const { packId, grade } = this.data;
+    const focus = this.data.levels.find((l) => l.id === id) || null;
+    this.applyFocus(focus);
+  },
+
+  onStartFocus() {
+    const { packId, grade, focusId, focusUnlocked } = this.data;
+    if (!focusId || !focusUnlocked) {
+      wx.showToast({ title: '先选一关吧', icon: 'none' });
+      return;
+    }
     wx.navigateTo({
-      url: `/pages/play/play?packId=${packId}&grade=${grade}&itemId=${id}`,
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&itemId=${focusId}`,
     });
   },
 });

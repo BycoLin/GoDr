@@ -1,22 +1,19 @@
 <view class="safe-pad tools">
-  <view class="hero-bar">
-    <view class="stickers">
-      <text class="st">花</text>
-      <text class="st">赞</text>
-      <text class="st">笑</text>
-    </view>
-    <view class="hero-title">趣味宝箱</view>
-    <view class="hero-desc">打开看看！拼音、看图算、数字排队都在这儿</view>
-  </view>
+  <view class="head-title">趣味宝箱</view>
+  <view class="head-sub">打开就能练的小工具</view>
 
   <view
-    class="entry {{item.tone}}"
+    class="tool-card {{item.tone}} pressable"
     wx:for="{{entries}}"
     wx:key="id"
     data-action="{{item.action}}"
     bindtap="onTap"
   >
-    <view class="entry-title">{{item.title}}</view>
-    <view class="entry-desc">{{item.desc}}</view>
+    <view class="tool-icon">{{item.mark}}</view>
+    <view class="tool-body">
+      <view class="tool-name">{{item.title}}</view>
+      <view class="tool-tip">{{item.short}}</view>
+    </view>
+    <view class="tool-go">开</view>
   </view>
 </view>

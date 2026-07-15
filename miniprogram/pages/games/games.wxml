@@ -1,75 +1,36 @@
 <view class="safe-pad games">
-  <view class="top-bar">
-    <view class="subject-line">
-      <text class="subject-now">当前：{{packSubject}}</text>
-      <text class="subject-note">自由练习，不推进小岛关卡</text>
-    </view>
-    <view class="chip-row grade">
-      <view
-        class="chip soft {{grade === item ? 'on' : ''}}"
-        wx:for="{{grades}}"
-        wx:key="*this"
-        data-grade="{{item}}"
-        bindtap="onSelectGrade"
-      >{{item}}年</view>
-    </view>
-  </view>
+  <view class="head-title">趣味加练</view>
+  <view class="head-sub">当前 {{packSubject}} · {{grade}} 年级 · 自由练，不涨星</view>
 
-  <view class="hero-card {{heroTone}}" bindtap="onTapHero">
+  <view class="hero-card {{heroTone}} pressable" bindtap="onTapHero">
     <view class="hero-badge">{{heroBadge}}</view>
-    <view class="hero-art">{{heroArt}}</view>
-    <view class="hero-label">今日推荐</view>
     <view class="hero-title">{{heroTitle}}</view>
     <view class="hero-desc">{{heroDesc}}</view>
     <view class="hero-go">{{heroGo}}</view>
   </view>
 
-  <view class="alt-bar" bindtap="onTapAlt" wx:if="{{altTitle}}">
-    <view class="alt-left">
-      <text class="alt-tag">{{altTag}}</text>
-      <text class="alt-title">{{altTitle}}</text>
+  <view class="side-card pressable" bindtap="onTapAlt" wx:if="{{altTitle}}">
+    <view class="side-left">
+      <view class="side-tag">{{altTag}}</view>
+      <view class="side-title">{{altTitle}}</view>
+      <view class="side-desc">{{altDesc}}</view>
     </view>
-    <text class="alt-desc">{{altDesc}}</text>
+    <view class="side-go">去练</view>
   </view>
 
-  <view class="quick-row">
-    <view
-      class="quick-card {{item.tone}}"
-      wx:for="{{features}}"
-      wx:key="id"
-      data-action="{{item.action}}"
-      bindtap="onTapFeature"
-    >
-      <view class="quick-tag">{{item.tag}}</view>
-      <view class="quick-title">{{item.title}}</view>
-      <view class="quick-desc">{{item.desc}}</view>
+  <view class="sec-title">专项练习</view>
+  <view
+    class="play-row {{item.tone}} pressable"
+    wx:for="{{games}}"
+    wx:key="mode"
+    data-mode="{{item.mode}}"
+    bindtap="onTapGame"
+  >
+    <view class="play-icon">{{item.tag}}</view>
+    <view class="play-body">
+      <view class="play-name">{{item.title}}</view>
+      <view class="play-tip">{{item.desc}}</view>
     </view>
-  </view>
-
-  <view class="more-toggle" bindtap="onToggleModes">
-    <text>{{modesExpanded ? '收起专项题型' : '更多专项题型'}}</text>
-    <text class="more-arrow">{{modesExpanded ? '▴' : '▾'}}</text>
-  </view>
-
-  <view class="mode-grid" wx:if="{{modesExpanded}}">
-    <view
-      class="mode-card tone-{{index % 3}}"
-      wx:for="{{games}}"
-      wx:key="mode"
-      data-mode="{{item.mode}}"
-      bindtap="onTapGame"
-    >
-      <view class="mode-tag">{{item.tag}}</view>
-      <view class="mode-title">{{item.title}}</view>
-      <view class="mode-desc">{{item.desc}}</view>
-    </view>
-  </view>
-
-  <view class="foot-links">
-    <view class="foot-link" bindtap="onTapMono">趣味棋盘</view>
-    <view class="foot-dot">·</view>
-    <view class="foot-link" bindtap="onTapTools">趣味宝箱</view>
-    <view class="foot-dot" wx:if="{{wrongCount > 0}}">·</view>
-    <view class="foot-link" bindtap="onTapWrongbook" wx:if="{{wrongCount > 0}}">错题本</view>
+    <view class="play-go">开</view>
   </view>
 </view>

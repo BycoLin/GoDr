@@ -2,7 +2,8 @@ import { getPackManifest, getPackSubjectKind, listPacks } from './registry';
 import type { PackSubjectKind } from './registry';
 
 const PACK_KEY = 'activePackId';
-const GRADE_KEY = 'activeGradeByPack';
+const GRADE_KEY = 'activeGrade';
+const LEGACY_GRADE_KEY = 'activeGradeByPack';
 
 export interface SubjectOption {
   packId: string;
@@ -52,41 +53,59 @@ export function setActivePackId(packId: string): void {
   }
 }
 
-function readGradeMap(): Record<string, number> {
+function readGlobalGrade(): number | null {
   try {
     const raw = wx.getStorageSync(GRADE_KEY);
-    if (raw && typeof raw === 'object') return raw as Record<string, number>;
+    const n = Number(raw);
+    if (Number.isFinite(n) && n > 0) return n;
   } catch {
     /* ignore */
   }
-  return {};
-}
-
-function writeGradeMap(map: Record<string, number>): void {
+  // 兼容旧版「按学科存年级」
   try {
-    wx.setStorageSync(GRADE_KEY, map);
+    const map = wx.getStorageSync(LEGACY_GRADE_KEY);
+    if (map && typeof map === 'object') {
+      const id = getActivePackId();
+      const n = Number((map as Record<string, number>)[id]);
+      if (Number.isFinite(n) && n > 0) return n;
+      const first = Object.values(map as Record<string, number>)
+        .map(Number)
+        .find((g) => Number.isFinite(g) && g > 0);
+      if (first) return first;
+    }
   } catch {
     /* ignore */
   }
+  return null;
 }
 
+function gradesOfPack(packId: string): number[] {
+  const manifest = getPackManifest(packId);
+  return (manifest?.grades?.length ? manifest.grades : [1]).map(Number);
+}
+
+/** 全局年级：切换学科时保持不变 */
 export function getActiveGrade(packId?: string): number {
   const id = packId || getActivePackId();
-  const manifest = getPackManifest(id);
-  const grades = manifest?.grades?.length ? manifest.grades : [1];
-  const map = readGradeMap();
-  const saved = map[id];
-  if (typeof saved === 'number' && grades.includes(saved)) return saved;
+  const grades = gradesOfPack(id);
+  const saved = readGlobalGrade();
+  if (saved != null && grades.includes(saved)) return saved;
+  if (saved != null) {
+    const le = [...grades].filter((g) => g <= saved).sort((a, b) => b - a)[0];
+    return le ?? grades[0];
+  }
   return grades[0];
 }
 
+/** 写入全局年级（packId 仅用于校验该学科是否支持该年级） */
 export function setActiveGrade(packId: string, grade: number): void {
-  const manifest = getPackManifest(packId);
-  const grades = manifest?.grades?.length ? manifest.grades : [1];
-  const next = grades.includes(grade) ? grade : grades[0];
-  const map = readGradeMap();
-  map[packId] = next;
-  writeGradeMap(map);
+  const grades = gradesOfPack(packId);
+  const next = grades.includes(Number(grade)) ? Number(grade) : grades[0];
+  try {
+    wx.setStorageSync(GRADE_KEY, next);
+  } catch {
+    /* ignore */
+  }
 }
 
 export function getActiveSubject(): SubjectOption {

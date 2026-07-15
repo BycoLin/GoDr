@@ -1,35 +1,47 @@
-<view class="safe-pad">
-  <view class="summary card">
-    <view class="summary-badge">关卡地图</view>
-    <view class="summary-title">{{grade}} 年级 · {{subject}}练习</view>
-    <view class="summary-progress">已通关 {{clearedCount}} / {{totalCount}} {{unitLabel}} · 通关涨星解锁下一关</view>
-    <view class="bar">
-      <view class="bar-fill" style="width: {{totalCount ? (clearedCount / totalCount * 100) : 0}}%;"></view>
+<view class="level-page">
+  <view class="top-bar">
+    <view class="top-left">
+      <view class="top-title">{{grade}} 年级 · {{subject}}</view>
+      <view class="top-sub">已通关 {{clearedCount}}/{{totalCount}} {{unitLabel}}</view>
     </view>
+    <view class="top-star">★ {{starSum}}</view>
   </view>
 
-  <view class="level-list">
-    <view
-      class="level-card {{item.unlocked ? '' : 'locked'}} {{item.cleared ? 'cleared' : ''}}"
-      wx:for="{{levels}}"
-      wx:key="id"
-      data-id="{{item.id}}"
-      data-unlocked="{{item.unlocked ? 1 : 0}}"
-      bindtap="onTapLevel"
-    >
-      <view class="level-index">{{index + 1}}</view>
-      <view class="level-body">
-        <view class="level-title">第 {{index + 1}} 关 · {{item.title}}</view>
-        <view class="level-meta">{{item.meta}}</view>
-        <view class="stars">
-          <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
-          <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
-          <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
+  <scroll-view class="path-scroll" scroll-y>
+    <view class="path">
+      <view
+        class="node {{item.unlocked ? '' : 'locked'}} {{item.cleared ? 'cleared' : ''}} {{item.id === focusId ? 'focus' : ''}}"
+        wx:for="{{levels}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        data-unlocked="{{item.unlocked ? 1 : 0}}"
+        bindtap="onTapLevel"
+      >
+        <view class="rail" wx:if="{{index < levels.length - 1}}"></view>
+        <view class="node-dot">
+          <text wx:if="{{item.cleared}}">✓</text>
+          <text wx:elif="{{!item.unlocked}}">锁</text>
+          <text wx:else>{{index + 1}}</text>
+        </view>
+        <view class="node-card">
+          <view class="node-title">第 {{index + 1}} 关 · {{item.title}}</view>
+          <view class="node-meta">{{item.meta}}</view>
+          <view class="stars">
+            <text class="star {{item.stars >= 1 ? 'on' : ''}}">★</text>
+            <text class="star {{item.stars >= 2 ? 'on' : ''}}">★</text>
+            <text class="star {{item.stars >= 3 ? 'on' : ''}}">★</text>
+          </view>
         </view>
       </view>
-      <view class="level-status {{item.unlocked ? (item.cleared ? 'again' : 'go') : 'lock'}}">
-        {{item.unlocked ? (item.cleared ? '再闯' : 'GO!') : '锁住'}}
-      </view>
     </view>
+    <view class="path-pad"></view>
+  </scroll-view>
+
+  <view class="bottom-dock">
+    <view class="goal-bubble">{{goalText}}</view>
+    <view
+      class="btn btn-primary btn-cta start-btn {{focusUnlocked ? '' : 'disabled'}}"
+      bindtap="onStartFocus"
+    >{{focusCleared ? '再闯一关' : '开始冒险'}}</view>
   </view>
 </view>
