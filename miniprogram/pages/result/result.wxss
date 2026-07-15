@@ -98,6 +98,18 @@
   font-weight: 800;
 }
 
+.goal-note {
+  margin-top: 14rpx;
+  display: inline-block;
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  background: #effffb;
+  border: 2rpx solid #9ee5db;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #0f8f82;
+}
+
 .progress-note {
   margin-top: 12rpx;
   font-size: 22rpx;

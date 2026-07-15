@@ -70,6 +70,141 @@
   color: #22b8a8;
 }
 
+.goal-card,
+.week-card {
+  margin-top: 24rpx;
+  background: #fff;
+  border: 3rpx solid #ece7df;
+  border-radius: 32rpx;
+  padding: 24rpx 28rpx 22rpx;
+  box-shadow: 0 8rpx 0 rgba(26, 20, 48, 0.06);
+}
+
+.goal-card.done {
+  border-color: #9ee5db;
+  background: #effffb;
+}
+
+.goal-head,
+.week-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14rpx;
+}
+
+.goal-title,
+.week-title {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.goal-count,
+.week-range {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #22b8a8;
+}
+
+.goal-bar {
+  height: 18rpx;
+  background: #efeaf4;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: #22b8a8;
+  border-radius: 999rpx;
+}
+
+.goal-card.done .goal-fill {
+  background: #ffc93c;
+}
+
+.goal-tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+}
+
+.week-dots {
+  display: flex;
+  justify-content: space-between;
+  gap: 8rpx;
+  margin-bottom: 20rpx;
+}
+
+.week-dot {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.week-dot-mark {
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: #efeaf4;
+  border: 3rpx solid #e4dde8;
+  box-sizing: border-box;
+}
+
+.week-dot.on .week-dot-mark {
+  background: #22b8a8;
+  border-color: #0f8f82;
+}
+
+.week-dot-label {
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #9a93a8;
+}
+
+.week-dot.on .week-dot-label {
+  color: #1a1430;
+}
+
+.week-stats {
+  display: flex;
+  gap: 12rpx;
+}
+
+.week-stat {
+  flex: 1;
+  text-align: center;
+  padding: 14rpx 4rpx;
+  background: #f8f6fb;
+  border-radius: 20rpx;
+}
+
+.week-num {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #1a1430;
+  line-height: 1.1;
+}
+
+.week-label {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #4a4458;
+}
+
+.week-extra {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+  line-height: 1.45;
+}
+
 .stat-row {
   margin-top: 28rpx;
   display: flex;

@@ -176,6 +176,10 @@ Page({
     if (daily && !pool.length) {
       pool = getPackItems(packId);
     }
+    // 错题复习：跨年级取全包，避免抽到无关题目
+    if (boss) {
+      pool = getPackItems(packId);
+    }
     if (subjectKind === 'math') {
       pool = pool.filter(isMath);
     } else if (subjectKind === 'english') {
@@ -190,10 +194,13 @@ Page({
       return;
     }
 
-    const wrongHints = pickBossPool(packId, 12).map((e) => ({
-      itemId: e.itemId,
-      quizType: e.quizType,
-    }));
+    const poolIds = new Set(pool.map((p) => p.id));
+    const wrongHints = pickBossPool(packId, 12)
+      .filter((e) => poolIds.has(e.itemId))
+      .map((e) => ({
+        itemId: e.itemId,
+        quizType: e.quizType,
+      }));
     this.poolCache = pool;
     this.wrongHints = wrongHints;
     this.finished = false;
@@ -517,9 +524,16 @@ Page({
     const quizType = current.type as QuizType;
 
     if (correct) {
-      if (boss && itemId) recordFix(packId, itemId, quizType);
+      if (itemId) recordFix(packId, itemId, quizType);
     } else if (itemId) {
       recordWrong(packId, itemId, quizType);
+    }
+
+    if (boss) {
+      this.wrongHints = pickBossPool(packId, 12).map((e) => ({
+        itemId: e.itemId,
+        quizType: e.quizType,
+      }));
     }
 
     const nextCombo = correct ? combo + 1 : 0;

@@ -11,6 +11,7 @@
     <view class="duel-note" wx:if="{{duel}}">你 {{userScore}} · 练习伙伴 {{rivalScore}}</view>
     <view class="points-row">+{{points}} 分<text wx:if="{{bestCombo >= 2}}"> · 最高连对 x{{bestCombo}}</text></view>
     <view class="encourage">{{encouragement}}</view>
+    <view class="goal-note" wx:if="{{goalNote}}">{{goalNote}}</view>
     <view class="progress-note" wx:if="{{progressNote}}">{{progressNote}}</view>
     <view class="badge-new" wx:if="{{newBadges.length}}">
       <view class="badge-new-label">新成就</view>

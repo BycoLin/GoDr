@@ -6,6 +6,7 @@ import { recordDailyResult } from '../../utils/daily';
 import { countActiveWrongs } from '../../utils/wrongbook';
 import { getPackSubjectKind } from '../../utils/registry';
 import { markPracticeDay } from '../../utils/streak';
+import { recordPracticeSession } from '../../utils/practice-log';
 
 Page({
   data: {
@@ -34,6 +35,7 @@ Page({
     timedOut: false,
     newBadges: [] as Array<{ id: string; title: string }>,
     progressNote: '',
+    goalNote: '',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -61,8 +63,10 @@ Page({
     const isMath = kind === 'math';
     const isEnglish = kind === 'english';
 
+    let newlyCleared = 0;
     if (!arcade && itemId) {
-      recordPlayResult(packId, itemId, grade, correct, total, stars);
+      const play = recordPlayResult(packId, itemId, grade, correct, total, stars);
+      newlyCleared = play.newlyCleared ? 1 : 0;
     }
 
     if (daily) {
@@ -70,6 +74,7 @@ Page({
     }
 
     markPracticeDay();
+    const { goalJustDone } = recordPracticeSession(total, newlyCleared);
 
     const wallet = applySessionReward({
       correct,
@@ -136,6 +141,8 @@ Page({
         ? '本局已计入关卡进度，可涨星解锁'
         : '';
 
+    const goalNote = goalJustDone ? '今日目标达成！练满 10 题啦' : '';
+
     this.setData({
       packId,
       grade,
@@ -147,6 +154,7 @@ Page({
       ratioText,
       encouragement,
       progressNote,
+      goalNote,
       arcade,
       isMath,
       isEnglish,
@@ -163,6 +171,10 @@ Page({
       timedOut,
       newBadges,
     });
+
+    if (goalJustDone) {
+      wx.showToast({ title: '今日目标达成', icon: 'success' });
+    }
   },
 
   onRetry() {

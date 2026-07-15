@@ -40,11 +40,12 @@ export function recordPlayResult(
   correct: number,
   total: number,
   stars: number,
-): PackProgress {
+): { progress: PackProgress; newlyCleared: boolean } {
   const progress = loadPackProgress(packId);
   const prev = progress.items[itemId];
   const cleared = stars >= 1 || correct >= Math.ceil(total * 0.6);
   const nextStars = Math.max(prev?.stars || 0, stars);
+  let newlyCleared = false;
 
   progress.items[itemId] = {
     stars: nextStars,
@@ -56,12 +57,13 @@ export function recordPlayResult(
   progress.stars[itemId] = nextStars;
   if (cleared && !progress.clearedIds.includes(itemId)) {
     progress.clearedIds.push(itemId);
+    newlyCleared = true;
   }
   progress.lastPlayedAt = Date.now();
   progress.lastGrade = grade;
   progress.lastItemId = itemId;
   savePackProgress(packId, progress);
-  return progress;
+  return { progress, newlyCleared };
 }
 
 export function saveLastSession(session: unknown): void {

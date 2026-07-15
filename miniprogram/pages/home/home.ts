@@ -10,6 +10,7 @@ import {
 import { getRankInfo } from '../../utils/rank';
 import { loadStreak } from '../../utils/streak';
 import { getReviewSummary } from '../../utils/review';
+import { getTodayGoal } from '../../utils/practice-log';
 
 interface FeaturePlay {
   id: string;
@@ -75,6 +76,12 @@ Page({
     reviewTip: '',
     reviewWrongs: 0,
     features: [] as FeaturePlay[],
+    goalAnswered: 0,
+    goalTarget: 10,
+    goalDone: false,
+    goalPercent: 0,
+    goalBarWidth: '0%',
+    goalTip: '',
   },
 
   refreshing: false,
@@ -118,6 +125,7 @@ Page({
       const rank = getRankInfo();
       const streak = loadStreak();
       const review = getReviewSummary(packId);
+      const goal = getTodayGoal();
 
       this.setData({
         packId,
@@ -142,6 +150,12 @@ Page({
         reviewTip: review.tip,
         reviewWrongs: review.wrongs,
         features: featuresForPack(packId),
+        goalAnswered: goal.answered,
+        goalTarget: goal.target,
+        goalDone: goal.done,
+        goalPercent: goal.percent,
+        goalBarWidth: goal.barWidth,
+        goalTip: goal.tip,
       });
     } catch (err) {
       console.error('home refresh failed', err);

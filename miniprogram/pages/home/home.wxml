@@ -55,6 +55,17 @@
     <view class="scene-pct">{{percent}}%</view>
   </view>
 
+  <view class="goal-card {{goalDone ? 'done' : ''}}">
+    <view class="goal-head">
+      <text class="goal-title">今日目标</text>
+      <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
+    </view>
+    <view class="goal-bar">
+      <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
+    </view>
+    <view class="goal-tip">{{goalTip}}</view>
+  </view>
+
   <view class="cta-wrap">
     <view class="cta-bubble" wx:if="{{continueTip}}">接着练 · {{continueShort}}</view>
     <view class="cta-bubble soft" wx:else>打开地图，一关一关闯</view>

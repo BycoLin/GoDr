@@ -251,7 +251,8 @@ export function buildMathBossQuiz(
     guard += 1;
     const hint = wrongPool[cursor % wrongPool.length];
     cursor += 1;
-    const item = byId.get(hint.itemId) || pool[Math.floor(Math.random() * pool.length)];
+    const item = byId.get(hint.itemId);
+    if (!item) continue;
     const type: MathQuizType =
       hint.quizType === 'mathCalc' ||
       hint.quizType === 'mathCompare' ||
@@ -271,6 +272,8 @@ export function nextMathAdaptiveQuestion(
   wrongHints?: Array<{ itemId: string; quizType: string }>,
 ): Question | null {
   if (!pool.length) return null;
+  if (baseMode === 'boss' && !wrongHints?.length) return null;
+
   let type: MathQuizType = 'mathCalc';
   if (!ctx.lastCorrect && (ctx.lastType === 'mathCalc' || ctx.lastType === 'mathCompare' || ctx.lastType === 'mathMissing')) {
     type = ctx.lastType;
@@ -286,7 +289,18 @@ export function nextMathAdaptiveQuestion(
   if (wrongHints?.length && (!ctx.lastCorrect || baseMode === 'boss')) {
     const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
     const found = pool.find((p) => p.id === hint.itemId);
-    if (found) item = found;
+    if (found) {
+      item = found;
+      if (
+        hint.quizType === 'mathCalc' ||
+        hint.quizType === 'mathCompare' ||
+        hint.quizType === 'mathMissing'
+      ) {
+        type = hint.quizType;
+      }
+    } else if (baseMode === 'boss') {
+      return null;
+    }
   }
   return makeByMathType(type, item);
 }

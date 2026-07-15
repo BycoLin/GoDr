@@ -9,6 +9,12 @@ import { getActivePackId, getActiveSubject } from '../../utils/active-subject';
 import { getRankInfo } from '../../utils/rank';
 import { clearStreak, loadStreak } from '../../utils/streak';
 import { getReviewSummary } from '../../utils/review';
+import {
+  clearPracticeLog,
+  getTodayGoal,
+  getWeekReport,
+} from '../../utils/practice-log';
+import type { WeekDayDot } from '../../utils/practice-log';
 
 Page({
   data: {
@@ -35,6 +41,17 @@ Page({
     streakDays: 0,
     streakBest: 0,
     reviewTip: '',
+    goalAnswered: 0,
+    goalTarget: 10,
+    goalDone: false,
+    goalBarWidth: '0%',
+    goalTip: '',
+    weekRangeLabel: '本周',
+    weekPracticeDays: 0,
+    weekAnswered: 0,
+    weekCleared: 0,
+    weekTip: '',
+    weekDays: [] as WeekDayDot[],
   },
 
   onShow() {
@@ -54,6 +71,8 @@ Page({
     const rank = getRankInfo();
     const streak = loadStreak();
     const review = getReviewSummary(packId);
+    const goal = getTodayGoal();
+    const week = getWeekReport();
     this.setData({
       packCount: packs.length,
       packId,
@@ -86,6 +105,17 @@ Page({
       streakDays: streak.current,
       streakBest: streak.best,
       reviewTip: review.tip,
+      goalAnswered: goal.answered,
+      goalTarget: goal.target,
+      goalDone: goal.done,
+      goalBarWidth: goal.barWidth,
+      goalTip: goal.tip,
+      weekRangeLabel: week.rangeLabel,
+      weekPracticeDays: week.practiceDays,
+      weekAnswered: week.answeredTotal,
+      weekCleared: week.clearedTotal,
+      weekTip: week.tip,
+      weekDays: week.days,
     });
   },
 
@@ -113,7 +143,7 @@ Page({
   onClearAll() {
     wx.showModal({
       title: '清空全部进度？',
-      content: '将清除练习进度、错题本、积分、成就与每日自测记录，不可恢复',
+      content: '将清除练习进度、错题本、积分、成就、每日自测与周报记录，不可恢复',
       success: (res) => {
         if (!res.confirm) return;
         const ids = listPacks().map((p) => p.id);
@@ -125,6 +155,7 @@ Page({
         clearBadges();
         clearDailyRecords();
         clearStreak();
+        clearPracticeLog();
         wx.removeStorageSync('lastPlaySession');
         this.onShow();
         wx.showToast({ title: '已清空', icon: 'success' });

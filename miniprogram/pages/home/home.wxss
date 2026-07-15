@@ -67,6 +67,7 @@
 .subject-pills,
 .grade-pills,
 .scene-card,
+.goal-card,
 .cta-wrap,
 .more-list {
   position: relative;
@@ -223,7 +224,7 @@
   border-radius: 40rpx;
   padding: 36rpx 32rpx 28rpx;
   color: #fff;
-  margin-bottom: 36rpx;
+  margin-bottom: 20rpx;
   text-align: center;
   position: relative;
 }
@@ -286,6 +287,68 @@
 .scene-pct {
   font-size: 40rpx;
   font-weight: 900;
+}
+
+.goal-card {
+  background: #fff;
+  border: 3rpx solid #ece7df;
+  border-radius: 32rpx;
+  padding: 24rpx 28rpx 22rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0 8rpx 0 rgba(26, 20, 48, 0.06);
+}
+
+.goal-card.done {
+  border-color: #9ee5db;
+  background: #effffb;
+}
+
+.goal-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14rpx;
+}
+
+.goal-title {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.goal-count {
+  font-size: 28rpx;
+  font-weight: 900;
+  color: #22b8a8;
+}
+
+.goal-card.done .goal-count {
+  color: #0f8f82;
+}
+
+.goal-bar {
+  height: 18rpx;
+  background: #efeaf4;
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.goal-fill {
+  height: 100%;
+  background: #22b8a8;
+  border-radius: 999rpx;
+  transition: width 0.25s ease;
+}
+
+.goal-card.done .goal-fill {
+  background: #ffc93c;
+}
+
+.goal-tip {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
 }
 
 .cta-wrap {

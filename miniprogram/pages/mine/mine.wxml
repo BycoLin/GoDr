@@ -12,6 +12,49 @@
     <view class="check-right">最佳 {{streakBest}} 天</view>
   </view>
 
+  <view class="goal-card {{goalDone ? 'done' : ''}}">
+    <view class="goal-head">
+      <text class="goal-title">今日目标</text>
+      <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
+    </view>
+    <view class="goal-bar">
+      <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
+    </view>
+    <view class="goal-tip">{{goalTip}}</view>
+  </view>
+
+  <view class="week-card">
+    <view class="week-head">
+      <text class="week-title">本周小结</text>
+      <text class="week-range">{{weekRangeLabel}}</text>
+    </view>
+    <view class="week-dots">
+      <view
+        class="week-dot {{item.practiced ? 'on' : ''}}"
+        wx:for="{{weekDays}}"
+        wx:key="date"
+      >
+        <view class="week-dot-mark"></view>
+        <text class="week-dot-label">{{item.label}}</text>
+      </view>
+    </view>
+    <view class="week-stats">
+      <view class="week-stat">
+        <view class="week-num">{{weekPracticeDays}}</view>
+        <view class="week-label">练过天数</view>
+      </view>
+      <view class="week-stat">
+        <view class="week-num">{{weekAnswered}}</view>
+        <view class="week-label">答题数</view>
+      </view>
+      <view class="week-stat">
+        <view class="week-num">{{weekCleared}}</view>
+        <view class="week-label">新通关</view>
+      </view>
+    </view>
+    <view class="week-extra">错题待练 {{wrongCount}} · {{weekTip}}</view>
+  </view>
+
   <view class="stat-row">
     <view class="stat coin">
       <view class="stat-mark">分</view>

@@ -323,7 +323,8 @@ export function buildBossQuiz(
     guard += 1;
     const hint = wrongPool[cursor % wrongPool.length];
     cursor += 1;
-    const item = byId.get(hint.itemId) || pool[Math.floor(Math.random() * pool.length)];
+    const item = byId.get(hint.itemId);
+    if (!item) continue;
     const q = makeByType(hint.quizType, item, pool, preferTitle);
     if (q) questions.push(q);
   }
@@ -339,6 +340,7 @@ export function nextAdaptiveQuestion(
   wrongHints?: WrongHint[],
 ): Question | null {
   if (!pool.length) return null;
+  if (baseMode === 'boss' && !wrongHints?.length) return null;
   const preferTitle = pool[0].grade <= 1;
   const modes = resolvePreferModes(ctx, baseMode);
   let guard = 0;
@@ -351,15 +353,10 @@ export function nextAdaptiveQuestion(
       const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
       const found = pool.find((p) => p.id === hint.itemId);
       if (found) {
-        item = found;
-        const q = makeByType(
-          !ctx.lastCorrect ? hint.quizType : quizType,
-          item,
-          pool,
-          preferTitle,
-        );
+        const q = makeByType(hint.quizType, found, pool, preferTitle);
         if (q) return q;
       }
+      if (baseMode === 'boss') continue;
     }
     const q = makeByType(quizType, item, pool, preferTitle);
     if (q) return q;

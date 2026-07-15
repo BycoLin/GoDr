@@ -218,7 +218,8 @@ export function buildEnglishBossQuiz(
     guard += 1;
     const hint = wrongPool[cursor % wrongPool.length];
     cursor += 1;
-    const item = byId.get(hint.itemId) || pool[Math.floor(Math.random() * pool.length)];
+    const item = byId.get(hint.itemId);
+    if (!item) continue;
     const type: EnglishQuizType | 'matchPair' =
       hint.quizType === 'enWordMean' ||
       hint.quizType === 'enMeanWord' ||
@@ -239,6 +240,8 @@ export function nextEnglishAdaptiveQuestion(
   wrongHints?: Array<{ itemId: string; quizType: string }>,
 ): Question | null {
   if (!pool.length) return null;
+  if (baseMode === 'boss' && !wrongHints?.length) return null;
+
   let type: EnglishQuizType | 'matchPair' = 'enWordMean';
   if (
     !ctx.lastCorrect &&
@@ -265,7 +268,19 @@ export function nextEnglishAdaptiveQuestion(
   if (wrongHints?.length && (!ctx.lastCorrect || baseMode === 'boss')) {
     const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
     const found = pool.find((p) => p.id === hint.itemId);
-    if (found) item = found;
+    if (found) {
+      item = found;
+      if (
+        hint.quizType === 'enWordMean' ||
+        hint.quizType === 'enMeanWord' ||
+        hint.quizType === 'enSpell' ||
+        hint.quizType === 'matchPair'
+      ) {
+        type = hint.quizType;
+      }
+    } else if (baseMode === 'boss') {
+      return null;
+    }
   }
   return makeByType(type, item, pool);
 }

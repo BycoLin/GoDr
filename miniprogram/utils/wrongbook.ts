@@ -85,18 +85,18 @@ export function recordWrong(packId: string, itemId: string, quizType: QuizType):
   return book;
 }
 
-/** Boss 局或复习答对后削弱/攻克 */
+/** 答对后移出错题本（同一条目答对即攻克） */
 export function recordFix(packId: string, itemId: string, quizType: QuizType): WrongBook {
   const book = loadWrongBook(packId);
   const k = entryKey(itemId, quizType);
   const idx = book.entries.findIndex((e) => entryKey(e.itemId, e.quizType) === k);
   if (idx < 0) return book;
   const prev = book.entries[idx];
-  const nextCount = Math.max(0, prev.wrongCount - 1);
+  if (prev.cleared && prev.wrongCount <= 0) return book;
   book.entries[idx] = {
     ...prev,
-    wrongCount: nextCount,
-    cleared: nextCount === 0,
+    wrongCount: 0,
+    cleared: true,
   };
   saveWrongBook(packId, book);
   return book;
