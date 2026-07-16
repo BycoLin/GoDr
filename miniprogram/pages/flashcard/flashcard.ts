@@ -5,6 +5,11 @@ import {
   isPoetry,
 } from '../../utils/registry';
 import type { EnglishItem, PoetryItem } from '../../utils/types';
+import {
+  buildStepUrl,
+  markPathStep,
+  type PathStepId,
+} from '../../utils/skill-path';
 
 interface FlashCard {
   id: string;
@@ -36,11 +41,15 @@ Page({
     known: 0,
     fuzzy: 0,
     done: false,
+    fromPath: false,
+    pathStep: '' as '' | PathStepId,
   },
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'english-g1-g2';
     const grade = Number(query.grade || 1);
+    const fromPath = query.fromPath === 'english';
+    const pathStep = (query.pathStep || '') as '' | PathStepId;
     const kind = getPackSubjectKind(packId);
     const pool = getItemsByGrade(packId, grade);
 
@@ -75,13 +84,15 @@ Page({
     }
 
     wx.setNavigationBarTitle({
-      title: kind === 'english' ? '单词闪卡' : '诗词背诵卡',
+      title: fromPath ? '学一学 · 单词闪卡' : kind === 'english' ? '单词闪卡' : '诗词背诵卡',
     });
 
     this.setData({
       packId,
       grade,
       kind,
+      fromPath,
+      pathStep,
       cards,
       total: cards.length,
       index: 0,
@@ -130,10 +141,23 @@ Page({
   },
 
   onQuiz() {
-    const { packId, grade, kind } = this.data;
+    const { packId, grade, kind, fromPath } = this.data;
+    if (fromPath) {
+      this.onPathNext();
+      return;
+    }
     const mode = kind === 'english' ? 'enWordMean' : 'fillNext';
     wx.redirectTo({
       url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
+    });
+  },
+
+  onPathNext() {
+    const { packId, grade, fromPath } = this.data;
+    if (!fromPath) return;
+    markPathStep('english', 'learn');
+    wx.redirectTo({
+      url: buildStepUrl('english', 'practice', { packId, grade }),
     });
   },
 

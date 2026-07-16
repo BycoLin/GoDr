@@ -1,6 +1,7 @@
 import { getActiveGrade, getActivePackId } from './active-subject';
+import { DAILY_LIMIT_SEC } from './daily';
 
-export type PathKind = 'pinyin' | 'math';
+export type PathKind = 'pinyin' | 'math' | 'english';
 export type PathStepId = 'learn' | 'practice' | 'test';
 
 export interface PathStepDef {
@@ -33,6 +34,22 @@ const MATH_STEPS: PathStepDef[] = [
   { id: 'test', index: 3, title: '测一测', action: '口算冲刺', tip: '限时测一测手速' },
 ];
 
+const ENGLISH_STEPS: PathStepDef[] = [
+  { id: 'learn', index: 1, title: '学一学', action: '单词闪卡', tip: '翻卡片认读单词' },
+  { id: 'practice', index: 2, title: '练一练', action: '看词选义', tip: '看英文选出中文意思' },
+  { id: 'test', index: 3, title: '测一测', action: '限时自测', tip: `${DAILY_LIMIT_SEC} 秒测一测记得多少` },
+];
+
+export function isPathKind(v: string | undefined): v is PathKind {
+  return v === 'pinyin' || v === 'math' || v === 'english';
+}
+
+export function parsePathKind(raw?: string): PathKind {
+  if (raw === 'math') return 'math';
+  if (raw === 'english') return 'english';
+  return 'pinyin';
+}
+
 function emptyState(kind: PathKind): PathState {
   return {
     kind,
@@ -53,6 +70,9 @@ export function getPathMeta(kind: PathKind): {
 } {
   if (kind === 'math') {
     return { title: '口算进阶', subject: '数学', steps: MATH_STEPS };
+  }
+  if (kind === 'english') {
+    return { title: '单词进阶', subject: '英语', steps: ENGLISH_STEPS };
   }
   return { title: '拼音进阶', subject: '语文', steps: PINYIN_STEPS };
 }
@@ -133,15 +153,27 @@ export function buildStepUrl(
     return `/pages/pinyin-learn/pinyin-learn?initial=${initial}&mode=fill&quizGoal=5&${from}`;
   }
 
-  if (step === 'learn') {
-    return `/pages/visual-math/visual-math?${from}`;
+  if (kind === 'math') {
+    if (step === 'learn') {
+      return `/pages/visual-math/visual-math?${from}`;
+    }
+    if (step === 'practice') {
+      return `/pages/number-line/number-line?${from}`;
+    }
+    const packId = opts.packId || getActivePackId();
+    const grade = opts.grade || getActiveGrade(packId);
+    return `/pages/play/play?packId=${packId}&grade=${grade}&mode=sprint&sprint=1&arcade=1&${from}`;
   }
-  if (step === 'practice') {
-    return `/pages/number-line/number-line?${from}`;
-  }
+
   const packId = opts.packId || getActivePackId();
   const grade = opts.grade || getActiveGrade(packId);
-  return `/pages/play/play?packId=${packId}&grade=${grade}&mode=sprint&sprint=1&arcade=1&${from}`;
+  if (step === 'learn') {
+    return `/pages/flashcard/flashcard?packId=${packId}&grade=${grade}&${from}`;
+  }
+  if (step === 'practice') {
+    return `/pages/play/play?packId=${packId}&grade=${grade}&mode=enWordMean&arcade=1&${from}`;
+  }
+  return `/pages/play/play?packId=${packId}&grade=${grade}&mode=daily&daily=1&timed=1&limitSec=${DAILY_LIMIT_SEC}&arcade=1&${from}`;
 }
 
 export function goPathHub(kind: PathKind): void {

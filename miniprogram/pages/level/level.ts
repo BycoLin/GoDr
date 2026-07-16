@@ -1,23 +1,12 @@
 import {
-  getItemsByGrade,
-  getPackManifest,
-  isEnglish,
-  isMath,
-  isPoetry,
-} from '../../utils/registry';
-import { loadPackProgress } from '../../utils/progress';
-import { isFavorite, toggleFavorite } from '../../utils/favorites';
-import type { KnowledgeItem } from '../../utils/types';
+  buildLevelSnapshot,
+  peekLevelSnapshot,
+  type LevelRow,
+} from '../../utils/level-map';
+import { preloadPlayPage } from '../../utils/page-prefetch';
+import { toggleFavorite } from '../../utils/favorites';
 
-interface LevelRow {
-  id: string;
-  title: string;
-  meta: string;
-  stars: number;
-  cleared: boolean;
-  unlocked: boolean;
-  favorited: boolean;
-}
+const ENTER_BUBBLE = '打开地图，一关一关闯';
 
 Page({
   data: {
@@ -33,29 +22,56 @@ Page({
     focusId: '',
     focusUnlocked: false,
     focusCleared: false,
-    goalText: '选一关，开始冒险吧',
+    goalText: ENTER_BUBBLE,
+    toneClass: 'tone-cn',
   },
+
+  _seenShow: false,
+  _pendingFocus: null as LevelRow | null,
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
     const grade = Number(query.grade || 1);
-    const manifest = getPackManifest(packId);
-    const subject = manifest?.subject || '';
-    const unitLabel = subject === '语文' ? '首' : '关';
-    this.setData({
-      packId,
-      grade,
-      packTitle: manifest?.title || '',
-      subject,
-      unitLabel,
-    });
+
+    const cached = peekLevelSnapshot(packId, grade);
+    const snapshot = cached || buildLevelSnapshot(packId, grade);
+    const focus = this.pickFocus(snapshot.levels);
+    this._pendingFocus = focus;
+
     wx.setNavigationBarTitle({
-      title: `${grade} 年级 · ${subject || '关卡'}`,
+      title: `${grade} 年级 · ${snapshot.subject || '关卡'}`,
     });
+
+    this.setData({
+      packId: snapshot.packId,
+      grade: snapshot.grade,
+      packTitle: snapshot.packTitle,
+      subject: snapshot.subject,
+      unitLabel: snapshot.unitLabel,
+      toneClass: snapshot.toneClass,
+      levels: snapshot.levels,
+      starSum: snapshot.starSum,
+      clearedCount: snapshot.clearedCount,
+      totalCount: snapshot.totalCount,
+      goalText: ENTER_BUBBLE,
+      ...this.focusPatch(focus, true),
+    });
+
+    wx.nextTick(() => preloadPlayPage());
+  },
+
+  onReady() {
+    const focus = this._pendingFocus;
+    if (!focus) return;
+    this.setData(this.focusPatch(focus, false));
   },
 
   onShow() {
-    this.refreshLevels();
+    if (!this._seenShow) {
+      this._seenShow = true;
+      return;
+    }
+    wx.nextTick(() => this.refreshLevels());
   },
 
   pickFocus(levels: LevelRow[], preferId?: string): LevelRow | null {
@@ -70,69 +86,46 @@ Page({
     return lastCleared || levels[0];
   },
 
-  applyFocus(focus: LevelRow | null) {
+  focusPatch(focus: LevelRow | null, keepEnterBubble = false) {
     if (!focus) {
-      this.setData({
+      return {
         focusId: '',
         focusUnlocked: false,
         focusCleared: false,
-        goalText: '暂无关卡',
-      });
-      return;
+        goalText: keepEnterBubble ? ENTER_BUBBLE : '暂无关卡',
+      };
     }
-    const goal = focus.cleared
-      ? `再闯「${focus.title}」，冲更高星`
-      : `本关目标：掌握「${focus.title}」`;
-    this.setData({
+    return {
       focusId: focus.id,
       focusUnlocked: focus.unlocked,
       focusCleared: focus.cleared,
-      goalText: goal,
-    });
+      goalText: keepEnterBubble
+        ? ENTER_BUBBLE
+        : focus.cleared
+          ? `再闯「${focus.title}」，冲更高星`
+          : `本关目标：掌握「${focus.title}」`,
+    };
+  },
+
+  applyFocus(focus: LevelRow | null) {
+    this.setData(this.focusPatch(focus, false));
   },
 
   refreshLevels() {
-    const { packId, grade, subject, focusId } = this.data;
-    const items = getItemsByGrade(packId, grade).filter((item) => {
-      if (subject === '数学') return isMath(item);
-      if (subject === '英语') return isEnglish(item);
-      return isPoetry(item);
-    }) as KnowledgeItem[];
-    const progress = loadPackProgress(packId);
-
-    const levels: LevelRow[] = items.map((item, index) => {
-      const itemProg = progress.items[item.id];
-      const prevCleared =
-        index === 0 || Boolean(progress.items[items[index - 1].id]?.cleared);
-      let meta = '';
-      if (isMath(item)) {
-        meta = item.subtitle || item.tags?.join(' · ') || '数学练习';
-      } else if (isEnglish(item)) {
-        meta = item.meaning + (item.phonetic ? ` · ${item.phonetic}` : '');
-      } else if (isPoetry(item)) {
-        meta = `${item.dynasty || ''} · ${item.author}`.replace(/^\s·\s/, '');
-      }
-      return {
-        id: item.id,
-        title: item.title,
-        meta,
-        stars: itemProg?.stars || 0,
-        cleared: Boolean(itemProg?.cleared),
-        unlocked: prevCleared,
-        favorited: isFavorite(packId, item.id),
-      };
-    });
-
-    const starSum = levels.reduce((s, l) => s + (l.stars || 0), 0);
-    const focus = this.pickFocus(levels, focusId);
-
+    const { packId, grade, focusId } = this.data;
+    if (!packId) return;
+    const snapshot = buildLevelSnapshot(packId, grade);
+    const focus = this.pickFocus(snapshot.levels, focusId);
     this.setData({
-      levels,
-      clearedCount: levels.filter((l) => l.cleared).length,
-      totalCount: levels.length,
-      starSum,
+      subject: snapshot.subject,
+      unitLabel: snapshot.unitLabel,
+      toneClass: snapshot.toneClass,
+      levels: snapshot.levels,
+      clearedCount: snapshot.clearedCount,
+      totalCount: snapshot.totalCount,
+      starSum: snapshot.starSum,
+      ...this.focusPatch(focus, false),
     });
-    this.applyFocus(focus);
   },
 
   onTapLevel(e: WechatMiniprogram.TouchEvent) {
@@ -164,6 +157,7 @@ Page({
       l.id === id ? { ...l, favorited: on } : l,
     );
     this.setData({ levels: next });
+    buildLevelSnapshot(packId, grade);
     wx.showToast({
       title: on ? '已收藏，可在「我的」再练' : '已取消收藏',
       icon: 'none',

@@ -53,6 +53,7 @@
       </view>
     </view>
     <view class="week-extra">错题待练 {{wrongCount}} · {{weekTip}}</view>
+    <button class="week-share" open-type="share">分享给家人看看本周练习</button>
   </view>
 
   <view class="stat-row">

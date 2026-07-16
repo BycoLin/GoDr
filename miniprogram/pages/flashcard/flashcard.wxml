@@ -1,4 +1,4 @@
-<view class="safe-pad flash">
+<view class="safe-pad flash {{fromPath ? 'path-page-pad' : ''}}">
   <block wx:if="{{!done && current}}">
     <view class="meta">第 {{index + 1}} / {{total}} 张 · 点卡片翻转</view>
     <view class="card flash-card {{flipped ? 'flipped' : ''}}" bindtap="onFlip">
@@ -27,7 +27,8 @@
       <view class="done-score">记得 {{known}} · 再看看 {{fuzzy}}</view>
       <view class="done-desc">熟悉了可以马上自测，不熟就再翻一轮</view>
     </view>
-    <button class="btn btn-primary" bindtap="onQuiz">开始自测</button>
+    <button class="btn btn-primary" wx:if="{{fromPath}}" bindtap="onPathNext">学完了，去练一练</button>
+    <button class="btn btn-primary" wx:else bindtap="onQuiz">开始自测</button>
     <button class="btn btn-secondary" bindtap="onRestart">再翻一轮</button>
     <button class="btn btn-ghost" bindtap="onBack">返回</button>
   </block>

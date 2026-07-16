@@ -6,6 +6,7 @@ import {
   nextPathStep,
   pathDoneCount,
   resetPath,
+  parsePathKind,
   type PathKind,
   type PathStepId,
 } from '../../utils/skill-path';
@@ -37,10 +38,10 @@ Page({
   },
 
   onLoad(query: Record<string, string | undefined>) {
-    const kind = (query.kind === 'math' ? 'math' : 'pinyin') as PathKind;
+    const kind = parsePathKind(query.kind);
     this.setData({ kind });
     wx.setNavigationBarTitle({
-      title: kind === 'math' ? '口算进阶' : '拼音进阶',
+      title: getPathMeta(kind).title,
     });
   },
 

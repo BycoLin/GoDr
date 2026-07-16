@@ -9,6 +9,36 @@ export interface FavoriteEntry {
 
 const KEY = 'levelFavorites';
 
+let favKeyCache: Set<string> | null = null;
+
+function entryKey(packId: string, itemId: string): string {
+  return `${packId}::${itemId}`;
+}
+
+function invalidateCache(): void {
+  favKeyCache = null;
+}
+
+function favoriteKeys(): Set<string> {
+  if (favKeyCache) return favKeyCache;
+  try {
+    const data = wx.getStorageSync(KEY) as FavoriteEntry[] | '';
+    if (!Array.isArray(data)) {
+      favKeyCache = new Set();
+      return favKeyCache;
+    }
+    favKeyCache = new Set(
+      data
+        .filter((e) => e && typeof e === 'object' && e.packId && e.itemId)
+        .map((e) => entryKey(e.packId, e.itemId)),
+    );
+    return favKeyCache;
+  } catch {
+    favKeyCache = new Set();
+    return favKeyCache;
+  }
+}
+
 function loadAll(): FavoriteEntry[] {
   try {
     const data = wx.getStorageSync(KEY) as FavoriteEntry[] | '';
@@ -23,10 +53,7 @@ function loadAll(): FavoriteEntry[] {
 
 function saveAll(list: FavoriteEntry[]): void {
   wx.setStorageSync(KEY, list);
-}
-
-function entryKey(packId: string, itemId: string): string {
-  return `${packId}::${itemId}`;
+  invalidateCache();
 }
 
 export function listFavorites(): FavoriteEntry[] {
@@ -34,8 +61,7 @@ export function listFavorites(): FavoriteEntry[] {
 }
 
 export function isFavorite(packId: string, itemId: string): boolean {
-  const k = entryKey(packId, itemId);
-  return loadAll().some((e) => entryKey(e.packId, e.itemId) === k);
+  return favoriteKeys().has(entryKey(packId, itemId));
 }
 
 export function addFavorite(entry: Omit<FavoriteEntry, 'savedAt'>): FavoriteEntry[] {
@@ -66,4 +92,5 @@ export function toggleFavorite(entry: Omit<FavoriteEntry, 'savedAt'>): boolean {
 
 export function clearFavorites(): void {
   wx.removeStorageSync(KEY);
+  invalidateCache();
 }

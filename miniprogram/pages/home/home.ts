@@ -11,6 +11,12 @@ import { getRankInfo } from '../../utils/rank';
 import { loadStreak } from '../../utils/streak';
 import { getReviewSummary } from '../../utils/review';
 import { getTodayGoal } from '../../utils/practice-log';
+import {
+  buildHomeShare,
+  toShareAppMessage,
+  toShareTimeline,
+} from '../../utils/share';
+import { scheduleLevelPrefetch } from '../../utils/page-prefetch';
 
 interface FeaturePlay {
   id: string;
@@ -32,6 +38,7 @@ function featuresForPack(packId: string): FeaturePlay[] {
   }
   if (kind === 'english') {
     return [
+      { id: 'path', title: '单词进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
       { id: 'flash', title: '翻翻看', desc: '翻一翻记一记', tag: '认读', tone: 'q-flash', action: 'flash' },
       { id: 'duel', title: '趣味对练', desc: '比一比谁更快', tag: '对练', tone: 'q-duel', action: 'duel' },
     ];
@@ -85,14 +92,64 @@ Page({
 
   refreshing: false,
 
+  onReady() {
+    const { packId, grade } = this.data;
+    scheduleLevelPrefetch(packId, grade);
+  },
+
   onShow() {
     if (this.refreshing) return;
-    this.refreshing = true;
+    wx.nextTick(() => {
+      if (this.refreshing) return;
+      this.refreshing = true;
+      try {
+        this.applyShareQuery();
+        this.refresh();
+      } finally {
+        this.refreshing = false;
+      }
+    });
+  },
+
+  goLevelMap(packId: string, grade: number) {
+    wx.navigateTo({
+      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
+    });
+  },
+
+  applyShareQuery() {
     try {
-      this.refresh();
-    } finally {
-      this.refreshing = false;
+      const enter = wx.getEnterOptionsSync?.();
+      const query = enter?.query || {};
+      const packId = String(query.packId || '');
+      const grade = Number(query.grade || 0);
+      if (packId) setActivePackId(packId);
+      if (grade > 0) setActiveGrade(packId || getActivePackId(), grade);
+    } catch {
+      // ignore
     }
+  },
+
+  buildSharePayload() {
+    const { worldName, starSum, streakDays, clearedCount, totalCount, packId, grade } =
+      this.data;
+    return buildHomeShare({
+      worldName,
+      starSum,
+      streakDays,
+      clearedCount,
+      totalCount,
+      packId,
+      grade,
+    });
+  },
+
+  onShareAppMessage() {
+    return toShareAppMessage(this.buildSharePayload());
+  },
+
+  onShareTimeline() {
+    return toShareTimeline(this.buildSharePayload());
   },
 
   refresh() {
@@ -156,6 +213,9 @@ Page({
         goalBarWidth: goal.barWidth,
         goalTip: goal.tip,
       });
+
+      const resolvedGrade = grades.map(Number).includes(grade) ? grade : grades[0];
+      scheduleLevelPrefetch(packId, resolvedGrade);
     } catch (err) {
       console.error('home refresh failed', err);
       wx.showToast({ title: '加载失败，再试一次', icon: 'none' });
@@ -173,13 +233,12 @@ Page({
     const grade = Number(e.currentTarget.dataset.grade);
     setActiveGrade(this.data.packId, grade);
     this.setData({ grade });
+    scheduleLevelPrefetch(this.data.packId, grade);
   },
 
   onEnterMap() {
     const { packId, grade } = this.data;
-    wx.navigateTo({
-      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
-    });
+    this.goLevelMap(packId, grade);
   },
 
   onContinue() {
@@ -187,9 +246,7 @@ Page({
     if (!continueTip) return;
     const progress = loadPackProgress(packId);
     const grade = progress.lastGrade || this.data.grade;
-    wx.navigateTo({
-      url: `/pages/level/level?packId=${packId}&grade=${grade}`,
-    });
+    this.goLevelMap(packId, grade);
   },
 
   onTapReview() {
@@ -237,8 +294,10 @@ Page({
       return;
     }
     if (action === 'path') {
-      const kind = getPackSubjectKind(packId) === 'math' ? 'math' : 'pinyin';
-      wx.navigateTo({ url: `/pages/skill-path/skill-path?kind=${kind}` });
+      const subjectKind = getPackSubjectKind(packId);
+      const pathKind =
+        subjectKind === 'math' ? 'math' : subjectKind === 'english' ? 'english' : 'pinyin';
+      wx.navigateTo({ url: `/pages/skill-path/skill-path?kind=${pathKind}` });
       return;
     }
     if (action === 'pinyin') {

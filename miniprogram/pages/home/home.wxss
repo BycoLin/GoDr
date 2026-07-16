@@ -1,3 +1,7 @@
+.home-page {
+  min-height: 100vh;
+}
+
 .home {
   min-height: 100vh;
   position: relative;
@@ -68,7 +72,6 @@
 .grade-pills,
 .scene-card,
 .goal-card,
-.cta-wrap,
 .more-list {
   position: relative;
   z-index: 1;
@@ -351,75 +354,6 @@
   color: #4a4458;
 }
 
-.cta-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40rpx;
-}
-
-.cta-bubble {
-  background: #fff;
-  color: #1a1430;
-  font-size: 26rpx;
-  font-weight: 800;
-  padding: 14rpx 28rpx;
-  border-radius: 999rpx;
-  border: 3rpx solid #ece7df;
-  margin-bottom: 18rpx;
-  box-shadow: 0 6rpx 0 rgba(26, 20, 48, 0.06);
-  max-width: 90%;
-  text-align: center;
-}
-
-.cta-bubble.soft {
-  color: #4a4458;
-}
-
-.cta-btn {
-  color: #fff;
-  animation: cta-bounce 1.8s ease-in-out infinite;
-}
-
-.cta-btn.tone-cn {
-  background: #22b8a8;
-  box-shadow: 0 12rpx 0 #0f8f82;
-}
-
-.cta-btn.tone-math {
-  background: #5b8cff;
-  box-shadow: 0 12rpx 0 #4470e0;
-}
-
-.cta-btn.tone-en {
-  background: #ff9f1c;
-  box-shadow: 0 12rpx 0 #e07f10;
-}
-
-@keyframes cta-bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-6rpx); }
-}
-
-.cta-btn:active {
-  animation: none;
-  transform: translateY(8rpx);
-}
-
-.cta-btn.tone-cn:active { box-shadow: 0 4rpx 0 #0f8f82; }
-.cta-btn.tone-math:active { box-shadow: 0 4rpx 0 #4470e0; }
-.cta-btn.tone-en:active { box-shadow: 0 4rpx 0 #e07f10; }
-
-.cta-sub {
-  margin-top: 18rpx;
-  font-size: 26rpx;
-  font-weight: 800;
-  color: #5b8cff;
-  min-height: 56rpx;
-  display: flex;
-  align-items: center;
-}
-
 .sec-title {
   position: relative;
   z-index: 1;
@@ -559,6 +493,30 @@
 
 .e-review { background: #fff5f3; border-color: #ffd0c8; }
 .e-mono { background: #fff8ef; border-color: #ffe0a8; }
+.e-share .more-icon { background: #22b8a8; }
+.e-share {
+  position: relative;
+  background: #f0fffb;
+  border-color: #9ee5db;
+}
+
+.share-overlay {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  border: none;
+  background: transparent;
+  z-index: 2;
+}
+
+.share-overlay::after {
+  border: none;
+}
 
 .more-body {
   flex: 1;

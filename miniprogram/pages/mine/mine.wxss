@@ -205,6 +205,24 @@
   line-height: 1.45;
 }
 
+.week-share {
+  margin: 18rpx 0 0;
+  padding: 0;
+  width: 100%;
+  min-height: 72rpx;
+  border-radius: 999rpx;
+  background: #effffb;
+  border: 3rpx solid #9ee5db;
+  color: #0f8f82;
+  font-size: 26rpx;
+  font-weight: 900;
+  line-height: 72rpx;
+}
+
+.week-share::after {
+  border: none;
+}
+
 .stat-row {
   margin-top: 28rpx;
   display: flex;

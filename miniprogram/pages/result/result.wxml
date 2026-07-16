@@ -19,9 +19,11 @@
     </view>
   </view>
 
-  <button class="btn btn-primary" bindtap="onRetry">再闯一次</button>
+  <button class="btn btn-primary" wx:if="{{pathNext}}" bindtap="onPathNext">{{pathNextText}}</button>
+  <button class="btn btn-primary" wx:elif="{{!pathNext && !pathDone}}" bindtap="onRetry">再闯一次</button>
+  <button class="btn btn-share" open-type="share">分享给小伙伴</button>
   <button class="btn btn-secondary" wx:if="{{pathDone}}" bindtap="onPathHub">回进阶路径</button>
-  <button class="btn btn-secondary" wx:else bindtap="onBackLevels">
+  <button class="btn btn-secondary" wx:elif="{{!pathNext}}" bindtap="onBackLevels">
     {{boss ? '回错题本' : (arcade ? '回趣味加练' : '回关卡地图')}}
   </button>
   <button class="btn btn-ghost" bindtap="onHome">回首页</button>

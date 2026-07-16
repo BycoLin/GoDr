@@ -7,7 +7,12 @@ import { countActiveWrongs } from '../../utils/wrongbook';
 import { getPackSubjectKind } from '../../utils/registry';
 import { markPracticeDay } from '../../utils/streak';
 import { recordPracticeSession } from '../../utils/practice-log';
-import { goPathHub, markPathStep } from '../../utils/skill-path';
+import { goPathHub, markPathStep, buildStepUrl, isPathKind } from '../../utils/skill-path';
+import {
+  buildResultShare,
+  toShareAppMessage,
+  toShareTimeline,
+} from '../../utils/share';
 
 Page({
   data: {
@@ -23,6 +28,7 @@ Page({
     arcade: false,
     isMath: false,
     isEnglish: false,
+    isPoetry: false,
     mode: 'mixed',
     boss: false,
     daily: false,
@@ -39,6 +45,8 @@ Page({
     goalNote: '',
     fromPath: '',
     pathDone: false,
+    pathNext: false,
+    pathNextText: '',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -55,7 +63,7 @@ Page({
     const duel = query.duel === '1' || mode === 'duel';
     const sprint = query.sprint === '1' || mode === 'sprint';
     const exam = query.exam === '1' || mode === 'exam';
-    const fromPath = query.fromPath === 'math' || query.fromPath === 'pinyin' ? query.fromPath : '';
+    const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const userScore = Number(query.userScore || 0);
     const rivalScore = Number(query.rivalScore || 0);
@@ -82,8 +90,19 @@ Page({
     const { goalJustDone } = recordPracticeSession(total, newlyCleared);
 
     let pathDone = false;
+    let pathNext = false;
+    let pathNextText = '';
     if (fromPath === 'math' && pathStep === 'test') {
       markPathStep('math', 'test');
+      pathDone = true;
+    }
+    if (fromPath === 'english' && pathStep === 'practice') {
+      markPathStep('english', 'practice');
+      pathNext = true;
+      pathNextText = '去测一测';
+    }
+    if (fromPath === 'english' && pathStep === 'test') {
+      markPathStep('english', 'test');
       pathDone = true;
     }
 
@@ -169,6 +188,7 @@ Page({
       arcade,
       isMath,
       isEnglish,
+      isPoetry: !isMath && !isEnglish,
       mode,
       boss,
       daily,
@@ -183,6 +203,8 @@ Page({
       newBadges,
       fromPath,
       pathDone,
+      pathNext,
+      pathNextText,
     });
 
     if (goalJustDone) {
@@ -190,9 +212,41 @@ Page({
     }
   },
 
+  buildSharePayload() {
+    const { title, stars, ratioText, duel, isPoetry, packId, grade, itemId, arcade } = this.data;
+    return buildResultShare({
+      title,
+      stars,
+      ratioText,
+      duel,
+      isPoetry,
+      packId,
+      grade,
+      itemId,
+      arcade,
+    });
+  },
+
+  onShareAppMessage() {
+    return toShareAppMessage(this.buildSharePayload());
+  },
+
+  onShareTimeline() {
+    return toShareTimeline(this.buildSharePayload());
+  },
+
   onPathHub() {
-    if (this.data.fromPath === 'math' || this.data.fromPath === 'pinyin') {
+    if (isPathKind(this.data.fromPath)) {
       goPathHub(this.data.fromPath);
+    }
+  },
+
+  onPathNext() {
+    const { fromPath, pathStep, packId, grade } = this.data;
+    if (fromPath === 'english' && pathStep === 'practice') {
+      wx.redirectTo({
+        url: buildStepUrl('english', 'test', { packId, grade }),
+      });
     }
   },
 

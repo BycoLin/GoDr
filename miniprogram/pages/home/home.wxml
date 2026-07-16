@@ -1,112 +1,123 @@
-<view class="safe-pad home">
-  <view class="deco deco-cloud a"></view>
-  <view class="deco deco-cloud b"></view>
-  <view class="deco deco-star"></view>
+<view class="home-page">
+  <view class="safe-pad home">
+    <view class="deco deco-cloud a"></view>
+    <view class="deco deco-cloud b"></view>
+    <view class="deco deco-star"></view>
 
-  <view class="status-row">
-    <view class="avatar">
-      <image class="avatar-img" src="/assets/miniprogram-avatar.png" mode="aspectFill" />
-    </view>
-    <view class="status-mid">
-      <view class="hello">你好，小朋友</view>
-      <view class="hello-sub">{{rankTitle}}</view>
-    </view>
-    <view class="status-chips">
-      <view class="chip">★ {{starSum}}</view>
-      <view class="chip fire" wx:if="{{streakDays > 0}}">连练 {{streakDays}}</view>
-    </view>
-  </view>
-
-  <view class="subject-pills">
-    <view
-      class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
-      data-pack-id="poetry-g1-g2"
-      bindtap="onSelectSubject"
-    >语文</view>
-    <view
-      class="sp {{packId === 'math-g1-g2' ? 'on math' : ''}}"
-      data-pack-id="math-g1-g2"
-      bindtap="onSelectSubject"
-    >数学</view>
-    <view
-      class="sp {{packId === 'english-g1-g2' ? 'on en' : ''}}"
-      data-pack-id="english-g1-g2"
-      bindtap="onSelectSubject"
-    >英语</view>
-  </view>
-
-  <view class="grade-pills">
-    <view
-      class="gp {{grade === item ? 'on' : ''}}"
-      wx:for="{{grades}}"
-      wx:key="*this"
-      data-grade="{{item}}"
-      bindtap="onSelectGrade"
-    >{{item}} 年级</view>
-  </view>
-
-  <view class="scene-card {{toneClass}}">
-    <view class="scene-mark">{{iconText}}</view>
-    <view class="scene-title">{{worldName}}</view>
-    <view class="scene-desc">已通关 {{clearedCount}}/{{totalCount}}</view>
-    <view class="scene-bar">
-      <view class="scene-fill" style="width: {{barWidth}};"></view>
-    </view>
-    <view class="scene-pct">{{percent}}%</view>
-  </view>
-
-  <view class="goal-card {{goalDone ? 'done' : ''}}">
-    <view class="goal-head">
-      <text class="goal-title">今日目标</text>
-      <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
-    </view>
-    <view class="goal-bar">
-      <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
-    </view>
-    <view class="goal-tip">{{goalTip}}</view>
-  </view>
-
-  <view class="cta-wrap">
-    <view class="cta-bubble" wx:if="{{continueTip}}">接着练 · {{continueShort}}</view>
-    <view class="cta-bubble soft" wx:else>打开地图，一关一关闯</view>
-    <view class="btn btn-cta cta-btn {{toneClass}}" bindtap="onEnterMap">开始冒险</view>
-    <view class="cta-sub" bindtap="onContinue" wx:if="{{continueTip}}">或继续上次地图</view>
-  </view>
-
-  <view class="sec-title">趣味玩法</view>
-  <view class="feature-list">
-    <view
-      class="feature-item {{item.tone}} pressable"
-      wx:for="{{features}}"
-      wx:key="id"
-      data-action="{{item.action}}"
-      bindtap="onTapFeature"
-    >
-      <view class="feature-icon">{{item.tag}}</view>
-      <view class="feature-body">
-        <view class="feature-name">{{item.title}}</view>
-        <view class="feature-tip">{{item.desc}}</view>
+    <view class="status-row">
+      <view class="avatar">
+        <image class="avatar-img" src="/assets/miniprogram-avatar.png" mode="aspectFill" />
       </view>
-      <view class="feature-go">开</view>
+      <view class="status-mid">
+        <view class="hello">你好，小朋友</view>
+        <view class="hello-sub">{{rankTitle}}</view>
+      </view>
+      <view class="status-chips">
+        <view class="chip">★ {{starSum}}</view>
+        <view class="chip fire" wx:if="{{streakDays > 0}}">连练 {{streakDays}}</view>
+      </view>
     </view>
-  </view>
 
-  <view class="more-list">
-    <view class="more-item e-review pressable" bindtap="onTapReview" wx:if="{{reviewTotal > 0}}">
-      <view class="more-icon">复</view>
-      <view class="more-body">
-        <view class="more-name">智能复习</view>
-        <view class="more-tip">{{reviewTip}}</view>
-      </view>
-      <view class="more-go">去</view>
+    <view class="subject-pills">
+      <view
+        class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
+        data-pack-id="poetry-g1-g2"
+        bindtap="onSelectSubject"
+      >语文</view>
+      <view
+        class="sp {{packId === 'math-g1-g2' ? 'on math' : ''}}"
+        data-pack-id="math-g1-g2"
+        bindtap="onSelectSubject"
+      >数学</view>
+      <view
+        class="sp {{packId === 'english-g1-g2' ? 'on en' : ''}}"
+        data-pack-id="english-g1-g2"
+        bindtap="onSelectSubject"
+      >英语</view>
     </view>
-    <view class="more-item e-mono pressable" bindtap="onGoMono">
-      <view class="more-icon">棋</view>
-      <view class="more-body">
-        <view class="more-name">趣味棋盘</view>
-        <view class="more-tip">走走答</view>
+
+    <view class="grade-pills">
+      <view
+        class="gp {{grade === item ? 'on' : ''}}"
+        wx:for="{{grades}}"
+        wx:key="*this"
+        data-grade="{{item}}"
+        bindtap="onSelectGrade"
+      >{{item}} 年级</view>
+    </view>
+
+    <view class="scene-card {{toneClass}}">
+      <view class="scene-mark">{{iconText}}</view>
+      <view class="scene-title">{{worldName}}</view>
+      <view class="scene-desc">已通关 {{clearedCount}}/{{totalCount}}</view>
+      <view class="scene-bar">
+        <view class="scene-fill" style="width: {{barWidth}};"></view>
       </view>
-      <view class="more-go">去</view>
+      <view class="scene-pct">{{percent}}%</view>
+    </view>
+
+    <view class="goal-card {{goalDone ? 'done' : ''}}">
+      <view class="goal-head">
+        <text class="goal-title">今日目标</text>
+        <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
+      </view>
+      <view class="goal-bar">
+        <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
+      </view>
+      <view class="goal-tip">{{goalTip}}</view>
+    </view>
+
+    <view class="adventure-dock adventure-dock--hero">
+      <view class="adventure-bubble" wx:if="{{continueTip}}">接着练 · {{continueShort}}</view>
+      <view class="adventure-bubble" wx:else>打开地图，一关一关闯</view>
+      <view class="btn btn-cta cta-btn {{toneClass}}" bindtap="onEnterMap">开始冒险</view>
+      <view class="adventure-sub" bindtap="onContinue" wx:if="{{continueTip}}">或继续上次地图</view>
+    </view>
+
+    <view class="sec-title">趣味玩法</view>
+    <view class="feature-list">
+      <view
+        class="feature-item {{item.tone}} pressable"
+        wx:for="{{features}}"
+        wx:key="id"
+        data-action="{{item.action}}"
+        bindtap="onTapFeature"
+      >
+        <view class="feature-icon">{{item.tag}}</view>
+        <view class="feature-body">
+          <view class="feature-name">{{item.title}}</view>
+          <view class="feature-tip">{{item.desc}}</view>
+        </view>
+        <view class="feature-go">开</view>
+      </view>
+    </view>
+
+    <view class="more-list">
+      <view class="more-item e-review pressable" bindtap="onTapReview" wx:if="{{reviewTotal > 0}}">
+        <view class="more-icon">复</view>
+        <view class="more-body">
+          <view class="more-name">智能复习</view>
+          <view class="more-tip">{{reviewTip}}</view>
+        </view>
+        <view class="more-go">去</view>
+      </view>
+      <view class="more-item e-mono pressable" bindtap="onGoMono">
+        <view class="more-icon">棋</view>
+        <view class="more-body">
+          <view class="more-name">趣味棋盘</view>
+          <view class="more-tip">走走答</view>
+        </view>
+        <view class="more-go">去</view>
+      </view>
+      <view class="more-item e-share pressable">
+        <view class="more-icon">享</view>
+        <view class="more-body">
+          <view class="more-name">分享给朋友</view>
+          <view class="more-tip">邀请一起闯关练</view>
+        </view>
+        <view class="more-go">发</view>
+        <button class="share-overlay" open-type="share" hover-class="none"></button>
+      </view>
     </view>
   </view>
 </view>

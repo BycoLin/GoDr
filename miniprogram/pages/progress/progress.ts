@@ -5,6 +5,11 @@ import {
   getActivePackId,
   getActiveSubject,
 } from '../../utils/active-subject';
+import {
+  buildProgressShare,
+  toShareAppMessage,
+  toShareTimeline,
+} from '../../utils/share';
 
 interface ProgressRow {
   id: string;
@@ -102,6 +107,26 @@ Page({
     const filter = e.currentTarget.dataset.filter as 'all' | 'done' | 'todo';
     this.setData({ filter });
     this.refresh();
+  },
+
+  buildSharePayload() {
+    const { worldName, starSum, clearedCount, totalCount, packId, grade } = this.data;
+    return buildProgressShare({
+      worldName,
+      starSum,
+      clearedCount,
+      totalCount,
+      packId,
+      grade,
+    });
+  },
+
+  onShareAppMessage() {
+    return toShareAppMessage(this.buildSharePayload());
+  },
+
+  onShareTimeline() {
+    return toShareTimeline(this.buildSharePayload());
   },
 
   onTapGradeMap() {

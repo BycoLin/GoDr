@@ -26,6 +26,11 @@ import {
   removeFavorite,
   type FavoriteEntry,
 } from '../../utils/favorites';
+import {
+  buildWeekShare,
+  toShareAppMessage,
+  toShareTimeline,
+} from '../../utils/share';
 
 interface FavoriteRow extends FavoriteEntry {
   key: string;
@@ -181,6 +186,25 @@ Page({
   onToggleBadges() {
     this.setData({ badgesExpanded: !this.data.badgesExpanded });
   },
+
+  buildSharePayload() {
+    const { rankTitle, streakDays, weekPracticeDays, weekAnswered } = this.data;
+    return buildWeekShare({
+      rankTitle,
+      streakDays,
+      weekPracticeDays,
+      weekAnswered,
+    });
+  },
+
+  onShareAppMessage() {
+    return toShareAppMessage(this.buildSharePayload());
+  },
+
+  onShareTimeline() {
+    return toShareTimeline(this.buildSharePayload());
+  },
+
   onToggleSfx() {
     const next = !this.data.sfxMuted;
     setSfxMuted(next);

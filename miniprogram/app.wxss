@@ -58,6 +58,57 @@ page {
   padding-bottom: 180rpx;
 }
 
+/* 首页 / 关卡页共用底部 CTA，随页面内容滚动 */
+.adventure-dock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28rpx 0 0;
+  box-sizing: border-box;
+}
+
+.adventure-dock--hero {
+  margin-bottom: 8rpx;
+}
+
+.adventure-dock--dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 32rpx calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(230, 255, 246, 0) 0%, rgba(255, 255, 255, 0.92) 35%, #fff 100%);
+  z-index: 30;
+}
+
+.adventure-bubble {
+  background: #fff;
+  border: 3rpx solid #ece7df;
+  border-radius: 999rpx;
+  padding: 12rpx 28rpx;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #1a1430;
+  margin-bottom: 14rpx;
+  box-shadow: 0 6rpx 0 rgba(26, 20, 48, 0.06);
+  max-width: 92%;
+  text-align: center;
+}
+
+.adventure-dock .btn-cta {
+  width: 80%;
+  margin: 0;
+}
+
+.adventure-sub {
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #5b8cff;
+  min-height: 48rpx;
+  line-height: 48rpx;
+}
+
 page {
   background:
     radial-gradient(circle at 48% 100%, rgba(255, 176, 160, 0.42) 0%, transparent 42%),
@@ -110,6 +161,46 @@ page {
   letter-spacing: 2rpx;
 }
 
+/* 学科主按钮色：首页与关卡页共用 */
+.cta-btn {
+  color: #fff;
+}
+
+.cta-btn.tone-cn {
+  background: #22b8a8;
+  box-shadow: 0 12rpx 0 #0f8f82;
+}
+
+.cta-btn.tone-math {
+  background: #5b8cff;
+  box-shadow: 0 12rpx 0 #4470e0;
+}
+
+.cta-btn.tone-en {
+  background: #ff9f1c;
+  box-shadow: 0 12rpx 0 #e07f10;
+}
+
+.cta-btn.tone-cn:active {
+  transform: translateY(8rpx);
+  box-shadow: 0 4rpx 0 #0f8f82;
+}
+
+.cta-btn.tone-math:active {
+  transform: translateY(8rpx);
+  box-shadow: 0 4rpx 0 #4470e0;
+}
+
+.cta-btn.tone-en:active {
+  transform: translateY(8rpx);
+  box-shadow: 0 4rpx 0 #e07f10;
+}
+
+.cta-btn.disabled {
+  background: #c8c2d4 !important;
+  box-shadow: 0 12rpx 0 #9a93a8 !important;
+}
+
 .btn-secondary {
   background: #fff;
   color: var(--color-primary-deep);
@@ -125,6 +216,18 @@ page {
 .btn-ghost {
   background: transparent;
   color: var(--color-muted);
+}
+
+.btn-share {
+  background: linear-gradient(135deg, #fff8ef 0%, #fff 100%);
+  color: var(--color-primary-deep);
+  border: 4rpx solid #9ee5db;
+  box-shadow: 0 10rpx 0 rgba(15, 143, 130, 0.14);
+}
+
+.btn-share:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 6rpx 0 rgba(15, 143, 130, 0.14);
 }
 
 .card {

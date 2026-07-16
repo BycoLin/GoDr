@@ -45,10 +45,10 @@
     <view class="path-pad"></view>
   </scroll-view>
 
-  <view class="bottom-dock">
-    <view class="goal-bubble">{{goalText}}</view>
+  <view class="adventure-dock adventure-dock--dock">
+    <view class="adventure-bubble">{{goalText}}</view>
     <view
-      class="btn btn-primary btn-cta start-btn {{focusUnlocked ? '' : 'disabled'}}"
+      class="btn btn-cta cta-btn {{toneClass}} {{focusUnlocked ? '' : 'disabled'}}"
       bindtap="onStartFocus"
     >{{focusCleared ? '再闯一关' : '开始冒险'}}</view>
   </view>

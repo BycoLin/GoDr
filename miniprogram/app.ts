@@ -1,4 +1,7 @@
 import { isFocusTimerEnabled, triggerFocusRemindIfDue } from './utils/focus-timer';
+import { enableShareMenus } from './utils/share';
+import { getActiveGrade, getActivePackId } from './utils/active-subject';
+import { preloadTabBarPages, scheduleLevelPrefetch } from './utils/page-prefetch';
 
 let focusWatchId = 0;
 
@@ -18,13 +21,14 @@ function startAppFocusWatch() {
 }
 
 App<IAppOption>({
-  globalData: {
-    focusReminded: false,
-  },
+  globalData: {},
   onLaunch() {
+    enableShareMenus();
     startAppFocusWatch();
-  },
-  onShow() {
-    startAppFocusWatch();
+    preloadTabBarPages();
+    wx.nextTick(() => {
+      const packId = getActivePackId();
+      scheduleLevelPrefetch(packId, getActiveGrade(packId));
+    });
   },
 });

@@ -42,6 +42,7 @@ import {
 } from '../../utils/daily';
 import { playAnswerSfx } from '../../utils/sfx';
 import { triggerFocusRemindIfDue } from '../../utils/focus-timer';
+import { isPathKind } from '../../utils/skill-path';
 import type {
   ArcadeMode,
   EnglishItem,
@@ -139,7 +140,6 @@ Page({
     orderAvailable: {} as Record<string, boolean>,
     fromPath: '',
     pathStep: '',
-    focusReminded: false,
   },
 
   poolCache: [] as KnowledgeItem[],
@@ -171,7 +171,7 @@ Page({
     const arcade =
       boss || daily || duel || sprint || exam || query.arcade === '1' || !itemId;
     const rolling = arcade && !exam && !duel;
-    const fromPath = query.fromPath === 'math' || query.fromPath === 'pinyin' ? query.fromPath : '';
+    const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const subjectKind = getPackSubjectKind(packId);
     const quizMode = subjectQuizMode(subjectKind, mode, sprint);
@@ -427,14 +427,6 @@ Page({
     if (duel) {
       this.startRivalTimer();
     }
-    this.setData({ focusReminded: false });
-  },
-
-  onShow() {
-    const app = getApp<IAppOption>();
-    if (app.globalData.focusReminded) {
-      this.setData({ focusReminded: true });
-    }
   },
 
   onUnload() {
@@ -445,17 +437,6 @@ Page({
   maybeRemindFocus() {
     if (this.finished) return;
     triggerFocusRemindIfDue();
-  },
-
-  onDismissFocusTip() {
-    const app = getApp<IAppOption>();
-    app.globalData.focusReminded = false;
-    this.setData({ focusReminded: false });
-  },
-
-  onEndFromFocus() {
-    if (this.finished) return;
-    this.finish(this.data.answers, false);
   },
 
   startTimer() {

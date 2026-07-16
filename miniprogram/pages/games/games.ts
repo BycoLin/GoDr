@@ -7,6 +7,11 @@ import {
 } from '../../utils/active-subject';
 import type { ArcadeMode, PackManifest } from '../../utils/types';
 import { loadPathState, pathDoneCount, type PathKind } from '../../utils/skill-path';
+import {
+  buildGamesShare,
+  toShareAppMessage,
+  toShareTimeline,
+} from '../../utils/share';
 
 interface GameCard {
   mode: ArcadeMode;
@@ -85,8 +90,9 @@ Page({
     const daily = loadDailyRecord();
     const games = gamesForPack(pack.id);
     const kind = getPackSubjectKind(pack.id);
-    const showPath = kind === 'math' || kind === 'poetry';
-    const pathKind: PathKind = kind === 'math' ? 'math' : 'pinyin';
+    const showPath = kind === 'math' || kind === 'poetry' || kind === 'english';
+    const pathKind: PathKind =
+      kind === 'math' ? 'math' : kind === 'english' ? 'english' : 'pinyin';
     const pathState = showPath ? loadPathState(pathKind) : null;
     const done = pathState ? pathDoneCount(pathState) : 0;
 
@@ -123,7 +129,8 @@ Page({
           : '暂无错题',
       showPath,
       pathKind,
-      pathTitle: pathKind === 'math' ? '口算进阶' : '拼音进阶',
+      pathTitle:
+        pathKind === 'math' ? '口算进阶' : pathKind === 'english' ? '单词进阶' : '拼音进阶',
       pathDesc: done > 0 ? `已完成 ${done}/3 · 学 → 练 → 测` : '学 → 练 → 测，循序巩固',
     });
   },
@@ -133,6 +140,20 @@ Page({
       url: `/pages/skill-path/skill-path?kind=${this.data.pathKind}`,
     });
   },
+
+  buildSharePayload() {
+    const { packSubject, grade, packId } = this.data;
+    return buildGamesShare({ packSubject, grade, packId });
+  },
+
+  onShareAppMessage() {
+    return toShareAppMessage(this.buildSharePayload());
+  },
+
+  onShareTimeline() {
+    return toShareTimeline(this.buildSharePayload());
+  },
+
   onTapAlt() {
     if (this.data.altAction === 'boss') {
       this.onTapBoss();
