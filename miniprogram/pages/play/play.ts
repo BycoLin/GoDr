@@ -41,6 +41,7 @@ import {
   todayKey,
 } from '../../utils/daily';
 import { playAnswerSfx } from '../../utils/sfx';
+import { triggerFocusRemindIfDue } from '../../utils/focus-timer';
 import type {
   ArcadeMode,
   EnglishItem,
@@ -136,6 +137,9 @@ Page({
     orderPicked: [] as string[],
     orderPickedTexts: [] as string[],
     orderAvailable: {} as Record<string, boolean>,
+    fromPath: '',
+    pathStep: '',
+    focusReminded: false,
   },
 
   poolCache: [] as KnowledgeItem[],
@@ -167,6 +171,8 @@ Page({
     const arcade =
       boss || daily || duel || sprint || exam || query.arcade === '1' || !itemId;
     const rolling = arcade && !exam && !duel;
+    const fromPath = query.fromPath === 'math' || query.fromPath === 'pinyin' ? query.fromPath : '';
+    const pathStep = query.pathStep || '';
     const subjectKind = getPackSubjectKind(packId);
     const quizMode = subjectQuizMode(subjectKind, mode, sprint);
     this.subjectKind = subjectKind;
@@ -409,6 +415,8 @@ Page({
       userScore: 0,
       rivalScore: 0,
       duelLead: '',
+      fromPath,
+      pathStep,
     });
     this.resetMatchState(questions[0]);
     this.resetOrderState(questions[0]);
@@ -419,11 +427,35 @@ Page({
     if (duel) {
       this.startRivalTimer();
     }
+    this.setData({ focusReminded: false });
+  },
+
+  onShow() {
+    const app = getApp<IAppOption>();
+    if (app.globalData.focusReminded) {
+      this.setData({ focusReminded: true });
+    }
   },
 
   onUnload() {
     this.clearTimer();
     this.clearRivalTimer();
+  },
+
+  maybeRemindFocus() {
+    if (this.finished) return;
+    triggerFocusRemindIfDue();
+  },
+
+  onDismissFocusTip() {
+    const app = getApp<IAppOption>();
+    app.globalData.focusReminded = false;
+    this.setData({ focusReminded: false });
+  },
+
+  onEndFromFocus() {
+    if (this.finished) return;
+    this.finish(this.data.answers, false);
   },
 
   startTimer() {
@@ -575,6 +607,7 @@ Page({
         this.finish(nextAnswers, false);
         return;
       }
+      this.maybeRemindFocus();
       this.advance(nextAnswers, index, questions, total);
     }, correct ? 700 : 800);
   },
@@ -779,6 +812,8 @@ Page({
       total,
       userScore,
       rivalScore,
+      fromPath,
+      pathStep,
     } = this.data;
     const correct = answers.filter((a) => a.correct).length;
     const answeredTotal = Math.max(
@@ -806,7 +841,7 @@ Page({
     saveLastSession(session);
     const title = encodeURIComponent(poemTitle);
     wx.redirectTo({
-      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}`,
+      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}&fromPath=${fromPath}&pathStep=${pathStep}`,
     });
   },
 });

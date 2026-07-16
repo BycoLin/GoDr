@@ -1,0 +1,36 @@
+<view class="safe-pad path">
+  <view class="hero">
+    <view class="hero-badge">{{subject}} · 学练测</view>
+    <view class="hero-title">{{title}}</view>
+    <view class="hero-desc">
+      已完成 {{doneCount}}/{{totalSteps}}
+      <text wx:if="{{kind === 'pinyin' && initial}}"> · 声母 {{initial}}</text>
+    </view>
+    <view class="hero-bar">
+      <view class="hero-fill" style="width: {{doneCount * 33.4}}%;"></view>
+    </view>
+  </view>
+
+  <view class="steps">
+    <view
+      class="step {{item.done ? 'done' : ''}} {{item.current ? 'current' : ''}}"
+      wx:for="{{steps}}"
+      wx:key="id"
+      data-step="{{item.id}}"
+      bindtap="onTapStep"
+    >
+      <view class="step-idx">{{item.done ? '✓' : item.index}}</view>
+      <view class="step-body">
+        <view class="step-title">{{item.title}} · {{item.action}}</view>
+        <view class="step-tip">{{item.tip}}</view>
+        <view class="step-status">{{item.statusText}}</view>
+      </view>
+      <view class="step-go">{{item.done ? '再练' : '去'}}</view>
+    </view>
+  </view>
+
+  <view class="cta-wrap">
+    <view class="btn btn-primary btn-cta cta" bindtap="onTapCta">{{ctaText}}</view>
+    <view class="reset" bindtap="onReset" wx:if="{{doneCount > 0}}">重新开始路径</view>
+  </view>
+</view>

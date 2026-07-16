@@ -25,6 +25,49 @@
   gap: 8rpx;
 }
 
+.focus-tip {
+  margin-top: 16rpx;
+  padding: 16rpx 18rpx;
+  border-radius: 24rpx;
+  background: #fff8ef;
+  border: 3rpx solid #ffe08a;
+}
+
+.focus-tip-text {
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #5a4300;
+  line-height: 1.4;
+}
+
+.focus-tip-actions {
+  margin-top: 14rpx;
+  display: flex;
+  gap: 12rpx;
+  justify-content: flex-end;
+}
+
+.focus-tip-btn {
+  min-height: 64rpx;
+  padding: 0 24rpx;
+  border-radius: 999rpx;
+  background: #22b8a8;
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 0 #0f8f82;
+}
+
+.focus-tip-btn.soft {
+  background: #fff;
+  color: #1a1430;
+  border: 2rpx solid #ece7df;
+  box-shadow: 0 4rpx 0 rgba(26, 20, 48, 0.08);
+}
+
 .combo {
   font-size: 24rpx;
   font-weight: 900;

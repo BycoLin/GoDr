@@ -5,6 +5,11 @@ import { listBadgesWithState, clearBadges } from '../../utils/badges';
 import { clearAllWrongBooks, countActiveWrongs } from '../../utils/wrongbook';
 import { clearDailyRecords, loadDailyRecord } from '../../utils/daily';
 import { isSfxMuted, setSfxMuted, playOkSfx } from '../../utils/sfx';
+import {
+  getFocusLimitMin,
+  isFocusTimerEnabled,
+  setFocusTimerEnabled,
+} from '../../utils/focus-timer';
 import { getActivePackId, getActiveSubject } from '../../utils/active-subject';
 import { getRankInfo } from '../../utils/rank';
 import { clearStreak, loadStreak } from '../../utils/streak';
@@ -68,6 +73,8 @@ Page({
     favoriteCount: 0,
     favoritesExpanded: false,
     favCanExpand: false,
+    focusEnabled: true,
+    focusLabel: '专注提醒：开（20 分钟）',
   },
 
   buildFavoriteRows() {
@@ -113,6 +120,8 @@ Page({
     const goal = getTodayGoal();
     const week = getWeekReport();
     const favorites = this.buildFavoriteRows();
+    const focusEnabled = isFocusTimerEnabled();
+    const focusMin = getFocusLimitMin();
     this.setData({
       packCount: packs.length,
       packId,
@@ -139,6 +148,10 @@ Page({
         : '今日限时尚未自测',
       sfxMuted,
       sfxLabel: sfxMuted ? '叭叭音效：关' : '叭叭音效：开',
+      focusEnabled,
+      focusLabel: focusEnabled
+        ? `专注提醒：开（${focusMin} 分钟）`
+        : '专注提醒：关',
       rankTitle: rank.title,
       rankTip: rank.tip,
       rankPercent: rank.percent,
@@ -178,6 +191,22 @@ Page({
     if (!next) playOkSfx();
     wx.showToast({
       title: next ? '音效已关闭' : '音效已打开',
+      icon: 'none',
+    });
+  },
+
+  onToggleFocus() {
+    const next = !this.data.focusEnabled;
+    setFocusTimerEnabled(next);
+    const focusMin = getFocusLimitMin();
+    this.setData({
+      focusEnabled: next,
+      focusLabel: next
+        ? `专注提醒：开（${focusMin} 分钟）`
+        : '专注提醒：关',
+    });
+    wx.showToast({
+      title: next ? `约 ${focusMin} 分钟温柔提醒` : '已关闭专注提醒',
       icon: 'none',
     });
   },

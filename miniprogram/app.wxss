@@ -26,6 +26,38 @@ page {
   --font-sub: 26rpx;
 }
 
+.path-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 16rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(230, 255, 246, 0) 0%, rgba(255, 255, 255, 0.92) 35%, #fff 100%);
+  z-index: 30;
+}
+
+.path-dock-btn {
+  min-height: 96rpx;
+  border-radius: 999rpx;
+  background: #22b8a8;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10rpx 0 #0f8f82;
+}
+
+.path-dock-btn:active {
+  transform: translateY(6rpx);
+  box-shadow: 0 4rpx 0 #0f8f82;
+}
+
+.path-page-pad {
+  padding-bottom: 180rpx;
+}
+
 page {
   background:
     radial-gradient(circle at 48% 100%, rgba(255, 176, 160, 0.42) 0%, transparent 42%),

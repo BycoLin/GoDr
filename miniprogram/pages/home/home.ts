@@ -18,17 +18,16 @@ interface FeaturePlay {
   desc: string;
   tag: string;
   tone: string;
-  action: 'duel' | 'sprint' | 'exam' | 'flash' | 'pinyin' | 'puzzle' | 'visual';
+  action: 'duel' | 'sprint' | 'exam' | 'flash' | 'pinyin' | 'puzzle' | 'visual' | 'path';
 }
 
 function featuresForPack(packId: string): FeaturePlay[] {
   const kind = getPackSubjectKind(packId);
   if (kind === 'math') {
     return [
+      { id: 'path', title: '口算进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-coral', action: 'path' },
       { id: 'sprint', title: '限时冲刺', desc: '60 秒练手速', tag: '冲刺', tone: 'q-sprint', action: 'sprint' },
       { id: 'duel', title: '趣味对练', desc: '比一比谁更快', tag: '对练', tone: 'q-duel', action: 'duel' },
-      { id: 'puzzle', title: '数字排队', desc: '排一排', tag: '数', tone: 'q-duel', action: 'puzzle' },
-      { id: 'visual', title: '看图口算', desc: '算一算', tag: '算', tone: 'q-coral', action: 'visual' },
     ];
   }
   if (kind === 'english') {
@@ -38,9 +37,9 @@ function featuresForPack(packId: string): FeaturePlay[] {
     ];
   }
   return [
+    { id: 'path', title: '拼音进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
     { id: 'flash', title: '翻翻看', desc: '先读一读再练', tag: '认读', tone: 'q-flash', action: 'flash' },
     { id: 'duel', title: '趣味对练', desc: '比一比默写', tag: '对练', tone: 'q-duel', action: 'duel' },
-    { id: 'pinyin', title: '拼音练习', desc: '声母韵母', tag: '拼', tone: 'q-teal', action: 'pinyin' },
   ];
 }
 
@@ -235,6 +234,11 @@ Page({
       wx.navigateTo({
         url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=exam&exam=1&arcade=1`,
       });
+      return;
+    }
+    if (action === 'path') {
+      const kind = getPackSubjectKind(packId) === 'math' ? 'math' : 'pinyin';
+      wx.navigateTo({ url: `/pages/skill-path/skill-path?kind=${kind}` });
       return;
     }
     if (action === 'pinyin') {

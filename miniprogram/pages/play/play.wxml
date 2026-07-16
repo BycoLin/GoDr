@@ -10,6 +10,14 @@
       </view>
     </view>
 
+    <view class="focus-tip" wx:if="{{focusReminded}}">
+      <view class="focus-tip-text">练了一会儿啦，歇歇眼睛更舒服～可以继续，也可以先结束。</view>
+      <view class="focus-tip-actions">
+        <view class="focus-tip-btn soft" bindtap="onDismissFocusTip">继续练</view>
+        <view class="focus-tip-btn" bindtap="onEndFromFocus">先结束</view>
+      </view>
+    </view>
+
     <view class="duel-board" wx:if="{{duel}}">
       <view class="duel-side {{duelLead === 'win' ? 'lead' : ''}}">
         <view class="duel-name">我</view>

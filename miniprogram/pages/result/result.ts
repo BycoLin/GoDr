@@ -7,6 +7,7 @@ import { countActiveWrongs } from '../../utils/wrongbook';
 import { getPackSubjectKind } from '../../utils/registry';
 import { markPracticeDay } from '../../utils/streak';
 import { recordPracticeSession } from '../../utils/practice-log';
+import { goPathHub, markPathStep } from '../../utils/skill-path';
 
 Page({
   data: {
@@ -36,6 +37,8 @@ Page({
     newBadges: [] as Array<{ id: string; title: string }>,
     progressNote: '',
     goalNote: '',
+    fromPath: '',
+    pathDone: false,
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -52,6 +55,8 @@ Page({
     const duel = query.duel === '1' || mode === 'duel';
     const sprint = query.sprint === '1' || mode === 'sprint';
     const exam = query.exam === '1' || mode === 'exam';
+    const fromPath = query.fromPath === 'math' || query.fromPath === 'pinyin' ? query.fromPath : '';
+    const pathStep = query.pathStep || '';
     const userScore = Number(query.userScore || 0);
     const rivalScore = Number(query.rivalScore || 0);
     const sessionPoints = Number(query.points || 0);
@@ -75,6 +80,12 @@ Page({
 
     markPracticeDay();
     const { goalJustDone } = recordPracticeSession(total, newlyCleared);
+
+    let pathDone = false;
+    if (fromPath === 'math' && pathStep === 'test') {
+      markPathStep('math', 'test');
+      pathDone = true;
+    }
 
     const wallet = applySessionReward({
       correct,
@@ -170,10 +181,18 @@ Page({
       bestCombo,
       timedOut,
       newBadges,
+      fromPath,
+      pathDone,
     });
 
     if (goalJustDone) {
       wx.showToast({ title: '今日目标达成', icon: 'success' });
+    }
+  },
+
+  onPathHub() {
+    if (this.data.fromPath === 'math' || this.data.fromPath === 'pinyin') {
+      goPathHub(this.data.fromPath);
     }
   },
 

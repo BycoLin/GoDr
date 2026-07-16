@@ -1,4 +1,4 @@
-<view class="safe-pad number">
+<view class="safe-pad number {{fromPath ? 'path-page-pad' : ''}}">
   <view class="head">
     <view class="title">数字宝宝排好队</view>
     <view class="desc">观察数字顺序，把空缺的位置补充完整</view>
@@ -31,7 +31,11 @@
 
   <view class="tip ok" wx:if="{{feedback === 'ok'}}">排对啦！</view>
   <view class="tip bad" wx:elif="{{feedback === 'bad'}}">再观察一下顺序～</view>
-  <view class="link" bindtap="onGoVisual">也去看图口算 →</view>
+  <view class="link" bindtap="onGoVisual" wx:if="{{!fromPath}}">也去看图口算 →</view>
 
   <num-keypad bind:key="onKey" />
+
+  <view class="path-dock" wx:if="{{fromPath}}">
+    <view class="path-dock-btn" bindtap="onPathNext">练完了，去测一测</view>
+  </view>
 </view>

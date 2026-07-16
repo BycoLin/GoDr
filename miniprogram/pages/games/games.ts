@@ -6,6 +6,7 @@ import {
   getActivePackId,
 } from '../../utils/active-subject';
 import type { ArcadeMode, PackManifest } from '../../utils/types';
+import { loadPathState, pathDoneCount, type PathKind } from '../../utils/skill-path';
 
 interface GameCard {
   mode: ArcadeMode;
@@ -64,6 +65,10 @@ Page({
     altTag: '巩固',
     altTitle: '错题再练',
     altDesc: '暂无',
+    showPath: false,
+    pathKind: 'pinyin' as PathKind,
+    pathTitle: '拼音进阶',
+    pathDesc: '学 → 练 → 测',
   },
 
   onShow() {
@@ -79,6 +84,11 @@ Page({
     const wrongCount = countActiveWrongs(pack.id);
     const daily = loadDailyRecord();
     const games = gamesForPack(pack.id);
+    const kind = getPackSubjectKind(pack.id);
+    const showPath = kind === 'math' || kind === 'poetry';
+    const pathKind: PathKind = kind === 'math' ? 'math' : 'pinyin';
+    const pathState = showPath ? loadPathState(pathKind) : null;
+    const done = pathState ? pathDoneCount(pathState) : 0;
 
     const preferBoss = wrongCount > 0;
     const heroAction = preferBoss ? 'boss' : 'daily';
@@ -111,9 +121,18 @@ Page({
         : wrongCount > 0
           ? `${wrongCount} 题`
           : '暂无错题',
+      showPath,
+      pathKind,
+      pathTitle: pathKind === 'math' ? '口算进阶' : '拼音进阶',
+      pathDesc: done > 0 ? `已完成 ${done}/3 · 学 → 练 → 测` : '学 → 练 → 测，循序巩固',
     });
   },
 
+  onTapPath() {
+    wx.navigateTo({
+      url: `/pages/skill-path/skill-path?kind=${this.data.pathKind}`,
+    });
+  },
   onTapAlt() {
     if (this.data.altAction === 'boss') {
       this.onTapBoss();

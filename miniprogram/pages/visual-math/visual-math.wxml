@@ -1,4 +1,4 @@
-<view class="safe-pad visual">
+<view class="safe-pad visual {{fromPath ? 'path-page-pad' : ''}}">
   <view class="head">
     <view class="title">{{total}}以内减法</view>
     <view class="desc">拿走一些，还剩多少？观察总数和拿走的数量，点出剩下的答案</view>
@@ -30,4 +30,8 @@
   <view class="tip bad" wx:elif="{{feedback === 'bad'}}">再数一数～</view>
 
   <num-keypad bind:key="onKey" />
+
+  <view class="path-dock" wx:if="{{fromPath}}">
+    <view class="path-dock-btn" bindtap="onPathNext">学完了，去练一练</view>
+  </view>
 </view>

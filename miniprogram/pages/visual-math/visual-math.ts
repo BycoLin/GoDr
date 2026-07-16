@@ -1,5 +1,6 @@
 import { randRange } from '../../utils/random';
 import { playAnswerSfx } from '../../utils/sfx';
+import { buildStepUrl, markPathStep, type PathKind, type PathStepId } from '../../utils/skill-path';
 
 const FRUITS = ['🍓', '🍎', '🍊', '🍇', '🍒', '🍑'];
 
@@ -14,9 +15,19 @@ Page({
     streak: 0,
     correctCount: 0,
     feedback: '' as '' | 'ok' | 'bad',
+    fromPath: false,
+    pathKind: '' as '' | PathKind,
+    pathStep: '' as '' | PathStepId,
   },
 
-  onLoad() {
+  onLoad(query: Record<string, string | undefined>) {
+    const fromPath = query.fromPath === 'math' || query.fromPath === 'pinyin';
+    this.setData({
+      fromPath,
+      pathKind: (fromPath ? query.fromPath : '') as '' | PathKind,
+      pathStep: (query.pathStep || '') as '' | PathStepId,
+    });
+    if (fromPath) wx.setNavigationBarTitle({ title: '学一学 · 看图口算' });
     this.nextQuestion();
   },
 
@@ -77,5 +88,11 @@ Page({
     } else {
       this.setData({ feedback: 'bad', streak: 0 });
     }
+  },
+
+  onPathNext() {
+    if (this.data.pathKind !== 'math') return;
+    markPathStep('math', 'learn');
+    wx.redirectTo({ url: buildStepUrl('math', 'practice') });
   },
 });

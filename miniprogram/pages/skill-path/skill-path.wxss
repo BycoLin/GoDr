@@ -1,0 +1,171 @@
+.path {
+  min-height: 100vh;
+}
+
+.hero {
+  background: #22b8a8;
+  color: #fff;
+  border-radius: 36rpx;
+  padding: 36rpx 32rpx 32rpx;
+  box-shadow: 0 14rpx 0 #0f8f82;
+  margin-bottom: 28rpx;
+}
+
+.hero-badge {
+  display: inline-block;
+  font-size: 22rpx;
+  font-weight: 900;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.28);
+  margin-bottom: 12rpx;
+}
+
+.hero-title {
+  font-size: 44rpx;
+  font-weight: 900;
+}
+
+.hero-desc {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  font-weight: 700;
+  opacity: 0.92;
+}
+
+.hero-bar {
+  margin-top: 20rpx;
+  height: 16rpx;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 999rpx;
+  overflow: hidden;
+}
+
+.hero-fill {
+  height: 100%;
+  background: #ffc93c;
+  border-radius: 999rpx;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  background: #fff;
+  border: 3rpx solid #ece7df;
+  border-radius: 28rpx;
+  padding: 22rpx 20rpx;
+  box-shadow: 0 8rpx 0 rgba(26, 20, 48, 0.06);
+  min-height: 140rpx;
+  box-sizing: border-box;
+}
+
+.step.current {
+  border-color: #9ee5db;
+  background: #effffb;
+}
+
+.step.done {
+  border-color: #ffe08a;
+}
+
+.step-idx {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #efeaf4;
+  color: #4a4458;
+  font-size: 30rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step.current .step-idx {
+  background: #22b8a8;
+  color: #fff;
+  box-shadow: 0 6rpx 0 #0f8f82;
+}
+
+.step.done .step-idx {
+  background: #ffc93c;
+  color: #5a4300;
+  box-shadow: 0 6rpx 0 #e0ad20;
+}
+
+.step-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.step-title {
+  font-size: 30rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.step-tip {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+}
+
+.step-status {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #9a93a8;
+}
+
+.step.current .step-status {
+  color: #0f8f82;
+}
+
+.step.done .step-status {
+  color: #e08a12;
+}
+
+.step-go {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #ffc93c;
+  color: #5a4300;
+  font-size: 26rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 0 #e0ad20;
+}
+
+.cta-wrap {
+  margin-top: 36rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cta {
+  width: 82%;
+}
+
+.reset {
+  margin-top: 20rpx;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #9a93a8;
+  min-height: 56rpx;
+  display: flex;
+  align-items: center;
+}

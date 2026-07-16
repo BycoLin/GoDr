@@ -15,7 +15,8 @@
     "pages/pinyin-learn/pinyin-learn",
     "pages/visual-math/visual-math",
     "pages/number-line/number-line",
-    "pages/mono/mono"
+    "pages/mono/mono",
+    "pages/skill-path/skill-path"
   ],
   "window": {
     "navigationBarBackgroundColor": "#22B8A8",

@@ -4,6 +4,7 @@
   "description": "闯关叭叭 · 趣味闯关练习微信小程序，覆盖数学、语文、英语等学科",
   "scripts": {
     "extract:poetry": "node scripts/extract-poetry.mjs",
+    "fetch:tts": "node scripts/fetch-pinyin-tts.mjs",
     "smoke:quiz": "node scripts/smoke-quiz.mjs",
     "typecheck": "tsc --noEmit"
   },

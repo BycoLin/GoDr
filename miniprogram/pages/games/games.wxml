@@ -18,6 +18,15 @@
     <view class="side-go">去练</view>
   </view>
 
+  <view class="path-entry pressable" wx:if="{{showPath}}" bindtap="onTapPath">
+    <view class="path-entry-tag">进阶</view>
+    <view class="path-entry-body">
+      <view class="path-entry-title">{{pathTitle}}</view>
+      <view class="path-entry-desc">{{pathDesc}}</view>
+    </view>
+    <view class="path-entry-go">开</view>
+  </view>
+
   <view class="sec-title">专项练习</view>
   <view
     class="play-row {{item.tone}} pressable"

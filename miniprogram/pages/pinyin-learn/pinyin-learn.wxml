@@ -1,10 +1,13 @@
-<view class="safe-pad learn" wx:if="{{current}}">
+<view class="safe-pad learn {{fromPath ? 'path-page-pad' : ''}}" wx:if="{{current}}">
   <view class="top-row">
     <view class="lesson">汉语拼音 · {{initial}}</view>
-    <view class="progress">{{index + 1}} / {{total}}</view>
+    <view class="progress">
+      <text wx:if="{{quizGoal > 0}}">连对 {{quizCorrect}}/{{quizGoal}}</text>
+      <text wx:else>{{index + 1}} / {{total}}</text>
+    </view>
   </view>
 
-  <view class="mode-row">
+  <view class="mode-row" wx:if="{{!fromPath || pathStep === 'learn'}}">
     <view class="mode {{mode === 'card' ? 'on' : ''}}" data-mode="card" bindtap="onMode">卡片模式</view>
     <view class="mode {{mode === 'fill' ? 'on' : ''}}" data-mode="fill" bindtap="onMode">填拼音</view>
     <view class="mode {{mode === 'list' ? 'on' : ''}}" data-mode="list" bindtap="onMode">列表模式</view>
@@ -38,7 +41,7 @@
 
   <!-- 填拼音 -->
   <block wx:elif="{{mode === 'fill'}}">
-    <view class="hint">看汉字，选出正确拼音</view>
+    <view class="hint">{{quizGoal > 0 ? '测关：看汉字选拼音' : '看汉字，选出正确拼音'}}</view>
     <view class="card main-card">
       <view class="char-box big">{{current.char}}</view>
       <view class="fill-feedback ok" wx:if="{{fillFeedback === 'ok'}}">答对啦！</view>
@@ -72,4 +75,8 @@
       </view>
     </view>
   </block>
+
+  <view class="path-dock" wx:if="{{fromPath && pathDockText && !(pathStep === 'test' && quizGoal > 0)}}">
+    <view class="path-dock-btn" bindtap="onPathNext">{{pathDockText}}</view>
+  </view>
 </view>
