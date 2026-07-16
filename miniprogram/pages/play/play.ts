@@ -43,6 +43,8 @@ import {
 import { playAnswerSfx } from '../../utils/sfx';
 import { triggerFocusRemindIfDue } from '../../utils/focus-timer';
 import { isPathKind } from '../../utils/skill-path';
+import { formatGradeLabel, parseGradeQuery } from '../../utils/grade-label';
+import { getActiveGrade } from '../../utils/active-subject';
 import type {
   ArcadeMode,
   EnglishItem,
@@ -154,7 +156,7 @@ Page({
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
-    const grade = Number(query.grade || 1);
+    const grade = parseGradeQuery(query.grade, getActiveGrade(packId));
     const itemId = query.itemId || '';
     const mode = (query.mode || 'mixed') as ArcadeMode;
     const boss = mode === 'boss' || query.boss === '1';
@@ -331,7 +333,7 @@ Page({
         poemTitle = ARCADE_MODE_LABELS[mode] || '趣味练习';
       }
       targetTotal = ROLLING_TARGET;
-      poemAuthor = `${grade} 年级`;
+      poemAuthor = formatGradeLabel(grade);
       modeLabel = poemTitle;
       wx.setNavigationBarTitle({ title: poemTitle });
     } else {

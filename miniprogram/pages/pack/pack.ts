@@ -1,10 +1,12 @@
 import { getPackManifest } from '../../utils/registry';
+import { formatGradeLabel } from '../../utils/grade-label';
 
 Page({
   data: {
     packId: '',
     title: '',
     grades: [] as number[],
+    gradeOptions: [] as Array<{ value: number; label: string; short: string }>,
     description: '',
   },
 
@@ -19,6 +21,11 @@ Page({
       packId,
       title: manifest.title,
       grades: manifest.grades,
+      gradeOptions: manifest.grades.map((g: number) => ({
+        value: Number(g),
+        label: formatGradeLabel(Number(g)),
+        short: g === 0 ? '幼小' : String(g),
+      })),
       description: manifest.description || '',
     });
     wx.setNavigationBarTitle({ title: manifest.title });

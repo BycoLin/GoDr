@@ -7,6 +7,7 @@ import {
 } from '../../utils/active-subject';
 import type { ArcadeMode, PackManifest } from '../../utils/types';
 import { loadPathState, pathDoneCount, type PathKind } from '../../utils/skill-path';
+import { formatGradeLabel } from '../../utils/grade-label';
 import {
   buildGamesShare,
   toShareAppMessage,
@@ -55,6 +56,7 @@ function gamesForPack(packId: string): GameCard[] {
 Page({
   data: {
     grade: 1,
+    gradeLabel: '1 年级',
     packId: 'poetry-g1-g2',
     packSubject: '语文',
     games: POETRY_GAMES,
@@ -77,11 +79,16 @@ Page({
   },
 
   onShow() {
-    const packs = listPacks();
-    if (!packs.length) return;
-    const packId = getActivePackId();
-    const current = packs.find((p) => p.id === packId) || packs[0];
-    this.applyPack(current);
+    try {
+      const packs = listPacks();
+      if (!packs.length) return;
+      const packId = getActivePackId();
+      const current = packs.find((p) => p.id === packId) || packs[0];
+      if (!current) return;
+      this.applyPack(current);
+    } catch (err) {
+      console.error('games onShow failed', err);
+    }
   },
 
   applyPack(pack: PackManifest) {
@@ -106,6 +113,7 @@ Page({
       packId: pack.id,
       packSubject: pack.subject,
       grade,
+      gradeLabel: formatGradeLabel(grade),
       games,
       wrongCount,
       heroAction,

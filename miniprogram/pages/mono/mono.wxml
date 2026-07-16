@@ -12,12 +12,13 @@
 
   <view class="grade-row">
     <view
-      class="grade-chip {{grade === item ? 'on' : ''}}"
-      wx:for="{{grades}}"
-      wx:key="*this"
-      data-grade="{{item}}"
+      class="grade-chip {{grade === item.value ? 'on' : ''}} {{item.pre ? 'grade-chip-pre' : ''}}"
+      wx:for="{{gradeOptions}}"
+      wx:for-index="idx"
+      wx:key="value"
+      data-index="{{idx}}"
       bindtap="onSelectGrade"
-    >{{item}} 年级</view>
+    >{{item.label}}</view>
   </view>
   <view class="subject-line">当前：{{subjectLabel}}（首页可切换）</view>
 

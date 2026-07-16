@@ -3,7 +3,7 @@
     <view>
       <view class="page-kicker">星星收集</view>
       <view class="page-title">{{worldName}}</view>
-      <view class="page-sub">{{subject}} · {{grade}} 年级 · 闯关页可切换</view>
+      <view class="page-sub">{{subject}} · {{gradeLabel}} · 闯关页可切换</view>
     </view>
     <view class="star-badge">★ {{starSum}}</view>
   </view>

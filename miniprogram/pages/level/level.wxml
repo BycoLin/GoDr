@@ -1,7 +1,7 @@
 <view class="level-page">
   <view class="top-bar">
     <view class="top-left">
-      <view class="top-title">{{grade}} 年级 · {{subject}}</view>
+      <view class="top-title">{{gradeLabel}} · {{subject}}</view>
       <view class="top-sub">已通关 {{clearedCount}}/{{totalCount}} {{unitLabel}} · 点☆可收藏</view>
     </view>
     <view class="top-star">★ {{starSum}}</view>

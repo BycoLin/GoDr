@@ -1,4 +1,4 @@
-/** 微信分享文案与路径 */
+import { formatGradeLabel } from './grade-label';
 
 export const SHARE_IMAGE = '/assets/miniprogram-avatar.png';
 
@@ -103,9 +103,9 @@ export function buildResultShare(opts: {
 
   let path = '/pages/home/home';
   if (!opts.arcade && opts.packId && opts.itemId) {
-    path = `/pages/level/level?packId=${opts.packId}&grade=${opts.grade || 1}`;
+    path = `/pages/level/level?packId=${opts.packId}&grade=${opts.grade ?? 1}`;
   } else if (opts.packId) {
-    path = `/pages/home/home?packId=${opts.packId}&grade=${opts.grade || 1}`;
+    path = `/pages/home/home?packId=${opts.packId}&grade=${opts.grade ?? 1}`;
   }
 
   return { title: shareTitle, path, imageUrl: SHARE_IMAGE };
@@ -155,7 +155,7 @@ export function buildGamesShare(opts: {
   packId: string;
 }): SharePayload {
   return {
-    title: `来闯关叭叭和我在 ${opts.packSubject} ${opts.grade} 年级趣味加练！`,
+    title: `来闯关叭叭和我在 ${opts.packSubject} ${formatGradeLabel(opts.grade)} 趣味加练！`,
     path: `/pages/games/games`,
     imageUrl: SHARE_IMAGE,
   };

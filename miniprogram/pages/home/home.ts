@@ -17,6 +17,12 @@ import {
   toShareTimeline,
 } from '../../utils/share';
 import { scheduleLevelPrefetch } from '../../utils/page-prefetch';
+import {
+  formatGradeLabel,
+  formatGradeMapLabel,
+  formatGradeShort,
+  parseGradeQuery,
+} from '../../utils/grade-label';
 
 interface FeaturePlay {
   id: string;
@@ -58,16 +64,35 @@ function sumGradeStars(packId: string, grade: number): number {
   }, 0);
 }
 
+function buildGradeOptions(grades: number[]) {
+  return grades.map((g) => ({
+    key: `g${Number(g)}`,
+    value: Number(g),
+    label: formatGradeLabel(Number(g)),
+    pre: Number(g) === 0,
+  }));
+}
+
+const DEFAULT_FEATURES: FeaturePlay[] = [
+  { id: 'path', title: '拼音进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
+  { id: 'flash', title: '翻翻看', desc: '先读一读再练', tag: '认读', tone: 'q-flash', action: 'flash' },
+  { id: 'duel', title: '趣味对练', desc: '比一比默写', tag: '对练', tone: 'q-duel', action: 'duel' },
+];
+
+const DEFAULT_GRADE_OPTIONS = buildGradeOptions([0, 1, 2]);
+
 Page({
   data: {
     packId: 'poetry-g1-g2',
     subject: '语文',
-    worldName: '诗词岛',
+    worldName: '语文岛',
     toneClass: 'tone-cn',
-    iconText: '诗',
+    iconText: '文',
     packTitle: '',
-    grades: [1, 2] as number[],
-    grade: 1,
+    grades: [0, 1, 2],
+    gradeOptions: DEFAULT_GRADE_OPTIONS,
+    grade: 0,
+    gradeKey: 'g0',
     continueTip: '',
     continueShort: '',
     clearedCount: 0,
@@ -81,34 +106,27 @@ Page({
     reviewTotal: 0,
     reviewTip: '',
     reviewWrongs: 0,
-    features: [] as FeaturePlay[],
+    features: DEFAULT_FEATURES,
     goalAnswered: 0,
     goalTarget: 10,
     goalDone: false,
     goalPercent: 0,
     goalBarWidth: '0%',
     goalTip: '',
+    adventureBubble: '打开地图，一关一关闯',
+    loadError: '',
   },
-
-  refreshing: false,
 
   onReady() {
     const { packId, grade } = this.data;
-    scheduleLevelPrefetch(packId, grade);
+    if (packId && grade != null) {
+      scheduleLevelPrefetch(packId, grade);
+    }
   },
 
   onShow() {
-    if (this.refreshing) return;
-    wx.nextTick(() => {
-      if (this.refreshing) return;
-      this.refreshing = true;
-      try {
-        this.applyShareQuery();
-        this.refresh();
-      } finally {
-        this.refreshing = false;
-      }
-    });
+    this.applyShareQuery();
+    this.refresh();
   },
 
   goLevelMap(packId: string, grade: number) {
@@ -122,9 +140,9 @@ Page({
       const enter = wx.getEnterOptionsSync?.();
       const query = enter?.query || {};
       const packId = String(query.packId || '');
-      const grade = Number(query.grade || 0);
+      const grade = parseGradeQuery(query.grade, -1);
       if (packId) setActivePackId(packId);
-      if (grade > 0) setActiveGrade(packId || getActivePackId(), grade);
+      if (grade >= 0) setActiveGrade(packId || getActivePackId(), grade);
     } catch {
       // ignore
     }
@@ -158,14 +176,16 @@ Page({
       const active = getActiveSubject();
       const manifest = getPackManifest(packId);
       const grade = getActiveGrade(packId);
-      const grades = manifest?.grades?.length ? [...manifest.grades] : [1];
+      const grades = manifest?.grades?.length ? [...manifest.grades] : [0, 1];
+      const resolvedGrade = grades.map(Number).includes(grade) ? grade : grades[0];
+      const gradeOptions = buildGradeOptions(grades.map(Number));
       const kind = active.kind;
       const toneClass =
         kind === 'math' ? 'tone-math' : kind === 'english' ? 'tone-en' : 'tone-cn';
-      const iconText = kind === 'math' ? '算' : kind === 'english' ? 'A' : '诗';
+      const iconText = kind === 'math' ? '算' : kind === 'english' ? 'A' : '文';
 
       const progress = loadPackProgress(packId);
-      const gradeItems = getItemsByGrade(packId, grade);
+      const gradeItems = getItemsByGrade(packId, resolvedGrade);
       const totalCount = gradeItems.length;
       const clearedIdSet = new Set(progress.clearedIds || []);
       const clearedCount = gradeItems.filter((item) => clearedIdSet.has(item.id)).length;
@@ -173,9 +193,18 @@ Page({
 
       let continueTip = '';
       let continueShort = '';
-      if (progress.lastItemId && progress.lastGrade) {
-        continueTip = `${active.worldName} · ${progress.lastGrade} 年级地图`;
-        continueShort = `${progress.lastGrade}年级`;
+      let adventureBubble = '打开地图，一关一关闯';
+      const lastGrade = progress.lastGrade;
+      const hasLast =
+        progress.lastItemId &&
+        lastGrade != null &&
+        Number.isFinite(Number(lastGrade));
+      if (hasLast && Number(lastGrade) === resolvedGrade) {
+        continueShort = formatGradeShort(Number(lastGrade));
+        continueTip = `${active.worldName} · ${formatGradeMapLabel(Number(lastGrade))}`;
+        adventureBubble = `接着练 · ${continueShort}`;
+      } else {
+        adventureBubble = `${formatGradeLabel(resolvedGrade)} · 打开地图闯一闯`;
       }
 
       const rank = getRankInfo();
@@ -191,14 +220,17 @@ Page({
         iconText,
         packTitle: manifest?.title || active.worldName,
         grades,
-        grade: grades.map(Number).includes(grade) ? grade : grades[0],
+        gradeOptions,
+        grade: resolvedGrade,
+        gradeKey: `g${resolvedGrade}`,
         continueTip,
         continueShort,
+        adventureBubble,
         clearedCount,
         totalCount,
         percent,
         barWidth: `${percent}%`,
-        starSum: sumGradeStars(packId, grade),
+        starSum: sumGradeStars(packId, resolvedGrade),
         rankTitle: rank.title,
         rankTip: rank.tip,
         streakDays: streak.current,
@@ -212,12 +244,21 @@ Page({
         goalPercent: goal.percent,
         goalBarWidth: goal.barWidth,
         goalTip: goal.tip,
+        loadError: '',
       });
 
-      const resolvedGrade = grades.map(Number).includes(grade) ? grade : grades[0];
       scheduleLevelPrefetch(packId, resolvedGrade);
     } catch (err) {
       console.error('home refresh failed', err);
+      this.setData({
+        loadError: '加载有点卡住了，点下面按钮再试',
+        gradeOptions: this.data.gradeOptions.length
+          ? this.data.gradeOptions
+          : DEFAULT_GRADE_OPTIONS,
+        features: this.data.features.length
+          ? this.data.features
+          : featuresForPack(this.data.packId || 'poetry-g1-g2'),
+      });
       wx.showToast({ title: '加载失败，再试一次', icon: 'none' });
     }
   },
@@ -230,10 +271,11 @@ Page({
   },
 
   onSelectGrade(e: WechatMiniprogram.TouchEvent) {
-    const grade = Number(e.currentTarget.dataset.grade);
-    setActiveGrade(this.data.packId, grade);
-    this.setData({ grade });
-    scheduleLevelPrefetch(this.data.packId, grade);
+    const idx = Number(e.currentTarget.dataset.index);
+    const opt = this.data.gradeOptions[idx];
+    if (!opt || !Number.isFinite(opt.value)) return;
+    setActiveGrade(this.data.packId, opt.value);
+    this.refresh();
   },
 
   onEnterMap() {
@@ -245,7 +287,10 @@ Page({
     const { packId, continueTip } = this.data;
     if (!continueTip) return;
     const progress = loadPackProgress(packId);
-    const grade = progress.lastGrade || this.data.grade;
+    const grade =
+      progress.lastGrade != null && Number.isFinite(Number(progress.lastGrade))
+        ? Number(progress.lastGrade)
+        : this.data.grade;
     this.goLevelMap(packId, grade);
   },
 

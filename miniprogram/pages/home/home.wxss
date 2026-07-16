@@ -5,7 +5,19 @@
 .home {
   min-height: 100vh;
   position: relative;
-  overflow: hidden;
+}
+
+.load-hint {
+  position: relative;
+  z-index: 2;
+  margin-bottom: 16rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 20rpx;
+  background: #fff5f3;
+  border: 3rpx solid #ffd0c8;
+  color: #8a3b32;
+  font-size: 26rpx;
+  font-weight: 800;
 }
 
 .deco {
@@ -72,6 +84,9 @@
 .grade-pills,
 .scene-card,
 .goal-card,
+.sec-title,
+.feature-list,
+.adventure-dock,
 .more-list {
   position: relative;
   z-index: 1;
@@ -221,6 +236,11 @@
   border-color: #ffc93c;
   color: #5a4300;
   box-shadow: 0 6rpx 0 #e0ad20;
+}
+
+.gp-pre {
+  font-size: 24rpx;
+  padding: 0 20rpx;
 }
 
 .scene-card {

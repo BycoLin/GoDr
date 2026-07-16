@@ -1,5 +1,6 @@
 <view class="home-page">
   <view class="safe-pad home">
+    <view class="load-hint" wx:if="{{loadError}}">{{loadError}}</view>
     <view class="deco deco-cloud a"></view>
     <view class="deco deco-cloud b"></view>
     <view class="deco deco-star"></view>
@@ -38,12 +39,13 @@
 
     <view class="grade-pills">
       <view
-        class="gp {{grade === item ? 'on' : ''}}"
-        wx:for="{{grades}}"
-        wx:key="*this"
-        data-grade="{{item}}"
+        class="gp {{gradeKey === item.key ? 'on' : ''}} {{item.pre ? 'gp-pre' : ''}}"
+        wx:for="{{gradeOptions}}"
+        wx:for-index="idx"
+        wx:key="key"
+        data-index="{{idx}}"
         bindtap="onSelectGrade"
-      >{{item}} 年级</view>
+      >{{item.label}}</view>
     </view>
 
     <view class="scene-card {{toneClass}}">
@@ -68,8 +70,7 @@
     </view>
 
     <view class="adventure-dock adventure-dock--hero">
-      <view class="adventure-bubble" wx:if="{{continueTip}}">接着练 · {{continueShort}}</view>
-      <view class="adventure-bubble" wx:else>打开地图，一关一关闯</view>
+      <view class="adventure-bubble">{{adventureBubble}}</view>
       <view class="btn btn-cta cta-btn {{toneClass}}" bindtap="onEnterMap">开始冒险</view>
       <view class="adventure-sub" bindtap="onContinue" wx:if="{{continueTip}}">或继续上次地图</view>
     </view>

@@ -31,10 +31,12 @@ import {
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
+import { formatGradeLabel } from '../../utils/grade-label';
 
 interface FavoriteRow extends FavoriteEntry {
   key: string;
   subjectShort: string;
+  gradeLabel: string;
 }
 
 Page({
@@ -87,6 +89,7 @@ Page({
       ...e,
       key: `${e.packId}::${e.itemId}`,
       subjectShort: (e.subject || '').slice(0, 1) || '关',
+      gradeLabel: formatGradeLabel(Number(e.grade || 0)),
     }));
   },
 

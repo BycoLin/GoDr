@@ -10,6 +10,7 @@ import {
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
+import { formatGradeLabel } from '../../utils/grade-label';
 
 interface ProgressRow {
   id: string;
@@ -26,6 +27,7 @@ Page({
     subject: '',
     worldName: '',
     grade: 1,
+    gradeLabel: '',
     toneClass: 'tone-cn',
     unitLabel: '首',
     clearedCount: 0,
@@ -91,6 +93,7 @@ Page({
       subject: active.subject,
       worldName: active.worldName,
       grade,
+      gradeLabel: formatGradeLabel(grade),
       toneClass,
       unitLabel,
       clearedCount,

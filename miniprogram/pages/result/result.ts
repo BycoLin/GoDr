@@ -8,6 +8,8 @@ import { getPackSubjectKind } from '../../utils/registry';
 import { markPracticeDay } from '../../utils/streak';
 import { recordPracticeSession } from '../../utils/practice-log';
 import { goPathHub, markPathStep, buildStepUrl, isPathKind } from '../../utils/skill-path';
+import { parseGradeQuery } from '../../utils/grade-label';
+import { getActiveGrade } from '../../utils/active-subject';
 import {
   buildResultShare,
   toShareAppMessage,
@@ -44,6 +46,7 @@ Page({
     progressNote: '',
     goalNote: '',
     fromPath: '',
+    pathStep: '',
     pathDone: false,
     pathNext: false,
     pathNextText: '',
@@ -51,7 +54,7 @@ Page({
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
-    const grade = Number(query.grade || 1);
+    const grade = parseGradeQuery(query.grade, getActiveGrade(packId));
     const itemId = query.itemId || '';
     const correct = Number(query.correct || 0);
     const total = Number(query.total || 0);
@@ -202,6 +205,7 @@ Page({
       timedOut,
       newBadges,
       fromPath,
+      pathStep,
       pathDone,
       pathNext,
       pathNextText,

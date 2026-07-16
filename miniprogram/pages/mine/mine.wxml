@@ -93,7 +93,7 @@
       <view class="fav-mark">{{item.subjectShort}}</view>
       <view class="fav-body">
         <view class="fav-title">{{item.title}}</view>
-        <view class="fav-meta">{{item.subject}} · {{item.grade}} 年级</view>
+        <view class="fav-meta">{{item.subject}} · {{item.gradeLabel}}</view>
       </view>
       <view class="fav-go">练</view>
       <view

@@ -10,6 +10,8 @@ import {
   markPathStep,
   type PathStepId,
 } from '../../utils/skill-path';
+import { parseGradeQuery } from '../../utils/grade-label';
+import { getActiveGrade } from '../../utils/active-subject';
 
 interface FlashCard {
   id: string;
@@ -47,7 +49,7 @@ Page({
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'english-g1-g2';
-    const grade = Number(query.grade || 1);
+    const grade = parseGradeQuery(query.grade, getActiveGrade(packId));
     const fromPath = query.fromPath === 'english';
     const pathStep = (query.pathStep || '') as '' | PathStepId;
     const kind = getPackSubjectKind(packId);

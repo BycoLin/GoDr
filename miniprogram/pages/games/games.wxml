@@ -1,6 +1,6 @@
 <view class="safe-pad games">
   <view class="head-title">趣味加练</view>
-  <view class="head-sub">当前 {{packSubject}} · {{grade}} 年级 · 自由练，不涨星</view>
+  <view class="head-sub">当前 {{packSubject}} · {{gradeLabel}} · 自由练，不涨星</view>
 
   <view class="hero-card {{heroTone}} pressable" bindtap="onTapHero">
     <view class="hero-badge">{{heroBadge}}</view>

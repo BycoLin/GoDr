@@ -9,13 +9,13 @@
   <view class="grade-grid">
     <view
       class="grade-card"
-      wx:for="{{grades}}"
-      wx:key="*this"
-      data-grade="{{item}}"
+      wx:for="{{gradeOptions}}"
+      wx:key="value"
+      data-grade="{{item.value}}"
       bindtap="onSelectGrade"
     >
-      <view class="grade-num">{{item}}</view>
-      <view class="grade-label">年级地图 · 开闯</view>
+      <view class="grade-num">{{item.short}}</view>
+      <view class="grade-label">{{item.label}} · 开闯</view>
     </view>
   </view>
 </view>

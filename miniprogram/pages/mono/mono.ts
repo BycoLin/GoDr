@@ -17,6 +17,7 @@ import {
   getActiveSubject,
   setActiveGrade,
 } from '../../utils/active-subject';
+import { formatGradeLabel } from '../../utils/grade-label';
 import type {
   EnglishItem,
   MathItem,
@@ -67,7 +68,8 @@ Page({
     packId: 'poetry-g1-g2',
     subjectLabel: '语文',
     grade: 1,
-    grades: [1, 2] as number[],
+    grades: [0, 1, 2] as number[],
+    gradeOptions: [] as Array<{ value: number; label: string }>,
     cells: [] as Array<BoardCell & { r: number; c: number; active: boolean }>,
     pos: 0,
     stars: 0,
@@ -96,11 +98,17 @@ Page({
     const active = getActiveSubject();
     const manifest = getPackManifest(packId);
     const grade = getActiveGrade(packId);
+    const grades = manifest?.grades || [0, 1];
     this.setData({
       packId,
       subjectLabel: active.subject,
       grade,
-      grades: manifest?.grades || [1],
+      grades,
+      gradeOptions: grades.map((g) => ({
+        value: Number(g),
+        label: formatGradeLabel(Number(g)),
+        pre: Number(g) === 0,
+      })),
       tip: `当前${active.subject}题库，摇一摇前进吧！`,
     });
     this.refreshBoard(this.data.pos);
@@ -121,9 +129,11 @@ Page({
 
   onSelectGrade(e: WechatMiniprogram.TouchEvent) {
     if (this.data.busy || this.data.showQuiz) return;
-    const grade = Number(e.currentTarget.dataset.grade);
-    setActiveGrade(this.data.packId, grade);
-    this.setData({ grade });
+    const idx = Number(e.currentTarget.dataset.index);
+    const opt = this.data.gradeOptions[idx];
+    if (!opt || !Number.isFinite(opt.value)) return;
+    setActiveGrade(this.data.packId, opt.value);
+    this.setData({ grade: opt.value });
   },
 
   onRoll() {

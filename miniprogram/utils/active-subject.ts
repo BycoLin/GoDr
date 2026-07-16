@@ -15,19 +15,21 @@ export interface SubjectOption {
 function worldNameFor(kind: PackSubjectKind): string {
   if (kind === 'math') return '数学岛';
   if (kind === 'english') return '英语岛';
-  return '诗词岛';
+  return '语文岛';
 }
 
 export function listSubjects(): SubjectOption[] {
-  return listPacks().map((pack) => {
-    const kind = getPackSubjectKind(pack.id);
-    return {
-      packId: pack.id,
-      subject: pack.subject,
-      kind,
-      worldName: worldNameFor(kind),
-    };
-  });
+  return listPacks()
+    .filter(Boolean)
+    .map((pack) => {
+      const kind = getPackSubjectKind(pack.id);
+      return {
+        packId: pack.id,
+        subject: pack.subject,
+        kind,
+        worldName: worldNameFor(kind),
+      };
+    });
 }
 
 export function getActivePackId(): string {
@@ -35,12 +37,12 @@ export function getActivePackId(): string {
   if (!packs.length) return 'poetry-g1-g2';
   try {
     const saved = wx.getStorageSync(PACK_KEY) as string;
-    if (saved && packs.some((p) => p.id === saved)) return saved;
+    if (saved && packs.some((p) => p?.id === saved)) return saved;
   } catch {
     /* ignore */
   }
-  const poetry = packs.find((p) => getPackSubjectKind(p.id) === 'poetry');
-  return poetry?.id || packs[0].id;
+  const poetry = packs.find((p) => p && getPackSubjectKind(p.id) === 'poetry');
+  return poetry?.id || packs[0]?.id || 'poetry-g1-g2';
 }
 
 export function setActivePackId(packId: string): void {
@@ -57,7 +59,7 @@ function readGlobalGrade(): number | null {
   try {
     const raw = wx.getStorageSync(GRADE_KEY);
     const n = Number(raw);
-    if (Number.isFinite(n) && n > 0) return n;
+    if (Number.isFinite(n) && n >= 0) return n;
   } catch {
     /* ignore */
   }
@@ -67,10 +69,10 @@ function readGlobalGrade(): number | null {
     if (map && typeof map === 'object') {
       const id = getActivePackId();
       const n = Number((map as Record<string, number>)[id]);
-      if (Number.isFinite(n) && n > 0) return n;
+      if (Number.isFinite(n) && n >= 0) return n;
       const first = Object.values(map as Record<string, number>)
         .map(Number)
-        .find((g) => Number.isFinite(g) && g > 0);
+        .find((g) => Number.isFinite(g) && g >= 0);
       if (first) return first;
     }
   } catch {
@@ -120,4 +122,30 @@ export function getActiveSubject(): SubjectOption {
     kind,
     worldName: worldNameFor(kind),
   };
+}
+
+/** 年级显示与 query 解析（0 = 幼小衔接） */
+export function formatGradeLabel(grade: number): string {
+  if (grade === 0) return '幼小衔接';
+  return `${grade} 年级`;
+}
+
+export function formatGradeShort(grade: number): string {
+  if (grade === 0) return '幼小衔接';
+  return `${grade}年级`;
+}
+
+export function formatGradeMapLabel(grade: number): string {
+  if (grade === 0) return '幼小衔接地图';
+  return `${grade} 年级地图`;
+}
+
+export function parseGradeQuery(raw: string | undefined, fallback: number): number {
+  if (raw === undefined || raw === null || raw === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+export function isValidGrade(grade: number | null | undefined): boolean {
+  return grade != null && Number.isFinite(grade) && grade >= 0;
 }

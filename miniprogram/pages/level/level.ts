@@ -3,8 +3,10 @@ import {
   peekLevelSnapshot,
   type LevelRow,
 } from '../../utils/level-map';
-import { preloadPlayPage } from '../../utils/page-prefetch';
 import { toggleFavorite } from '../../utils/favorites';
+import { preloadPlayPage } from '../../utils/page-prefetch';
+import { formatGradeLabel } from '../../utils/grade-label';
+import { getActiveGrade } from '../../utils/active-subject';
 
 const ENTER_BUBBLE = '打开地图，一关一关闯';
 
@@ -24,6 +26,7 @@ Page({
     focusCleared: false,
     goalText: ENTER_BUBBLE,
     toneClass: 'tone-cn',
+    gradeLabel: '',
   },
 
   _seenShow: false,
@@ -31,7 +34,10 @@ Page({
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
-    const grade = Number(query.grade || 1);
+    const grade =
+      query.grade != null && query.grade !== ''
+        ? Number(query.grade)
+        : getActiveGrade(packId);
 
     const cached = peekLevelSnapshot(packId, grade);
     const snapshot = cached || buildLevelSnapshot(packId, grade);
@@ -39,12 +45,13 @@ Page({
     this._pendingFocus = focus;
 
     wx.setNavigationBarTitle({
-      title: `${grade} 年级 · ${snapshot.subject || '关卡'}`,
+      title: `${formatGradeLabel(grade)} · ${snapshot.subject || '关卡'}`,
     });
 
     this.setData({
       packId: snapshot.packId,
       grade: snapshot.grade,
+      gradeLabel: formatGradeLabel(snapshot.grade),
       packTitle: snapshot.packTitle,
       subject: snapshot.subject,
       unitLabel: snapshot.unitLabel,
@@ -53,7 +60,6 @@ Page({
       starSum: snapshot.starSum,
       clearedCount: snapshot.clearedCount,
       totalCount: snapshot.totalCount,
-      goalText: ENTER_BUBBLE,
       ...this.focusPatch(focus, true),
     });
 
