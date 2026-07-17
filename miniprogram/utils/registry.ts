@@ -6,34 +6,34 @@ import type {
   PoetryItem,
 } from './types';
 
-/** 已注册知识包；新增包时在此追加 id，并 require 对应 JS 模块 */
+import poetryManifest from '../data/packs/poetry-g1-g2/manifest.js';
+import poetryItems from '../data/packs/poetry-g1-g2/items.js';
+import mathManifest from '../data/packs/math-g1-g2/manifest.js';
+import mathItems from '../data/packs/math-g1-g2/items.js';
+import englishManifest from '../data/packs/english-g1-g2/manifest.js';
+import englishItems from '../data/packs/english-g1-g2/items.js';
+
+/** 已注册知识包 */
 const PACK_IDS = ['poetry-g1-g2', 'math-g1-g2', 'english-g1-g2'] as const;
 
 type PackId = (typeof PACK_IDS)[number];
 
 export type PackSubjectKind = 'poetry' | 'math' | 'english';
 
-const poetryManifest = require('../data/packs/poetry-g1-g2/manifest.js') as PackManifest;
-const poetryItems = require('../data/packs/poetry-g1-g2/items.js') as PoetryItem[];
-const mathManifest = require('../data/packs/math-g1-g2/manifest.js') as PackManifest;
-const mathItems = require('../data/packs/math-g1-g2/items.js') as MathItem[];
-const englishManifest = require('../data/packs/english-g1-g2/manifest.js') as PackManifest;
-const englishItems = require('../data/packs/english-g1-g2/items.js') as EnglishItem[];
-
 const manifests: Record<PackId, PackManifest> = {
-  'poetry-g1-g2': poetryManifest,
-  'math-g1-g2': mathManifest,
-  'english-g1-g2': englishManifest,
+  'poetry-g1-g2': poetryManifest as PackManifest,
+  'math-g1-g2': mathManifest as PackManifest,
+  'english-g1-g2': englishManifest as PackManifest,
 };
 
 const itemsByPack: Record<PackId, KnowledgeItem[]> = {
-  'poetry-g1-g2': poetryItems,
-  'math-g1-g2': mathItems,
-  'english-g1-g2': englishItems,
+  'poetry-g1-g2': poetryItems as PoetryItem[],
+  'math-g1-g2': mathItems as MathItem[],
+  'english-g1-g2': englishItems as EnglishItem[],
 };
 
 export function listPacks(): PackManifest[] {
-  return PACK_IDS.map((id) => manifests[id]);
+  return PACK_IDS.map((id) => manifests[id]).filter(Boolean);
 }
 
 export function getPackManifest(packId: string): PackManifest | undefined {

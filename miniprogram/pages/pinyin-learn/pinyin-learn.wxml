@@ -1,6 +1,6 @@
 <view class="safe-pad learn {{fromPath ? 'path-page-pad' : ''}}" wx:if="{{current}}">
   <view class="top-row">
-    <view class="lesson">汉语拼音 · {{initial}}</view>
+    <view class="lesson">{{kind === 'final' ? '韵母' : '声母'}} · {{subjectLabel}}</view>
     <view class="progress">
       <text wx:if="{{quizGoal > 0}}">连对 {{quizCorrect}}/{{quizGoal}}</text>
       <text wx:else>{{index + 1}} / {{total}}</text>
@@ -18,15 +18,15 @@
     <view class="hint">跟读拼音，观察拼读过程</view>
     <view class="card main-card">
       <view class="formula">
-        <text class="ini">{{current.initial}}</text>
-        <text class="op"> + </text>
+        <text class="ini" wx:if="{{current.initial}}">{{current.initial}}</text>
+        <text class="op" wx:if="{{current.initial}}"> + </text>
         <text>{{current.final}}</text>
         <text class="op"> = </text>
         <text class="full">{{current.pinyin}}</text>
       </view>
       <view class="big-row">
         <view class="big-pinyin">
-          <text class="ini">{{current.initial}}</text><text>{{current.final}}</text>
+          <text class="ini" wx:if="{{current.initial}}">{{current.initial}}</text><text>{{current.final}}</text>
         </view>
         <view class="speak" bindtap="onSpeak">读</view>
       </view>

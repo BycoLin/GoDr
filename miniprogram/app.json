@@ -13,10 +13,12 @@
     "pages/tools/tools",
     "pages/pinyin/pinyin",
     "pages/pinyin-learn/pinyin-learn",
+    "pages/pinyin-drill/pinyin-drill",
     "pages/visual-math/visual-math",
     "pages/number-line/number-line",
     "pages/mono/mono",
-    "pages/skill-path/skill-path"
+    "pages/skill-path/skill-path",
+    "pages/unit-test/unit-test"
   ],
   "window": {
     "navigationBarBackgroundColor": "#22B8A8",
@@ -58,6 +60,5 @@
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "sitemapLocation": "sitemap.json"
 }

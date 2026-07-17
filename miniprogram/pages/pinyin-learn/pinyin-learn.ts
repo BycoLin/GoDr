@@ -7,7 +7,7 @@ import {
 } from '../../utils/skill-path';
 import { speakChinese, stopSpeak } from '../../utils/tts';
 
-const { getSyllables } = require('../../data/tools/pinyin');
+const { getSyllables, getFinalSyllables, getFinalById } = require('../../data/tools/pinyin');
 const { playAnswerSfx } = require('../../utils/sfx');
 
 interface SyllableItem {
@@ -20,6 +20,8 @@ interface SyllableItem {
 
 Page({
   data: {
+    kind: 'initial' as 'initial' | 'final',
+    subjectLabel: 'b',
     initial: 'b',
     mode: 'card' as 'card' | 'fill' | 'list',
     items: [] as SyllableItem[],
@@ -38,30 +40,55 @@ Page({
   },
 
   onLoad(query: Record<string, string | undefined>) {
+    const kind = query.kind === 'final' ? 'final' : 'initial';
     const initial = query.initial || 'b';
+    const finalId = decodeURIComponent(query.final || 'a');
     const fromPath = query.fromPath === 'pinyin' || query.fromPath === 'math';
     const pathKind = (fromPath ? query.fromPath : '') as '' | PathKind;
     const pathStep = (query.pathStep || '') as '' | PathStepId;
     const quizGoal = Number(query.quizGoal || 0);
     const mode = (query.mode as 'card' | 'fill' | 'list') || (quizGoal > 0 ? 'fill' : 'card');
     const justLearned = query.justLearned === '1';
-    const items = getSyllables(initial) as SyllableItem[];
+
+    const items =
+      kind === 'final'
+        ? (getFinalSyllables(finalId) as SyllableItem[])
+        : (getSyllables(initial) as SyllableItem[]);
+
     if (!items.length) {
-      wx.showToast({ title: '暂无该声母内容', icon: 'none' });
+      wx.showToast({
+        title: kind === 'final' ? '暂无该韵母内容' : '暂无该声母内容',
+        icon: 'none',
+      });
       setTimeout(() => wx.navigateBack(), 800);
       return;
     }
+
+    const subjectLabel =
+      kind === 'final'
+        ? getFinalById(finalId)?.label || finalId
+        : initial;
+
     wx.setNavigationBarTitle({
-      title: quizGoal > 0 ? `测一测 · ${initial}` : `拼音 ${initial}`,
+      title:
+        quizGoal > 0
+          ? `测一测 · ${subjectLabel}`
+          : kind === 'final'
+            ? `韵母 ${subjectLabel}`
+            : `声母 ${subjectLabel}`,
     });
+
     let pathDockText = '';
     if (fromPath) {
       if (pathStep === 'learn' || justLearned) pathDockText = '学完了，去练一练';
       else if (pathStep === 'practice') pathDockText = '练完了，去测一测';
       else if (pathStep === 'test') pathDockText = quizGoal > 0 ? `连对 ${quizGoal} 题过关` : '测完回路径';
     }
+
     this.setData({
-      initial,
+      kind,
+      subjectLabel,
+      initial: kind === 'final' ? finalId : initial,
       items,
       total: items.length,
       index: 0,
@@ -120,7 +147,6 @@ Page({
   onSpeak() {
     const { current } = this.data;
     if (!current) return;
-    // 读汉字读音；提示里带上拼音
     speakChinese(current.char, `${current.pinyin} · ${current.char}`);
   },
 
@@ -156,14 +182,11 @@ Page({
     setTimeout(() => {
       if (this.data.index < total - 1) {
         this.onNext();
+      } else if (fromPath && pathStep === 'test' && quizGoal > 0) {
+        const shuffled = items.slice().sort(() => Math.random() - 0.5);
+        this.setData({ items: shuffled });
+        this.goIndex(0);
       } else {
-        // 循环题目，测关继续刷
-        if (fromPath && pathStep === 'test' && quizGoal > 0) {
-          const shuffled = items.slice().sort(() => Math.random() - 0.5);
-          this.setData({ items: shuffled });
-          this.goIndex(0);
-          return;
-        }
         wx.showToast({ title: '本组练完啦', icon: 'success' });
       }
     }, 600);

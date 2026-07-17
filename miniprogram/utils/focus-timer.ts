@@ -2,8 +2,8 @@
 
 const ENABLE_KEY = 'focusTimerEnabled';
 
-/** 建议单次练习时长（分钟）；测试时可临时改为 1，上线改回 20 */
-export const FOCUS_LIMIT_MIN = 1;
+/** 建议单次练习时长（分钟） */
+export const FOCUS_LIMIT_MIN = 20;
 
 const LIMIT_MS = FOCUS_LIMIT_MIN * 60 * 1000;
 const TOAST_DURATION_MS = 3500;

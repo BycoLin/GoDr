@@ -287,7 +287,8 @@ export function buildArcadeQuiz(
       mode === 'daily' ||
       mode === 'duel' ||
       mode === 'sprint' ||
-      mode === 'exam'
+      mode === 'exam' ||
+      mode === 'unit'
     ) {
       const all: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
       quizType = all[questions.length % all.length];
@@ -376,6 +377,10 @@ export function gradeAnswer(
     question.type === 'mathCalc' ||
     question.type === 'mathCompare' ||
     question.type === 'mathMissing' ||
+    question.type === 'mathMakeTen' ||
+    question.type === 'mathBreakTen' ||
+    question.type === 'mathFlatTen' ||
+    question.type === 'mathBorrowTen' ||
     question.type === 'enWordMean' ||
     question.type === 'enMeanWord' ||
     question.type === 'enSpell'
@@ -422,6 +427,10 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   mathCalc: '口算练习',
   mathCompare: '比大小',
   mathMissing: '算式填空',
+  mathMakeTen: '凑十法',
+  mathBreakTen: '破十法',
+  mathFlatTen: '平十法',
+  mathBorrowTen: '借十法',
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
   enSpell: '缺字母练习',
@@ -430,4 +439,5 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   duel: '趣味对练',
   sprint: '限时冲刺',
   exam: '模拟小测',
+  unit: '单元测验',
 };

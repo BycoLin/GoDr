@@ -9,6 +9,7 @@ module.exports = [
     dynasty: '',
     lines: ['太阳当空照', '花儿对我笑', '小鸟说早早早', '你为什么背上小书包'],
     tags: ['幼小衔接', '童谣'],
+    unit: 1,
   },
   {
     id: 'poetry_g0_xiao_bai_tu',
@@ -19,6 +20,7 @@ module.exports = [
     dynasty: '',
     lines: ['小白兔', '白又白', '两只耳朵竖起来', '爱吃萝卜和青菜', '蹦蹦跳跳真可爱'],
     tags: ['幼小衔接', '童谣'],
+    unit: 1,
   },
   {
     id: 'poetry_g0_shu_zi_ge',
@@ -29,6 +31,7 @@ module.exports = [
     dynasty: '',
     lines: ['一二三四五', '上山打老虎', '老虎没打到', '打到小松鼠'],
     tags: ['幼小衔接', '童谣'],
+    unit: 1,
   },
   {
     id: 'poetry_g0_xiao_shou',
@@ -39,6 +42,7 @@ module.exports = [
     dynasty: '',
     lines: ['小手拍拍', '小嘴扭扭', '眼睛眨眨', '眉毛皱皱'],
     tags: ['幼小衔接', '童谣'],
+    unit: 1,
   },
   {
     id: 'poetry_g1_yong_e',
@@ -49,6 +53,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['鹅鹅鹅', '曲项向天歌', '白毛浮绿水', '红掌拨清波'],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g1_jiang_nan',
@@ -67,6 +72,7 @@ module.exports = [
       '鱼戏莲叶北',
     ],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g1_hua',
@@ -77,6 +83,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['远看山有色', '近听水无声', '春去花还在', '人来鸟不惊'],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g1_min_nong',
@@ -87,6 +94,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['锄禾日当午', '汗滴禾下土', '谁知盘中餐', '粒粒皆辛苦'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g1_gu_lang_yue_xing',
@@ -97,6 +105,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['小时不识月', '呼作白玉盘', '又疑瑶台镜', '飞在青云端'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g1_feng',
@@ -107,6 +116,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['解落三秋叶', '能开二月花', '过江千尺浪', '入竹万竿斜'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g2_mei_hua',
@@ -117,6 +127,7 @@ module.exports = [
     dynasty: '宋',
     lines: ['墙角数枝梅', '凌寒独自开', '遥知不是雪', '为有暗香来'],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g2_xiao_er_chui_diao',
@@ -127,6 +138,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['蓬头稚子学垂纶', '侧坐莓苔草映身', '路人借问遥招手', '怕得鱼惊不应人'],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g2_deng_guan_que_lou',
@@ -137,6 +149,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['白日依山尽', '黄河入海流', '欲穷千里目', '更上一层楼'],
     tags: ['必背', '上册'],
+    unit: 1,
   },
   {
     id: 'poetry_g2_wang_lu_shan_pu_bu',
@@ -147,6 +160,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['日照香炉生紫烟', '遥看瀑布挂前川', '飞流直下三千尺', '疑是银河落九天'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g2_jiang_xue',
@@ -157,6 +171,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['千山鸟飞绝', '万径人踪灭', '孤舟蓑笠翁', '独钓寒江雪'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g2_ye_su_shan_si',
@@ -167,6 +182,7 @@ module.exports = [
     dynasty: '唐',
     lines: ['危楼高百尺', '手可摘星辰', '不敢高声语', '恐惊天上人'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
   {
     id: 'poetry_g2_chi_le_ge',
@@ -177,5 +193,6 @@ module.exports = [
     dynasty: '北朝',
     lines: ['敕勒川', '阴山下', '天似穹庐', '笼盖四野', '天苍苍', '野茫茫', '风吹草低见牛羊'],
     tags: ['必背', '上册'],
+    unit: 2,
   },
 ];

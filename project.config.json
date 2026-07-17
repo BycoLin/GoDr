@@ -33,7 +33,7 @@
     "newFeature": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
-    "useIsolateContext": true,
+    "useIsolateContext": false,
     "nodeModules": false,
     "enhance": true,
     "useMultiFrameRuntime": true,

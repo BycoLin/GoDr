@@ -6,5 +6,5 @@ module.exports = {
   grades: [0, 1, 2],
   version: '1.1.0',
   description: '幼小衔接数感与一、二年级口算练习',
-  itemCount: 14,
+  itemCount: 18,
 };

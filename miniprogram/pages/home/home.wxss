@@ -415,7 +415,8 @@
   border-color: #ffe0a8;
 }
 
-.feature-item.q-teal {
+.feature-item.q-teal,
+.feature-item.q-exam {
   background: #effffb;
   border-color: #9ee5db;
 }
@@ -442,7 +443,8 @@
 .q-duel .feature-icon { background: #5b8cff; }
 .q-sprint .feature-icon,
 .q-flash .feature-icon { background: #ff9f1c; }
-.q-teal .feature-icon { background: #22b8a8; }
+.q-teal .feature-icon,
+.q-exam .feature-icon { background: #22b8a8; }
 .q-coral .feature-icon { background: #ff6f61; }
 
 .feature-body {

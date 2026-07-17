@@ -169,19 +169,232 @@ const SYLLABLES = {
   ],
 };
 
+/** 韵母表（幼小衔接 / 一年级） */
+const FINALS = [
+  { id: 'a', label: 'a', tip: '啊', tone: 0, group: '单韵母' },
+  { id: 'o', label: 'o', tip: '喔', tone: 1, group: '单韵母' },
+  { id: 'e', label: 'e', tip: '鹅', tone: 2, group: '单韵母' },
+  { id: 'i', label: 'i', tip: '衣', tone: 3, group: '单韵母' },
+  { id: 'u', label: 'u', tip: '乌', tone: 4, group: '单韵母' },
+  { id: 'ü', label: 'ü', tip: '鱼', tone: 0, group: '单韵母' },
+  { id: 'ai', label: 'ai', tip: '爱', tone: 1, group: '复韵母' },
+  { id: 'ei', label: 'ei', tip: '诶', tone: 2, group: '复韵母' },
+  { id: 'ui', label: 'ui', tip: '威', tone: 3, group: '复韵母' },
+  { id: 'ao', label: 'ao', tip: '熬', tone: 4, group: '复韵母' },
+  { id: 'ou', label: 'ou', tip: '欧', tone: 0, group: '复韵母' },
+  { id: 'iu', label: 'iu', tip: '优', tone: 1, group: '复韵母' },
+  { id: 'ie', label: 'ie', tip: '耶', tone: 2, group: '复韵母' },
+  { id: 'üe', label: 'üe', tip: '约', tone: 3, group: '复韵母' },
+  { id: 'er', label: 'er', tip: '儿', tone: 4, group: '复韵母' },
+  { id: 'an', label: 'an', tip: '安', tone: 0, group: '鼻韵母' },
+  { id: 'en', label: 'en', tip: '恩', tone: 1, group: '鼻韵母' },
+  { id: 'in', label: 'in', tip: '音', tone: 2, group: '鼻韵母' },
+  { id: 'un', label: 'un', tip: '温', tone: 3, group: '鼻韵母' },
+  { id: 'ün', label: 'ün', tip: '晕', tone: 4, group: '鼻韵母' },
+  { id: 'ang', label: 'ang', tip: '昂', tone: 0, group: '鼻韵母' },
+  { id: 'eng', label: 'eng', tip: '亨', tone: 1, group: '鼻韵母' },
+  { id: 'ing', label: 'ing', tip: '英', tone: 2, group: '鼻韵母' },
+  { id: 'ong', label: 'ong', tip: '翁', tone: 3, group: '鼻韵母' },
+];
+
+/** 补充韵母例字（扫描 SYLLABLES 不够时用） */
+const FINAL_EXTRA = {
+  ai: [
+    { initial: 'b', pinyin: 'bái', final: 'ái', char: '白' },
+    { initial: 'm', pinyin: 'mài', final: 'ài', char: '卖' },
+    { initial: 'd', pinyin: 'dài', final: 'ài', char: '带' },
+  ],
+  ei: [
+    { initial: 'b', pinyin: 'bèi', final: 'èi', char: '被' },
+    { initial: 'f', pinyin: 'fēi', final: 'ēi', char: '飞' },
+    { initial: 'm', pinyin: 'měi', final: 'ěi', char: '美' },
+  ],
+  ui: [
+    { initial: 'g', pinyin: 'guī', final: 'uī', char: '归' },
+    { initial: 'd', pinyin: 'duì', final: 'uì', char: '对' },
+    { initial: 'h', pinyin: 'huí', final: 'uí', char: '回' },
+  ],
+  ao: [
+    { initial: 'm', pinyin: 'māo', final: 'āo', char: '猫' },
+    { initial: 'g', pinyin: 'gāo', final: 'āo', char: '高' },
+    { initial: 'h', pinyin: 'hǎo', final: 'ǎo', char: '好' },
+  ],
+  ou: [
+    { initial: 'd', pinyin: 'dōu', final: 'ōu', char: '都' },
+    { initial: 'l', pinyin: 'lóu', final: 'óu', char: '楼' },
+    { initial: 'sh', pinyin: 'shǒu', final: 'ǒu', char: '手' },
+  ],
+  iu: [
+    { initial: 'n', pinyin: 'niú', final: 'iú', char: '牛' },
+    { initial: 'l', pinyin: 'liù', final: 'iù', char: '六' },
+    { initial: 'j', pinyin: 'jiǔ', final: 'iǔ', char: '九' },
+  ],
+  ie: [
+    { initial: 'x', pinyin: 'xiě', final: 'iě', char: '写' },
+    { initial: 'b', pinyin: 'bié', final: 'ié', char: '别' },
+    { initial: 'l', pinyin: 'liè', final: 'iè', char: '列' },
+  ],
+  üe: [
+    { initial: 'x', pinyin: 'xuě', final: 'uě', char: '雪' },
+    { initial: 'q', pinyin: 'què', final: 'uè', char: '却' },
+    { initial: 'y', pinyin: 'yuè', final: 'uè', char: '月' },
+  ],
+  er: [
+    { initial: '—', pinyin: 'ér', final: 'ér', char: '儿' },
+    { initial: '—', pinyin: 'ěr', final: 'ěr', char: '耳' },
+    { initial: '—', pinyin: 'èr', final: 'èr', char: '二' },
+  ],
+  an: [
+    { initial: 'b', pinyin: 'bān', final: 'ān', char: '班' },
+    { initial: 'm', pinyin: 'màn', final: 'àn', char: '慢' },
+    { initial: 't', pinyin: 'tiān', final: 'iān', char: '天' },
+  ],
+  en: [
+    { initial: 'b', pinyin: 'běn', final: 'ěn', char: '本' },
+    { initial: 'r', pinyin: 'rén', final: 'én', char: '人' },
+    { initial: 's', pinyin: 'sēn', final: 'ēn', char: '森' },
+  ],
+  in: [
+    { initial: 'x', pinyin: 'xīn', final: 'īn', char: '心' },
+    { initial: 'j', pinyin: 'jīn', final: 'īn', char: '今' },
+    { initial: 'l', pinyin: 'lín', final: 'ín', char: '林' },
+  ],
+  un: [
+    { initial: 'ch', pinyin: 'chūn', final: 'ūn', char: '春' },
+    { initial: 't', pinyin: 'tún', final: 'ún', char: '屯' },
+    { initial: 'k', pinyin: 'kūn', final: 'ūn', char: '昆' },
+  ],
+  ün: [
+    { initial: 'y', pinyin: 'yún', final: 'ún', char: '云' },
+    { initial: 'j', pinyin: 'jūn', final: 'ūn', char: '军' },
+    { initial: 'q', pinyin: 'qún', final: 'ún', char: '群' },
+  ],
+  ang: [
+    { initial: 't', pinyin: 'táng', final: 'áng', char: '糖' },
+    { initial: 'f', pinyin: 'fáng', final: 'áng', char: '房' },
+    { initial: 'ch', pinyin: 'chàng', final: 'àng', char: '唱' },
+  ],
+  eng: [
+    { initial: 'f', pinyin: 'fēng', final: 'ēng', char: '风' },
+    { initial: 'd', pinyin: 'dēng', final: 'ēng', char: '灯' },
+    { initial: 'sh', pinyin: 'shēng', final: 'ēng', char: '声' },
+  ],
+  ing: [
+    { initial: 'x', pinyin: 'xīng', final: 'īng', char: '星' },
+    { initial: 't', pinyin: 'tīng', final: 'īng', char: '听' },
+    { initial: 'y', pinyin: 'yīng', final: 'īng', char: '鹰' },
+  ],
+  ong: [
+    { initial: 'g', pinyin: 'gōng', final: 'ōng', char: '工' },
+    { initial: 'h', pinyin: 'hóng', final: 'óng', char: '红' },
+    { initial: 'zh', pinyin: 'zhōng', final: 'ōng', char: '中' },
+  ],
+  ü: [
+    { initial: 'y', pinyin: 'yú', final: 'ú', char: '鱼' },
+    { initial: 'j', pinyin: 'jù', final: 'ù', char: '句' },
+    { initial: 'q', pinyin: 'qǔ', final: 'ǔ', char: '取' },
+  ],
+};
+
+function baseFinal(str) {
+  return String(str || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/ü/g, 'v')
+    .replace(/Ü/g, 'v');
+}
+
+function finalKey(id) {
+  return id === 'ü' || id === 'ün' || id === 'üe' ? id.replace(/ü/g, 'v') : id;
+}
+
+function mapSyllable(initialId, item) {
+  const ini = initialId === '—' ? '' : initialId;
+  const formula = ini
+    ? `${ini} + ${item.final} = ${item.pinyin}`
+    : `${item.final} = ${item.pinyin}`;
+  return {
+    ...item,
+    initial: ini,
+    formula,
+  };
+}
+
 function getInitials() {
   return INITIALS;
 }
 
+function getFinals() {
+  return FINALS;
+}
+
 function getSyllables(initialId) {
-  return (SYLLABLES[initialId] || []).map((item) => ({
-    ...item,
-    initial: initialId,
-    formula: `${initialId} + ${item.final} = ${item.pinyin}`,
-  }));
+  return (SYLLABLES[initialId] || []).map((item) => mapSyllable(initialId, item));
+}
+
+function getFinalSyllables(finalId) {
+  const key = finalKey(finalId);
+  const fromScan = [];
+  Object.entries(SYLLABLES).forEach(([initialId, list]) => {
+    list.forEach((item) => {
+      if (baseFinal(item.final) === key) {
+        fromScan.push(mapSyllable(initialId, item));
+      }
+    });
+  });
+  const extra = (FINAL_EXTRA[finalId] || FINAL_EXTRA[key] || []).map((item) =>
+    mapSyllable(item.initial, item),
+  );
+  const merged = [...fromScan, ...extra];
+  const seen = new Set();
+  const unique = merged.filter((item) => {
+    const k = `${item.pinyin}:${item.char}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+  return unique.slice(0, 6);
+}
+
+/** 全部拼读例字（认读练习用） */
+function getAllSyllables() {
+  const out = [];
+  Object.entries(SYLLABLES).forEach(([initialId, list]) => {
+    list.forEach((item) => {
+      out.push(mapSyllable(initialId, item));
+    });
+  });
+  Object.values(FINAL_EXTRA).forEach((list) => {
+    list.forEach((item) => {
+      out.push(mapSyllable(item.initial, item));
+    });
+  });
+  return out;
+}
+
+function getFinalById(finalId) {
+  return FINALS.find((f) => f.id === finalId);
+}
+
+function resolveFinalId(finalStr) {
+  const bf = baseFinal(finalStr);
+  const ranked = [...FINALS].sort((a, b) => b.id.length - a.id.length);
+  for (const f of ranked) {
+    const k = finalKey(f.id);
+    if (k === bf) return f.id;
+    if (f.id === 'üe' && bf === 'ue') return f.id;
+    if (f.id === 'ün' && bf === 'un') return f.id;
+  }
+  return bf;
 }
 
 module.exports = {
   getInitials,
+  getFinals,
   getSyllables,
+  getFinalSyllables,
+  getAllSyllables,
+  getFinalById,
+  baseFinal,
+  resolveFinalId,
 };

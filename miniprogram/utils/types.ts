@@ -21,10 +21,21 @@ export interface PoetryItem {
   dynasty?: string;
   lines: string[];
   tags?: string[];
+  /** 课本单元序号，从 1 起 */
+  unit?: number;
 }
 
 /** 数学关卡：按技能模板动态出题 */
-export type MathSkill = 'add' | 'sub' | 'mix' | 'compare' | 'missing';
+export type MathSkill =
+  | 'add'
+  | 'sub'
+  | 'mix'
+  | 'compare'
+  | 'missing'
+  | 'makeTen'
+  | 'breakTen'
+  | 'flatTen'
+  | 'borrowTen';
 
 export interface MathItem {
   id: string;
@@ -36,6 +47,7 @@ export interface MathItem {
   /** 运算数上限，如 10 / 20 / 100 */
   max: number;
   tags?: string[];
+  unit?: number;
 }
 
 /** 英语单词关卡 */
@@ -49,6 +61,7 @@ export interface EnglishItem {
   phonetic?: string;
   category?: string;
   tags?: string[];
+  unit?: number;
 }
 
 export type KnowledgeItem = PoetryItem | MathItem | EnglishItem;
@@ -61,7 +74,14 @@ export type PoetryQuizType =
   | 'orderLines'
   | 'fillBlank';
 
-export type MathQuizType = 'mathCalc' | 'mathCompare' | 'mathMissing';
+export type MathQuizType =
+  | 'mathCalc'
+  | 'mathCompare'
+  | 'mathMissing'
+  | 'mathMakeTen'
+  | 'mathBreakTen'
+  | 'mathFlatTen'
+  | 'mathBorrowTen';
 
 export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
 
@@ -75,7 +95,8 @@ export type ArcadeMode =
   | 'daily'
   | 'duel'
   | 'sprint'
-  | 'exam';
+  | 'exam'
+  | 'unit';
 
 export interface ChoiceOption {
   id: string;

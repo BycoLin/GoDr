@@ -15,7 +15,8 @@ import {
 } from '../../utils/share';
 
 interface GameCard {
-  mode: ArcadeMode;
+  mode?: ArcadeMode;
+  link?: string;
   title: string;
   desc: string;
   tag: string;
@@ -23,6 +24,10 @@ interface GameCard {
 }
 
 const POETRY_GAMES: GameCard[] = [
+  { link: '/pages/pinyin/pinyin?tab=initial', title: '声母表', desc: '23 个声母认读拼读', tag: '声母', tone: 'm-sky' },
+  { link: '/pages/pinyin/pinyin?tab=final', title: '韵母表', desc: '单韵母到鼻韵母', tag: '韵母', tone: 'm-grass' },
+  { link: '/pages/pinyin-drill/pinyin-drill?kind=initial', title: '声母认读', desc: '看字选声母', tag: '认读', tone: 'm-coral' },
+  { link: '/pages/pinyin-drill/pinyin-drill?kind=final', title: '韵母认读', desc: '看字选韵母', tag: '认读', tone: 'm-sun' },
   { mode: 'mixed', title: '综合练', desc: '多种题型搅一搅', tag: '综合', tone: 'm-teal' },
   { mode: 'fillNext', title: '下一句', desc: '上句出来接下句', tag: '接龙', tone: 'm-coral' },
   { mode: 'matchPair', title: '上下句配对', desc: '点一点配对成功', tag: '配对', tone: 'm-sky' },
@@ -33,6 +38,10 @@ const POETRY_GAMES: GameCard[] = [
 
 const MATH_GAMES: GameCard[] = [
   { mode: 'mixed', title: '综合练', desc: '速算比较填空一起', tag: '综合', tone: 'm-teal' },
+  { mode: 'mathMakeTen', title: '凑十法', desc: '先凑成 10 再相加', tag: '凑十', tone: 'm-grass' },
+  { mode: 'mathBreakTen', title: '破十法', desc: '先减 10 再合并', tag: '破十', tone: 'm-orange' },
+  { mode: 'mathFlatTen', title: '平十法', desc: '先减到 10 再算', tag: '平十', tone: 'm-teal' },
+  { mode: 'mathBorrowTen', title: '借十法', desc: '个位不够向十位借', tag: '借十', tone: 'm-sky' },
   { mode: 'mathCalc', title: '口算练习', desc: '加减又快又准', tag: '速算', tone: 'm-sky' },
   { mode: 'mathCompare', title: '比大小', desc: '选对 > < =', tag: '比较', tone: 'm-sun' },
   { mode: 'mathMissing', title: '缺数填空', desc: '找出藏起来的数', tag: '填空', tone: 'm-coral' },
@@ -149,6 +158,13 @@ Page({
     });
   },
 
+  onTapUnitTest() {
+    const { packId, grade } = this.data;
+    wx.navigateTo({
+      url: `/pages/unit-test/unit-test?packId=${packId}&grade=${grade}`,
+    });
+  },
+
   buildSharePayload() {
     const { packSubject, grade, packId } = this.data;
     return buildGamesShare({ packSubject, grade, packId });
@@ -179,6 +195,11 @@ Page({
   },
 
   onTapGame(e: WechatMiniprogram.TouchEvent) {
+    const link = String(e.currentTarget.dataset.link || '');
+    if (link) {
+      wx.navigateTo({ url: link });
+      return;
+    }
     const mode = e.currentTarget.dataset.mode as ArcadeMode;
     const { packId, grade } = this.data;
     wx.navigateTo({

@@ -4,7 +4,8 @@
  */
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath, pathToFileURL } from 'url';
+import { fileURLToPath } from 'url';
+import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
@@ -15,43 +16,64 @@ function charKey(char) {
   return [...char].map((c) => c.codePointAt(0).toString(16)).join('_');
 }
 
-async function loadSyllables() {
-  // pinyin.js 是 CommonJS，用动态 import 转 file URL 可能不行；直接读 eval 太脏。
-  // 改用 createRequire
-  const { createRequire } = await import('module');
+function loadChars() {
   const require = createRequire(import.meta.url);
   const mod = require(pinyinPath);
-  const initials = mod.getInitials();
   const chars = new Set();
-  initials.forEach((item) => {
+
+  mod.getInitials().forEach((item) => {
+    if (item.tip) chars.add(item.tip);
     (mod.getSyllables(item.id) || []).forEach((s) => {
       if (s.char) chars.add(s.char);
     });
   });
+
+  mod.getFinals().forEach((item) => {
+    if (item.tip) chars.add(item.tip);
+    (mod.getFinalSyllables(item.id) || []).forEach((s) => {
+      if (s.char) chars.add(s.char);
+    });
+  });
+
+  (mod.getAllSyllables() || []).forEach((s) => {
+    if (s.char) chars.add(s.char);
+  });
+
   return [...chars];
 }
 
 async function fetchOne(char) {
-  const url = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(char)}&le=zh`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status} for ${char}`);
-  const buf = Buffer.from(await res.arrayBuffer());
-  if (buf.length < 200) throw new Error(`too small for ${char}: ${buf.length}`);
-  return buf;
+  const urls = [
+    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(char)}&le=zh`,
+    `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(char)}&type=1`,
+  ];
+  let lastErr;
+  for (const url of urls) {
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length < 200) throw new Error(`too small: ${buf.length}`);
+      return buf;
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error(`fetch failed for ${char}`);
 }
 
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
-  const chars = await loadSyllables();
+  const chars = loadChars();
   console.log(`共 ${chars.length} 个汉字，下载到 ${outDir}`);
 
   let ok = 0;
+  let skip = 0;
   let fail = 0;
   for (const char of chars) {
     const file = path.join(outDir, `${charKey(char)}.mp3`);
     if (fs.existsSync(file) && fs.statSync(file).size > 200) {
-      console.log(`skip ${char}`);
-      ok += 1;
+      skip += 1;
       continue;
     }
     try {
@@ -65,7 +87,7 @@ async function main() {
       fail += 1;
     }
   }
-  console.log(`完成：成功 ${ok}，失败 ${fail}`);
+  console.log(`完成：新增 ${ok}，已有 ${skip}，失败 ${fail}`);
 }
 
 main().catch((err) => {

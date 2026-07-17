@@ -15,6 +15,16 @@ import {
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
+import {
+  recordUnitTestResult,
+  unitTitle,
+} from '../../utils/unit-test';
+import {
+  buildRematchPlayUrl,
+  formatTypesLabel,
+  loadSessionWrongTypes,
+} from '../../utils/session-rematch';
+import type { QuizType } from '../../utils/types';
 
 Page({
   data: {
@@ -37,6 +47,9 @@ Page({
     duel: false,
     sprint: false,
     exam: false,
+    unitTest: false,
+    unitNo: 0,
+    unitBestText: '',
     userScore: 0,
     rivalScore: 0,
     points: 0,
@@ -50,6 +63,9 @@ Page({
     pathDone: false,
     pathNext: false,
     pathNextText: '',
+    showRematch: false,
+    rematchTypesText: '',
+    wrongTypes: [] as QuizType[],
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -66,6 +82,8 @@ Page({
     const duel = query.duel === '1' || mode === 'duel';
     const sprint = query.sprint === '1' || mode === 'sprint';
     const exam = query.exam === '1' || mode === 'exam';
+    const unitTest = query.unitTest === '1' || mode === 'unit';
+    const unitNo = Math.max(0, Number(query.unit || 0));
     const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const userScore = Number(query.userScore || 0);
@@ -87,6 +105,12 @@ Page({
 
     if (daily) {
       recordDailyResult(correct, total, sessionPoints);
+    }
+
+    let unitBestText = '';
+    if (unitTest && unitNo > 0) {
+      const rec = recordUnitTestResult(packId, grade, unitNo, correct, total);
+      unitBestText = `本单元最佳 ${rec.bestCorrect}/${rec.bestTotal}`;
     }
 
     markPracticeDay();
@@ -139,6 +163,13 @@ Page({
       else encouragement = '平手！再来比一比～';
     } else if (timedOut) {
       encouragement = sprint ? '时间到！手速还能再练～' : '时间到！再来练习！';
+    } else if (unitTest) {
+      encouragement =
+        stars >= 3
+          ? `${unitTitle(unitNo)}全对！本单元掌握了！`
+          : stars >= 2
+            ? `${unitTitle(unitNo)}完成！再测一次冲满分～`
+            : '错题已进错题本，回头再巩固本单元～';
     } else if (exam) {
       encouragement =
         stars >= 3
@@ -168,13 +199,19 @@ Page({
         : '先缓缓，再练一关会更好！';
     }
 
-    const progressNote = arcade
-      ? '本局是自由加练，未计入小岛关卡进度'
-      : itemId
-        ? '本局已计入关卡进度，可涨星解锁'
-        : '';
+    const progressNote = unitTest
+      ? `${unitBestText} · 单元测验不计关卡星星，错题已收录`
+      : arcade
+        ? '本局是自由加练，未计入小岛关卡进度'
+        : itemId
+          ? '本局已计入关卡进度，可涨星解锁'
+          : '';
 
     const goalNote = goalJustDone ? '今日目标达成！练满 10 题啦' : '';
+
+    const wrongTypes = loadSessionWrongTypes(packId, grade);
+    const showRematch = wrongTypes.length > 0 && correct < total;
+    const rematchTypesText = formatTypesLabel(wrongTypes);
 
     this.setData({
       packId,
@@ -198,6 +235,9 @@ Page({
       duel,
       sprint,
       exam,
+      unitTest,
+      unitNo,
+      unitBestText,
       userScore,
       rivalScore,
       points: sessionPoints,
@@ -209,6 +249,9 @@ Page({
       pathDone,
       pathNext,
       pathNextText,
+      showRematch,
+      rematchTypesText,
+      wrongTypes,
     });
 
     if (goalJustDone) {
@@ -254,8 +297,27 @@ Page({
     }
   },
 
+  onRematchSame() {
+    const { packId, grade, itemId, arcade, unitTest, unitNo, wrongTypes } = this.data;
+    if (!wrongTypes.length) {
+      wx.showToast({ title: '暂无薄弱题型', icon: 'none' });
+      return;
+    }
+    wx.redirectTo({
+      url: buildRematchPlayUrl({
+        packId,
+        grade,
+        wrongTypes,
+        itemId,
+        arcade,
+        unitTest,
+        unitNo,
+      }),
+    });
+  },
+
   onRetry() {
-    const { packId, grade, itemId, arcade, mode, boss, daily, duel, sprint, exam } = this.data;
+    const { packId, grade, itemId, arcade, mode, boss, daily, duel, sprint, exam, unitTest, unitNo } = this.data;
     if (boss) {
       wx.redirectTo({
         url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=boss&boss=1&arcade=1`,
@@ -286,6 +348,12 @@ Page({
       });
       return;
     }
+    if (unitTest && unitNo > 0) {
+      wx.redirectTo({
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=unit&unit=${unitNo}&arcade=1`,
+      });
+      return;
+    }
     if (arcade) {
       wx.redirectTo({
         url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
@@ -298,9 +366,15 @@ Page({
   },
 
   onBackLevels() {
-    const { packId, grade, arcade, boss } = this.data;
+    const { packId, grade, arcade, boss, unitTest } = this.data;
     if (boss) {
       wx.redirectTo({ url: `/pages/wrongbook/wrongbook?packId=${packId}` });
+      return;
+    }
+    if (unitTest) {
+      wx.redirectTo({
+        url: `/pages/unit-test/unit-test?packId=${packId}&grade=${grade}`,
+      });
       return;
     }
     if (arcade) {

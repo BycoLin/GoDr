@@ -45,11 +45,19 @@ import { triggerFocusRemindIfDue } from '../../utils/focus-timer';
 import { isPathKind } from '../../utils/skill-path';
 import { formatGradeLabel, parseGradeQuery } from '../../utils/grade-label';
 import { getActiveGrade } from '../../utils/active-subject';
+import { buildUnitQuiz, getUnitItems, unitTestNavTitle, UNIT_QUESTION_COUNT } from '../../utils/unit-test';
+import {
+  extractWrongTypes,
+  formatTypesLabel,
+  parseTypesQuery,
+} from '../../utils/session-rematch';
 import type {
   ArcadeMode,
   EnglishItem,
+  EnglishQuizType,
   KnowledgeItem,
   MathItem,
+  MathQuizType,
   PoetryItem,
   Question,
   QuizType,
@@ -84,6 +92,7 @@ function subjectQuizMode(
     mode === 'duel' ||
     mode === 'sprint' ||
     mode === 'exam' ||
+    mode === 'unit' ||
     mode === 'daily' ||
     mode === 'boss'
   ) {
@@ -105,6 +114,8 @@ Page({
     duel: false,
     sprint: false,
     exam: false,
+    unitTest: false,
+    unitNo: 1,
     timed: false,
     limitSec: 0,
     remainSec: 0,
@@ -153,6 +164,7 @@ Page({
   lastCorrect: true,
   subjectKind: 'poetry' as PackSubjectKind,
   quizMode: 'mixed' as ArcadeMode,
+  preferTypes: [] as QuizType[],
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
@@ -164,15 +176,20 @@ Page({
     const duel = mode === 'duel' || query.duel === '1';
     const sprint = mode === 'sprint' || query.sprint === '1';
     const exam = mode === 'exam' || query.exam === '1';
+    const unitTest = mode === 'unit';
+    const unitNo = Math.max(1, Number(query.unit || 1));
+    const preferTypes = parseTypesQuery(query.types);
+    const rematch = query.rematch === '1' && preferTypes.length > 0;
+    this.preferTypes = preferTypes;
     const timed =
       query.timed === '1' || daily || duel || sprint;
     const limitSec = Number(
       query.limitSec ||
         (daily ? DAILY_LIMIT_SEC : duel ? DUEL_LIMIT_SEC : sprint ? SPRINT_LIMIT_SEC : 0),
     );
-    const arcade =
-      boss || daily || duel || sprint || exam || query.arcade === '1' || !itemId;
-    const rolling = arcade && !exam && !duel;
+    let arcade =
+      boss || daily || duel || sprint || exam || unitTest || query.arcade === '1' || !itemId;
+    let rolling = arcade && !exam && !duel && !unitTest;
     const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const subjectKind = getPackSubjectKind(packId);
@@ -321,6 +338,106 @@ Page({
       poemAuthor = `${targetTotal} 题一次测`;
       modeLabel = '模拟小测';
       wx.setNavigationBarTitle({ title: '模拟小测' });
+    } else if (unitTest) {
+      questions = buildUnitQuiz(packId, grade, unitNo);
+      if (!questions.length) {
+        wx.showToast({ title: '该单元暂无题目', icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 900);
+        return;
+      }
+      targetTotal = questions.length;
+      poemTitle = unitTestNavTitle(packId, grade, unitNo);
+      poemAuthor = `${targetTotal} 题 · 只考本单元`;
+      modeLabel = '单元测验';
+      wx.setNavigationBarTitle({ title: '单元测验' });
+    } else if (rematch) {
+      const typesLabel = formatTypesLabel(preferTypes);
+      if (unitTest) {
+        const unitItems = getUnitItems(packId, grade, unitNo);
+        const uMath = unitItems.filter(isMath) as MathItem[];
+        const uEnglish = unitItems.filter(isEnglish) as EnglishItem[];
+        const uPoetry = unitItems.filter(isPoetry) as PoetryItem[];
+        if (subjectKind === 'math') {
+          questions = buildMathArcadeQuiz(
+            uMath.length ? uMath : mathPool,
+            'mixed',
+            UNIT_QUESTION_COUNT,
+            preferTypes,
+          );
+        } else if (subjectKind === 'english') {
+          questions = buildEnglishArcadeQuiz(
+            uEnglish.length ? uEnglish : englishPool,
+            'mixed',
+            UNIT_QUESTION_COUNT,
+            preferTypes,
+          );
+        } else {
+          questions = buildArcadeQuiz(
+            uPoetry.length ? uPoetry : poetryPool,
+            'mixed',
+            UNIT_QUESTION_COUNT,
+            preferTypes,
+          );
+        }
+        targetTotal = questions.length || UNIT_QUESTION_COUNT;
+        arcade = true;
+        rolling = false;
+        poemTitle = `${unitTestNavTitle(packId, grade, unitNo)} · 同类加练`;
+        poemAuthor = typesLabel;
+      } else if (itemId) {
+        const item = getItemById(packId, itemId);
+        if (!item) {
+          wx.showToast({ title: '关卡不存在', icon: 'none' });
+          setTimeout(() => wx.navigateBack(), 800);
+          return;
+        }
+        if (isMath(item)) {
+          questions = buildMathQuizForItem(item, 5, preferTypes as MathQuizType[]);
+          poemTitle = item.title;
+          poemAuthor = typesLabel;
+        } else if (isEnglish(item)) {
+          const enTypes = preferTypes.filter(
+            (t): t is EnglishQuizType | 'matchPair' =>
+              t === 'matchPair' ||
+              t === 'enWordMean' ||
+              t === 'enMeanWord' ||
+              t === 'enSpell',
+          );
+          questions = buildEnglishQuizForItem(item, englishPool, 5, enTypes);
+          poemTitle = item.word;
+          poemAuthor = typesLabel;
+        } else {
+          questions = buildQuizForItem(item, poetryPool, {
+            count: 5,
+            modes: preferTypes,
+            rampHard: false,
+          });
+          poemTitle = item.title;
+          poemAuthor = typesLabel;
+        }
+        targetTotal = questions.length;
+        arcade = false;
+        rolling = false;
+        modeLabel = '同类加练';
+        wx.setNavigationBarTitle({ title: '同类加练' });
+      } else {
+        if (subjectKind === 'math') {
+          questions = buildMathArcadeQuiz(mathPool, 'mixed', 1, preferTypes);
+        } else if (subjectKind === 'english') {
+          questions = buildEnglishArcadeQuiz(englishPool, 'mixed', 1, preferTypes);
+        } else {
+          questions = buildArcadeQuiz(poetryPool, 'mixed', 1, preferTypes);
+        }
+        targetTotal = ROLLING_TARGET;
+        arcade = true;
+        rolling = true;
+        poemTitle = '同类加练';
+        poemAuthor = typesLabel;
+      }
+      modeLabel = '同类加练';
+      if (!itemId || unitTest) {
+        wx.setNavigationBarTitle({ title: '同类加练' });
+      }
     } else if (arcade) {
       if (subjectKind === 'math') {
         questions = buildMathArcadeQuiz(mathPool, quizMode, 1);
@@ -384,7 +501,11 @@ Page({
             ? 'sprint'
             : exam
               ? 'exam'
-              : mode;
+              : unitTest
+              ? 'unit'
+              : rematch
+                ? 'mixed'
+                : mode;
 
     this.setData({
       packId,
@@ -397,6 +518,8 @@ Page({
       duel,
       sprint,
       exam,
+      unitTest,
+      unitNo,
       timed,
       limitSec,
       remainSec: limitSec,
@@ -607,6 +730,10 @@ Page({
         current.type !== 'mathCalc' &&
         current.type !== 'mathCompare' &&
         current.type !== 'mathMissing' &&
+        current.type !== 'mathMakeTen' &&
+        current.type !== 'mathBreakTen' &&
+        current.type !== 'mathFlatTen' &&
+        current.type !== 'mathBorrowTen' &&
         current.type !== 'enWordMean' &&
         current.type !== 'enMeanWord' &&
         current.type !== 'enSpell')
@@ -714,6 +841,7 @@ Page({
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
             lastType: this.lastType,
+            preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
         );
@@ -725,6 +853,7 @@ Page({
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
             lastType: this.lastType,
+            preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
         );
@@ -736,6 +865,7 @@ Page({
             combo: this.data.combo,
             lastCorrect: this.lastCorrect,
             lastType: this.lastType,
+            preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
         );
@@ -790,6 +920,8 @@ Page({
       duel,
       sprint,
       exam,
+      unitTest,
+      unitNo,
       sessionPoints,
       bestCombo,
       total,
@@ -812,10 +944,13 @@ Page({
       correct,
       total: answeredTotal,
       answers,
+      wrongTypes: extractWrongTypes(questions, answers),
       arcade,
       mode,
       boss,
       daily,
+      unitTest,
+      unitNo: unitTest ? unitNo : undefined,
       sessionPoints,
       bestCombo,
       timedOut,
@@ -824,7 +959,7 @@ Page({
     saveLastSession(session);
     const title = encodeURIComponent(poemTitle);
     wx.redirectTo({
-      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}&fromPath=${fromPath}&pathStep=${pathStep}`,
+      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&unit=${unitNo}&unitTest=${unitTest ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}&fromPath=${fromPath}&pathStep=${pathStep}`,
     });
   },
 });

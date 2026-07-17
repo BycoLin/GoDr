@@ -1,0 +1,38 @@
+<view class="safe-pad unit-test">
+  <view class="hero">
+    <view class="hero-badge">{{packSubject}} · 按单元</view>
+    <view class="hero-title">单元测验</view>
+    <view class="hero-desc">{{gradeLabel}} · {{hint}}</view>
+  </view>
+
+  <view class="compare">
+    <view class="compare-item">
+      <view class="compare-tag">单元测验</view>
+      <view class="compare-text">指定单元 · 固定 {{units[0].questionCount || 10}} 题</view>
+    </view>
+    <view class="compare-item muted">
+      <view class="compare-tag">模拟小测</view>
+      <view class="compare-text">全年级随机 · 综合抽题</view>
+    </view>
+  </view>
+
+  <view class="unit-list" wx:if="{{units.length}}">
+    <view
+      class="unit-row pressable"
+      wx:for="{{units}}"
+      wx:key="unit"
+      data-unit="{{item.unit}}"
+      bindtap="onTapUnit"
+    >
+      <view class="unit-idx">{{item.unit}}</view>
+      <view class="unit-body">
+        <view class="unit-title">{{item.title}}</view>
+        <view class="unit-tip">{{item.itemCount}} 个知识点 · {{item.questionCount}} 题</view>
+        <view class="unit-score">{{item.bestText}}<text wx:if="{{item.attempts > 0}}"> · 已测 {{item.attempts}} 次</text></view>
+      </view>
+      <view class="unit-go">测</view>
+    </view>
+  </view>
+
+  <view class="empty" wx:else>{{hint}}</view>
+</view>

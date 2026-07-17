@@ -6,6 +6,7 @@ import type {
   EnglishQuizType,
   MatchPairQuestion,
   Question,
+  QuizType,
 } from './types';
 
 function shuffle<T>(arr: T[]): T[] {
@@ -151,13 +152,23 @@ export function buildEnglishQuizForItem(
   item: EnglishItem,
   pool: EnglishItem[],
   count = 5,
+  preferTypes?: Array<EnglishQuizType | 'matchPair'>,
 ): Question[] {
   const fullPool = pool.length ? pool : [item];
+  const types = preferTypes?.filter(
+    (t): t is EnglishQuizType | 'matchPair' =>
+      t === 'matchPair' ||
+      t === 'enWordMean' ||
+      t === 'enMeanWord' ||
+      t === 'enSpell',
+  );
   const questions: Question[] = [];
   let guard = 0;
   while (questions.length < count && guard < count * 12) {
     guard += 1;
-    const type = preferredType(questions.length);
+    const type = types?.length
+      ? types[questions.length % types.length]
+      : preferredType(questions.length);
     const q =
       type === 'matchPair'
         ? makeEnMatch(fullPool)
@@ -171,15 +182,25 @@ export function buildEnglishArcadeQuiz(
   pool: EnglishItem[],
   mode: ArcadeMode,
   count = 8,
+  preferModes?: QuizType[],
 ): Question[] {
   if (!pool.length) return [];
+  const enPrefer = preferModes?.filter(
+    (t): t is EnglishQuizType | 'matchPair' =>
+      t === 'matchPair' ||
+      t === 'enWordMean' ||
+      t === 'enMeanWord' ||
+      t === 'enSpell',
+  );
   const questions: Question[] = [];
   let guard = 0;
   while (questions.length < count && guard < count * 12) {
     guard += 1;
     const item = pool[Math.floor(Math.random() * pool.length)];
     let type: EnglishQuizType | 'matchPair';
-    if (
+    if (enPrefer?.length) {
+      type = enPrefer[questions.length % enPrefer.length];
+    } else if (
       mode === 'enWordMean' ||
       mode === 'enMeanWord' ||
       mode === 'enSpell' ||
@@ -192,7 +213,8 @@ export function buildEnglishArcadeQuiz(
       mode === 'daily' ||
       mode === 'duel' ||
       mode === 'sprint' ||
-      mode === 'exam'
+      mode === 'exam' ||
+      mode === 'unit'
     ) {
       type = preferredType(questions.length);
     } else {
@@ -236,14 +258,29 @@ export function buildEnglishBossQuiz(
 export function nextEnglishAdaptiveQuestion(
   pool: EnglishItem[],
   baseMode: ArcadeMode,
-  ctx: { combo: number; lastCorrect: boolean; lastType?: string },
+  ctx: {
+    combo: number;
+    lastCorrect: boolean;
+    lastType?: string;
+    preferModes?: QuizType[];
+  },
   wrongHints?: Array<{ itemId: string; quizType: string }>,
 ): Question | null {
   if (!pool.length) return null;
   if (baseMode === 'boss' && !wrongHints?.length) return null;
 
+  const enPrefer = ctx.preferModes?.filter(
+    (t): t is EnglishQuizType | 'matchPair' =>
+      t === 'matchPair' ||
+      t === 'enWordMean' ||
+      t === 'enMeanWord' ||
+      t === 'enSpell',
+  );
+
   let type: EnglishQuizType | 'matchPair' = 'enWordMean';
-  if (
+  if (enPrefer?.length) {
+    type = enPrefer[Math.floor(Math.random() * enPrefer.length)];
+  } else if (
     !ctx.lastCorrect &&
     (ctx.lastType === 'enWordMean' ||
       ctx.lastType === 'enMeanWord' ||
@@ -296,4 +333,5 @@ export const ENGLISH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
   duel: '趣味对练',
   sprint: '限时冲刺',
   exam: '模拟小测',
+  unit: '单元测验',
 };

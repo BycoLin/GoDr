@@ -9,6 +9,7 @@ module.exports = [
     skill: 'add',
     max: 5,
     tags: ['幼小衔接', '加法'],
+    unit: 1,
   },
   {
     id: 'math_g0_sub5',
@@ -19,6 +20,7 @@ module.exports = [
     skill: 'sub',
     max: 5,
     tags: ['幼小衔接', '减法'],
+    unit: 1,
   },
   {
     id: 'math_g0_compare5',
@@ -29,6 +31,7 @@ module.exports = [
     skill: 'compare',
     max: 5,
     tags: ['幼小衔接', '比较'],
+    unit: 1,
   },
   {
     id: 'math_g0_missing5',
@@ -39,6 +42,7 @@ module.exports = [
     skill: 'missing',
     max: 5,
     tags: ['幼小衔接', '填空'],
+    unit: 1,
   },
   {
     id: 'math_g1_add10',
@@ -49,6 +53,7 @@ module.exports = [
     skill: 'add',
     max: 10,
     tags: ['速算', '加法'],
+    unit: 1,
   },
   {
     id: 'math_g1_sub10',
@@ -59,6 +64,7 @@ module.exports = [
     skill: 'sub',
     max: 10,
     tags: ['速算', '减法'],
+    unit: 1,
   },
   {
     id: 'math_g1_mix10',
@@ -69,6 +75,51 @@ module.exports = [
     skill: 'mix',
     max: 10,
     tags: ['速算', '混合'],
+    unit: 1,
+  },
+  {
+    id: 'math_g1_make10',
+    type: 'math',
+    grade: 1,
+    title: '凑十法',
+    subtitle: '先凑成 10 再相加',
+    skill: 'makeTen',
+    max: 20,
+    tags: ['凑十法', '加法'],
+    unit: 2,
+  },
+  {
+    id: 'math_g1_break10',
+    type: 'math',
+    grade: 1,
+    title: '破十法',
+    subtitle: '先减 10 再合并',
+    skill: 'breakTen',
+    max: 20,
+    tags: ['破十法', '减法'],
+    unit: 2,
+  },
+  {
+    id: 'math_g1_flat10',
+    type: 'math',
+    grade: 1,
+    title: '平十法',
+    subtitle: '先减到 10 再算',
+    skill: 'flatTen',
+    max: 20,
+    tags: ['平十法', '减法'],
+    unit: 2,
+  },
+  {
+    id: 'math_g1_borrow10',
+    type: 'math',
+    grade: 1,
+    title: '借十法',
+    subtitle: '个位不够向十位借',
+    skill: 'borrowTen',
+    max: 20,
+    tags: ['借十法', '减法'],
+    unit: 2,
   },
   {
     id: 'math_g1_compare20',
@@ -79,6 +130,7 @@ module.exports = [
     skill: 'compare',
     max: 20,
     tags: ['比较'],
+    unit: 3,
   },
   {
     id: 'math_g1_missing10',
@@ -89,6 +141,7 @@ module.exports = [
     skill: 'missing',
     max: 10,
     tags: ['填空'],
+    unit: 3,
   },
   {
     id: 'math_g2_add20',
@@ -99,6 +152,7 @@ module.exports = [
     skill: 'add',
     max: 20,
     tags: ['速算', '加法'],
+    unit: 1,
   },
   {
     id: 'math_g2_sub20',
@@ -109,6 +163,7 @@ module.exports = [
     skill: 'sub',
     max: 20,
     tags: ['速算', '减法'],
+    unit: 1,
   },
   {
     id: 'math_g2_mix20',
@@ -119,6 +174,7 @@ module.exports = [
     skill: 'mix',
     max: 20,
     tags: ['速算', '混合'],
+    unit: 1,
   },
   {
     id: 'math_g2_compare100',
@@ -129,6 +185,7 @@ module.exports = [
     skill: 'compare',
     max: 100,
     tags: ['比较'],
+    unit: 2,
   },
   {
     id: 'math_g2_missing20',
@@ -139,5 +196,6 @@ module.exports = [
     skill: 'missing',
     max: 20,
     tags: ['填空'],
+    unit: 2,
   },
 ];

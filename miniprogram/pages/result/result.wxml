@@ -17,6 +17,11 @@
       <view class="badge-new-label">新成就</view>
       <view class="badge-chip" wx:for="{{newBadges}}" wx:key="id">{{item.title}}</view>
     </view>
+    <view class="rematch-box" wx:if="{{showRematch}}">
+      <view class="rematch-label">本局薄弱题型</view>
+      <view class="rematch-types">{{rematchTypesText}}</view>
+      <button class="btn btn-rematch" bindtap="onRematchSame">再练同类</button>
+    </view>
   </view>
 
   <button class="btn btn-primary" wx:if="{{pathNext}}" bindtap="onPathNext">{{pathNextText}}</button>
@@ -24,7 +29,7 @@
   <button class="btn btn-share" open-type="share">分享给小伙伴</button>
   <button class="btn btn-secondary" wx:if="{{pathDone}}" bindtap="onPathHub">回进阶路径</button>
   <button class="btn btn-secondary" wx:elif="{{!pathNext}}" bindtap="onBackLevels">
-    {{boss ? '回错题本' : (arcade ? '回趣味加练' : '回关卡地图')}}
+    {{boss ? '回错题本' : (unitTest ? '回单元测验' : (arcade ? '回趣味加练' : '回关卡地图'))}}
   </button>
   <button class="btn btn-ghost" bindtap="onHome">回首页</button>
 </view>

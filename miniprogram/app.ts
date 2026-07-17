@@ -23,12 +23,22 @@ function startAppFocusWatch() {
 App<IAppOption>({
   globalData: {},
   onLaunch() {
-    enableShareMenus();
-    startAppFocusWatch();
-    preloadTabBarPages();
-    wx.nextTick(() => {
-      const packId = getActivePackId();
-      scheduleLevelPrefetch(packId, getActiveGrade(packId));
-    });
+    try {
+      enableShareMenus();
+    } catch (err) {
+      console.warn('enableShareMenus failed', err);
+    }
+
+    // 首屏渲染完成后再启动预加载与专注提醒，避免阻塞模拟器
+    setTimeout(() => {
+      try {
+        startAppFocusWatch();
+        preloadTabBarPages();
+        const packId = getActivePackId();
+        scheduleLevelPrefetch(packId, getActiveGrade(packId));
+      } catch (err) {
+        console.error('app deferred init failed', err);
+      }
+    }, 1500);
   },
 });

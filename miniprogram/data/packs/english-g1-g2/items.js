@@ -10,6 +10,7 @@ module.exports = [
     phonetic: '/wʌn/',
     category: 'number',
     tags: ['幼小衔接', '数字'],
+    unit: 1,
   },
   {
     id: 'en_g0_two',
@@ -21,6 +22,7 @@ module.exports = [
     phonetic: '/tuː/',
     category: 'number',
     tags: ['幼小衔接', '数字'],
+    unit: 1,
   },
   {
     id: 'en_g0_three',
@@ -32,6 +34,7 @@ module.exports = [
     phonetic: '/θriː/',
     category: 'number',
     tags: ['幼小衔接', '数字'],
+    unit: 1,
   },
   {
     id: 'en_g0_yellow',
@@ -43,6 +46,7 @@ module.exports = [
     phonetic: '/ˈjeləʊ/',
     category: 'color',
     tags: ['幼小衔接', '颜色'],
+    unit: 1,
   },
   {
     id: 'en_g0_mom',
@@ -54,6 +58,7 @@ module.exports = [
     phonetic: '/mɒm/',
     category: 'family',
     tags: ['幼小衔接', '家人'],
+    unit: 1,
   },
   {
     id: 'en_g1_apple',
@@ -65,6 +70,7 @@ module.exports = [
     phonetic: '/ˈæpl/',
     category: 'fruit',
     tags: ['单词', '水果'],
+    unit: 1,
   },
   {
     id: 'en_g1_banana',
@@ -76,6 +82,7 @@ module.exports = [
     phonetic: '/bəˈnɑːnə/',
     category: 'fruit',
     tags: ['单词', '水果'],
+    unit: 1,
   },
   {
     id: 'en_g1_cat',
@@ -87,6 +94,7 @@ module.exports = [
     phonetic: '/kæt/',
     category: 'animal',
     tags: ['单词', '动物'],
+    unit: 2,
   },
   {
     id: 'en_g1_dog',
@@ -98,6 +106,7 @@ module.exports = [
     phonetic: '/dɒɡ/',
     category: 'animal',
     tags: ['单词', '动物'],
+    unit: 2,
   },
   {
     id: 'en_g1_red',
@@ -109,6 +118,7 @@ module.exports = [
     phonetic: '/red/',
     category: 'color',
     tags: ['单词', '颜色'],
+    unit: 3,
   },
   {
     id: 'en_g1_blue',
@@ -120,6 +130,7 @@ module.exports = [
     phonetic: '/bluː/',
     category: 'color',
     tags: ['单词', '颜色'],
+    unit: 3,
   },
   {
     id: 'en_g1_book',
@@ -131,6 +142,7 @@ module.exports = [
     phonetic: '/bʊk/',
     category: 'school',
     tags: ['单词', '学习'],
+    unit: 4,
   },
   {
     id: 'en_g1_pen',
@@ -142,6 +154,7 @@ module.exports = [
     phonetic: '/pen/',
     category: 'school',
     tags: ['单词', '学习'],
+    unit: 4,
   },
   {
     id: 'en_g2_family',
@@ -153,6 +166,7 @@ module.exports = [
     phonetic: '/ˈfæməli/',
     category: 'people',
     tags: ['单词', '人物'],
+    unit: 1,
   },
   {
     id: 'en_g2_friend',
@@ -164,6 +178,7 @@ module.exports = [
     phonetic: '/frend/',
     category: 'people',
     tags: ['单词', '人物'],
+    unit: 1,
   },
   {
     id: 'en_g2_happy',
@@ -175,6 +190,7 @@ module.exports = [
     phonetic: '/ˈhæpi/',
     category: 'feeling',
     tags: ['单词', '心情'],
+    unit: 2,
   },
   {
     id: 'en_g2_water',
@@ -186,6 +202,7 @@ module.exports = [
     phonetic: '/ˈwɔːtə/',
     category: 'food',
     tags: ['单词', '饮食'],
+    unit: 2,
   },
   {
     id: 'en_g2_milk',
@@ -197,6 +214,7 @@ module.exports = [
     phonetic: '/mɪlk/',
     category: 'food',
     tags: ['单词', '饮食'],
+    unit: 2,
   },
   {
     id: 'en_g2_teacher',
@@ -208,6 +226,7 @@ module.exports = [
     phonetic: '/ˈtiːtʃə/',
     category: 'school',
     tags: ['单词', '学习'],
+    unit: 3,
   },
   {
     id: 'en_g2_morning',
@@ -219,6 +238,7 @@ module.exports = [
     phonetic: '/ˈmɔːnɪŋ/',
     category: 'time',
     tags: ['单词', '时间'],
+    unit: 3,
   },
   {
     id: 'en_g2_school',
@@ -230,5 +250,6 @@ module.exports = [
     phonetic: '/skuːl/',
     category: 'school',
     tags: ['单词', '学习'],
+    unit: 3,
   },
 ];

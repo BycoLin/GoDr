@@ -18,6 +18,15 @@
     <view class="side-go">去练</view>
   </view>
 
+  <view class="path-entry pressable q-exam" bindtap="onTapUnitTest">
+    <view class="path-entry-tag">单元</view>
+    <view class="path-entry-body">
+      <view class="path-entry-title">单元测验</view>
+      <view class="path-entry-desc">按课本单元 · 固定 10 题 · 错题进错题本</view>
+    </view>
+    <view class="path-entry-go">选</view>
+  </view>
+
   <view class="path-entry pressable" wx:if="{{showPath}}" bindtap="onTapPath">
     <view class="path-entry-tag">进阶</view>
     <view class="path-entry-body">
@@ -31,8 +40,9 @@
   <view
     class="play-row {{item.tone}} pressable"
     wx:for="{{games}}"
-    wx:key="mode"
+    wx:key="title"
     data-mode="{{item.mode}}"
+    data-link="{{item.link}}"
     bindtap="onTapGame"
   >
     <view class="play-icon">{{item.tag}}</view>

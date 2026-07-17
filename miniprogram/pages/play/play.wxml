@@ -33,7 +33,7 @@
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
       class="card q-card"
-      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'mathMakeTen' || current.type === 'mathBreakTen' || current.type === 'mathFlatTen' || current.type === 'mathBorrowTen' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
     >
       <view class="q-type">
         <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
@@ -41,6 +41,10 @@
         <block wx:elif="{{current.type === 'mathCalc'}}">速算</block>
         <block wx:elif="{{current.type === 'mathCompare'}}">比大小</block>
         <block wx:elif="{{current.type === 'mathMissing'}}">填空</block>
+        <block wx:elif="{{current.type === 'mathMakeTen'}}">凑十法</block>
+        <block wx:elif="{{current.type === 'mathBreakTen'}}">破十法</block>
+        <block wx:elif="{{current.type === 'mathFlatTen'}}">平十法</block>
+        <block wx:elif="{{current.type === 'mathBorrowTen'}}">借十法</block>
         <block wx:elif="{{current.type === 'enWordMean'}}">看词选义</block>
         <block wx:elif="{{current.type === 'enMeanWord'}}">看义选词</block>
         <block wx:elif="{{current.type === 'enSpell'}}">缺字母</block>
