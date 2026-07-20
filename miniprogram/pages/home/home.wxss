@@ -96,7 +96,7 @@
   display: flex;
   align-items: center;
   gap: 16rpx;
-  margin-bottom: 28rpx;
+  margin-bottom: 20rpx;
 }
 
 .avatar {
@@ -317,7 +317,7 @@
   border: 3rpx solid #ece7df;
   border-radius: 32rpx;
   padding: 24rpx 28rpx 22rpx;
-  margin-bottom: 28rpx;
+  margin-bottom: 24rpx;
   box-shadow: 0 8rpx 0 rgba(26, 20, 48, 0.06);
 }
 
@@ -333,10 +333,27 @@
   margin-bottom: 14rpx;
 }
 
+.goal-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+}
+
 .goal-title {
   font-size: 30rpx;
   font-weight: 900;
   color: #1a1430;
+}
+
+.goal-scope {
+  flex-shrink: 0;
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+  background: #eef3ff;
+  color: #5b8cff;
+  font-size: 20rpx;
+  font-weight: 800;
 }
 
 .goal-count {

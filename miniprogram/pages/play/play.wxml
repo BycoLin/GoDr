@@ -50,7 +50,7 @@
         <block wx:elif="{{current.type === 'enSpell'}}">缺字母</block>
         <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
       </view>
-      <view class="q-prompt">{{current.prompt}}</view>
+      <view class="q-prompt {{current.type === 'fillBlank' ? 'q-prompt-center' : ''}}">{{current.prompt}}</view>
       <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'options-chars' : ''}}">
         <view
           class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"

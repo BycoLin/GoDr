@@ -13,6 +13,18 @@
       {
         "value": "node_modules",
         "type": "folder"
+      },
+      {
+        "value": "data/README.md",
+        "type": "file"
+      },
+      {
+        "value": "assets/tts",
+        "type": "folder"
+      },
+      {
+        "value": "package-pinyin/assets/tts",
+        "type": "folder"
       }
     ],
     "include": []
@@ -32,7 +44,7 @@
     "autoAudits": false,
     "newFeature": false,
     "uglifyFileName": false,
-    "uploadWithSourceMap": true,
+    "uploadWithSourceMap": false,
     "useIsolateContext": false,
     "nodeModules": false,
     "enhance": true,

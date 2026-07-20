@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "数字排队",
+  "usingComponents": {
+    "num-keypad": "/package-extra/components/num-keypad/num-keypad"
+  }
+}

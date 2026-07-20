@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "数字排队",
-  "usingComponents": {
-    "num-keypad": "/components/num-keypad/num-keypad"
-  }
-}

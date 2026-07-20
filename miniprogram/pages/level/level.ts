@@ -27,10 +27,28 @@ Page({
     goalText: ENTER_BUBBLE,
     toneClass: 'tone-cn',
     gradeLabel: '',
+    scrollHeight: 400,
   },
 
   _seenShow: false,
   _pendingFocus: null as LevelRow | null,
+
+  initScrollHeight() {
+    try {
+      const win = wx.getWindowInfo?.() || wx.getSystemInfoSync();
+      const rpx = win.windowWidth / 750;
+      const topBar = 132 * rpx;
+      const dock = 248 * rpx;
+      const safeBottom =
+        win.safeArea && win.screenHeight
+          ? Math.max(0, win.screenHeight - win.safeArea.bottom)
+          : 0;
+      const scrollHeight = Math.floor(win.windowHeight - topBar - dock - safeBottom);
+      this.setData({ scrollHeight: Math.max(scrollHeight, 240) });
+    } catch {
+      this.setData({ scrollHeight: 400 });
+    }
+  },
 
   onLoad(query: Record<string, string | undefined>) {
     const packId = query.packId || 'poetry-g1-g2';
@@ -63,6 +81,7 @@ Page({
       ...this.focusPatch(focus, true),
     });
 
+    this.initScrollHeight();
     wx.nextTick(() => preloadPlayPage());
   },
 

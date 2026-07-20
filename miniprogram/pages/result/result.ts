@@ -25,6 +25,7 @@ import {
   loadSessionWrongTypes,
 } from '../../utils/session-rematch';
 import type { QuizType } from '../../utils/types';
+import { ROUTES, routePage } from '../../utils/routes';
 
 Page({
   data: {
@@ -65,7 +66,10 @@ Page({
     pathNextText: '',
     showRematch: false,
     rematchTypesText: '',
+    rematchTags: [] as string[],
     wrongTypes: [] as QuizType[],
+    showBackLink: false,
+    backLabel: '',
   },
 
   onLoad(query: Record<string, string | undefined>) {
@@ -202,7 +206,7 @@ Page({
     const progressNote = unitTest
       ? `${unitBestText} · 单元测验不计关卡星星，错题已收录`
       : arcade
-        ? '本局是自由加练，未计入小岛关卡进度'
+        ? '自由加练，不计关卡进度'
         : itemId
           ? '本局已计入关卡进度，可涨星解锁'
           : '';
@@ -212,6 +216,17 @@ Page({
     const wrongTypes = loadSessionWrongTypes(packId, grade);
     const showRematch = wrongTypes.length > 0 && correct < total;
     const rematchTypesText = formatTypesLabel(wrongTypes);
+    const rematchTags = rematchTypesText
+      ? rematchTypesText.split(/[、,，]/).map((s) => s.trim()).filter(Boolean)
+      : [];
+    const showBackLink = !pathNext && !pathDone;
+    const backLabel = boss
+      ? '错题本'
+      : unitTest
+        ? '单元测验'
+        : arcade
+          ? '趣味加练'
+          : '关卡地图';
 
     this.setData({
       packId,
@@ -251,7 +266,10 @@ Page({
       pathNextText,
       showRematch,
       rematchTypesText,
+      rematchTags,
       wrongTypes,
+      showBackLink,
+      backLabel,
     });
 
     if (goalJustDone) {
@@ -368,12 +386,12 @@ Page({
   onBackLevels() {
     const { packId, grade, arcade, boss, unitTest } = this.data;
     if (boss) {
-      wx.redirectTo({ url: `/pages/wrongbook/wrongbook?packId=${packId}` });
+      wx.redirectTo({ url: routePage(ROUTES.wrongbook, `packId=${packId}`) });
       return;
     }
     if (unitTest) {
       wx.redirectTo({
-        url: `/pages/unit-test/unit-test?packId=${packId}&grade=${grade}`,
+        url: routePage(ROUTES.unitTest, `packId=${packId}&grade=${grade}`),
       });
       return;
     }

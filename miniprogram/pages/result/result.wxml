@@ -1,35 +1,61 @@
-<view class="safe-pad result">
-  <view class="card result-card">
-    <view class="label" wx:if="{{arcade || isMath || isEnglish}}">{{title}}</view>
-    <view class="label" wx:else>《{{title}}》</view>
-    <view class="stars">
-      <text class="star {{stars >= 1 ? 'on' : ''}}">★</text>
-      <text class="star {{stars >= 2 ? 'on' : ''}}">★</text>
-      <text class="star {{stars >= 3 ? 'on' : ''}}">★</text>
-    </view>
-    <view class="score">{{ratioText}}</view>
-    <view class="duel-note" wx:if="{{duel}}">你 {{userScore}} · 练习伙伴 {{rivalScore}}</view>
-    <view class="points-row">+{{points}} 分<text wx:if="{{bestCombo >= 2}}"> · 最高连对 x{{bestCombo}}</text></view>
-    <view class="encourage">{{encouragement}}</view>
-    <view class="goal-note" wx:if="{{goalNote}}">{{goalNote}}</view>
-    <view class="progress-note" wx:if="{{progressNote}}">{{progressNote}}</view>
-    <view class="badge-new" wx:if="{{newBadges.length}}">
-      <view class="badge-new-label">新成就</view>
-      <view class="badge-chip" wx:for="{{newBadges}}" wx:key="id">{{item.title}}</view>
-    </view>
-    <view class="rematch-box" wx:if="{{showRematch}}">
-      <view class="rematch-label">本局薄弱题型</view>
-      <view class="rematch-types">{{rematchTypesText}}</view>
-      <button class="btn btn-rematch" bindtap="onRematchSame">再练同类</button>
+<view class="result-page">
+  <view class="safe-pad result-body">
+    <view class="card result-card">
+      <view class="score-hero">
+        <view class="label" wx:if="{{arcade || isMath || isEnglish}}">{{title}}</view>
+        <view class="label" wx:else>《{{title}}》</view>
+        <view class="stars">
+          <text class="star {{stars >= 1 ? 'on' : ''}}">★</text>
+          <text class="star {{stars >= 2 ? 'on' : ''}}">★</text>
+          <text class="star {{stars >= 3 ? 'on' : ''}}">★</text>
+        </view>
+        <view class="score">{{ratioText}}</view>
+        <view class="duel-note" wx:if="{{duel}}">你 {{userScore}} · 练习伙伴 {{rivalScore}}</view>
+        <view class="points-chip">+{{points}} 分<text wx:if="{{bestCombo >= 2}}"> · 连对 x{{bestCombo}}</text></view>
+      </view>
+
+      <view class="feedback-block">
+        <view class="encourage">{{encouragement}}</view>
+        <view class="result-meta" wx:if="{{goalNote || progressNote}}">
+          <view class="goal-note" wx:if="{{goalNote}}">{{goalNote}}</view>
+          <view class="progress-note" wx:if="{{progressNote}}">{{progressNote}}</view>
+        </view>
+      </view>
+
+      <view class="badge-new" wx:if="{{newBadges.length}}">
+        <view class="badge-new-label">新成就</view>
+        <view class="badge-row">
+          <view class="badge-chip" wx:for="{{newBadges}}" wx:key="id">{{item.title}}</view>
+        </view>
+      </view>
+
+      <view class="weak-panel" wx:if="{{showRematch}}">
+        <view class="weak-head">
+          <text class="weak-icon">!</text>
+          <text class="weak-title">本局薄弱题型</text>
+        </view>
+        <view class="weak-tags">
+          <text class="weak-tag" wx:for="{{rematchTags}}" wx:key="*this">{{item}}</text>
+        </view>
+      </view>
     </view>
   </view>
 
-  <button class="btn btn-primary" wx:if="{{pathNext}}" bindtap="onPathNext">{{pathNextText}}</button>
-  <button class="btn btn-primary" wx:elif="{{!pathNext && !pathDone}}" bindtap="onRetry">再闯一次</button>
-  <button class="btn btn-share" open-type="share">分享给小伙伴</button>
-  <button class="btn btn-secondary" wx:if="{{pathDone}}" bindtap="onPathHub">回进阶路径</button>
-  <button class="btn btn-secondary" wx:elif="{{!pathNext}}" bindtap="onBackLevels">
-    {{boss ? '回错题本' : (unitTest ? '回单元测验' : (arcade ? '回趣味加练' : '回关卡地图'))}}
-  </button>
-  <button class="btn btn-ghost" bindtap="onHome">回首页</button>
+  <view class="result-dock">
+    <button class="btn btn-primary dock-main" wx:if="{{pathNext}}" bindtap="onPathNext">{{pathNextText}}</button>
+    <button class="btn btn-primary dock-main" wx:elif="{{pathDone}}" bindtap="onPathHub">回进阶路径</button>
+    <button class="btn btn-primary dock-main" wx:elif="{{showRematch}}" bindtap="onRematchSame">再练同类</button>
+    <button class="btn btn-primary dock-main" wx:else bindtap="onRetry">再闯一次</button>
+
+    <view class="dock-row">
+      <button class="dock-chip" open-type="share" hover-class="dock-chip--active">分享</button>
+      <view
+        class="dock-chip"
+        wx:if="{{showBackLink}}"
+        bindtap="onBackLevels"
+        hover-class="dock-chip--active"
+      >{{backLabel}}</view>
+      <view class="dock-chip" bindtap="onHome" hover-class="dock-chip--active">回首页</view>
+    </view>
+  </view>
 </view>

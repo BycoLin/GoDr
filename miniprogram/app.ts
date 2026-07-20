@@ -2,6 +2,7 @@ import { isFocusTimerEnabled, triggerFocusRemindIfDue } from './utils/focus-time
 import { enableShareMenus } from './utils/share';
 import { getActiveGrade, getActivePackId } from './utils/active-subject';
 import { preloadTabBarPages, scheduleLevelPrefetch } from './utils/page-prefetch';
+import { TYPE_MODULE } from './utils/types';
 
 let focusWatchId = 0;
 
@@ -21,7 +22,7 @@ function startAppFocusWatch() {
 }
 
 App<IAppOption>({
-  globalData: {},
+  globalData: { typeModule: TYPE_MODULE },
   onLaunch() {
     try {
       enableShareMenus();

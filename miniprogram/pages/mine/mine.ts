@@ -26,6 +26,7 @@ import {
   removeFavorite,
   type FavoriteEntry,
 } from '../../utils/favorites';
+import { ROUTES, routePage } from '../../utils/routes';
 import {
   buildWeekShare,
   toShareAppMessage,
@@ -239,7 +240,7 @@ Page({
   },
 
   onGoWrongbook() {
-    wx.navigateTo({ url: `/pages/wrongbook/wrongbook?packId=${this.data.packId}` });
+    wx.navigateTo({ url: routePage(ROUTES.wrongbook, `packId=${this.data.packId}`) });
   },
 
   onPlayFavorite(e: WechatMiniprogram.TouchEvent) {

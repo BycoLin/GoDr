@@ -213,3 +213,6 @@ export interface PackProgress {
   lastGrade?: number;
   lastItemId?: string;
 }
+
+/** 供微信依赖分析识别（纯类型文件需保留一条运行时导出） */
+export const TYPE_MODULE = 1;

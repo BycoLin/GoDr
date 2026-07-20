@@ -1,5 +1,6 @@
 import { getActiveGrade, getActivePackId } from './active-subject';
 import { DAILY_LIMIT_SEC } from './daily';
+import { ROUTES, routePage } from './routes';
 
 export type PathKind = 'pinyin' | 'math' | 'english';
 export type PathStepId = 'learn' | 'practice' | 'test';
@@ -145,20 +146,20 @@ export function buildStepUrl(
   if (kind === 'pinyin') {
     const initial = opts.initial || loadPathState('pinyin').initial || 'b';
     if (step === 'learn') {
-      return `/pages/pinyin/pinyin?${from}`;
+      return routePage(ROUTES.pinyin, from);
     }
     if (step === 'practice') {
-      return `/pages/pinyin-learn/pinyin-learn?initial=${initial}&mode=fill&${from}`;
+      return routePage(ROUTES.pinyinLearn, `initial=${initial}&mode=fill&${from}`);
     }
-    return `/pages/pinyin-learn/pinyin-learn?initial=${initial}&mode=fill&quizGoal=5&${from}`;
+    return routePage(ROUTES.pinyinLearn, `initial=${initial}&mode=fill&quizGoal=5&${from}`);
   }
 
   if (kind === 'math') {
     if (step === 'learn') {
-      return `/pages/visual-math/visual-math?${from}`;
+      return routePage(ROUTES.visualMath, from);
     }
     if (step === 'practice') {
-      return `/pages/number-line/number-line?${from}`;
+      return routePage(ROUTES.numberLine, from);
     }
     const packId = opts.packId || getActivePackId();
     const grade = opts.grade || getActiveGrade(packId);
@@ -168,7 +169,7 @@ export function buildStepUrl(
   const packId = opts.packId || getActivePackId();
   const grade = opts.grade || getActiveGrade(packId);
   if (step === 'learn') {
-    return `/pages/flashcard/flashcard?packId=${packId}&grade=${grade}&${from}`;
+    return routePage(ROUTES.flashcard, `packId=${packId}&grade=${grade}&${from}`);
   }
   if (step === 'practice') {
     return `/pages/play/play?packId=${packId}&grade=${grade}&mode=enWordMean&arcade=1&${from}`;
@@ -177,10 +178,11 @@ export function buildStepUrl(
 }
 
 export function goPathHub(kind: PathKind): void {
+  const url = routePage(ROUTES.skillPath, `kind=${kind}`);
   wx.redirectTo({
-    url: `/pages/skill-path/skill-path?kind=${kind}`,
+    url,
     fail: () => {
-      wx.navigateTo({ url: `/pages/skill-path/skill-path?kind=${kind}` });
+      wx.navigateTo({ url });
     },
   });
 }

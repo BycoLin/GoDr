@@ -1,5 +1,5 @@
 /**
- * 拉取拼音汉字本地朗读音频（有道），打进小程序包，无需认证/合法域名。
+ * 可选：拉取拼音汉字朗读 mp3 到本地（默认已改用在线 TTS，一般无需运行）。
  * 用法：node scripts/fetch-pinyin-tts.mjs
  */
 import fs from 'fs';
@@ -9,8 +9,8 @@ import { createRequire } from 'module';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, '..');
-const outDir = path.join(root, 'miniprogram', 'assets', 'tts');
-const pinyinPath = path.join(root, 'miniprogram', 'data', 'tools', 'pinyin.js');
+const outDir = path.join(root, 'miniprogram', 'package-pinyin', 'assets', 'tts');
+const pinyinPath = path.join(root, 'miniprogram', 'package-pinyin', 'data', 'tools', 'pinyin.js');
 
 function charKey(char) {
   return [...char].map((c) => c.codePointAt(0).toString(16)).join('_');

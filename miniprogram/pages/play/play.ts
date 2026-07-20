@@ -189,7 +189,7 @@ Page({
     );
     let arcade =
       boss || daily || duel || sprint || exam || unitTest || query.arcade === '1' || !itemId;
-    let rolling = arcade && !exam && !duel && !unitTest;
+    let rolling = arcade && !exam && !duel && !unitTest && !daily;
     const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const subjectKind = getPackSubjectKind(packId);
@@ -264,32 +264,30 @@ Page({
       for (let i = 0; i < Math.min(DAILY_QUESTION_COUNT, seededPool.length * 2); i += 1) {
         rotated.push(seededPool[pickSeededIndex(seed, i, seededPool.length)]);
       }
-      if (subjectKind === 'math') {
-        questions = buildMathArcadeQuiz(
-          (rotated.filter(isMath) as MathItem[]).length
+      const dailyPool =
+        subjectKind === 'math'
+          ? (rotated.filter(isMath) as MathItem[]).length
             ? (rotated.filter(isMath) as MathItem[])
-            : mathPool,
-          'mixed',
-          1,
-        );
+            : mathPool
+          : subjectKind === 'english'
+            ? (rotated.filter(isEnglish) as EnglishItem[]).length
+              ? (rotated.filter(isEnglish) as EnglishItem[])
+              : englishPool
+            : (rotated.filter(isPoetry) as PoetryItem[]).length
+              ? (rotated.filter(isPoetry) as PoetryItem[])
+              : poetryPool;
+      if (subjectKind === 'math') {
+        questions = buildMathArcadeQuiz(dailyPool as MathItem[], 'mixed', DAILY_QUESTION_COUNT);
       } else if (subjectKind === 'english') {
         questions = buildEnglishArcadeQuiz(
-          (rotated.filter(isEnglish) as EnglishItem[]).length
-            ? (rotated.filter(isEnglish) as EnglishItem[])
-            : englishPool,
+          dailyPool as EnglishItem[],
           'mixed',
-          1,
+          DAILY_QUESTION_COUNT,
         );
       } else {
-        questions = buildArcadeQuiz(
-          (rotated.filter(isPoetry) as PoetryItem[]).length
-            ? (rotated.filter(isPoetry) as PoetryItem[])
-            : poetryPool,
-          'mixed',
-          1,
-        );
+        questions = buildArcadeQuiz(dailyPool as PoetryItem[], 'mixed', DAILY_QUESTION_COUNT);
       }
-      targetTotal = DAILY_QUESTION_COUNT;
+      targetTotal = questions.length || DAILY_QUESTION_COUNT;
       poemTitle = '每日自测';
       poemAuthor = `${limitSec} 秒自测`;
       modeLabel = '每日自测';
@@ -710,6 +708,11 @@ Page({
     setTimeout(() => {
       this.setData({ comboPulse: false });
       if (this.data.duel && userScore >= total) {
+        this.finish(nextAnswers, false);
+        return;
+      }
+      const { daily, exam, unitTest, total: target } = this.data;
+      if ((daily || exam || unitTest) && nextAnswers.length >= target) {
         this.finish(nextAnswers, false);
         return;
       }

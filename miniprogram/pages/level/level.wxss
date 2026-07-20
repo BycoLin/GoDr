@@ -1,8 +1,10 @@
 .level-page {
+  height: 100vh;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .top-bar {
@@ -39,8 +41,7 @@
 }
 
 .path-scroll {
-  flex: 1;
-  height: 0;
+  width: 100%;
   padding: 0 32rpx;
   box-sizing: border-box;
 }
@@ -202,4 +203,24 @@
 
 .path-pad {
   height: 280rpx;
+}
+
+.path-empty {
+  margin-top: 80rpx;
+  text-align: center;
+  padding: 48rpx 32rpx;
+}
+
+.path-empty-title {
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #1a1430;
+}
+
+.path-empty-tip {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #4a4458;
+  line-height: 1.5;
 }

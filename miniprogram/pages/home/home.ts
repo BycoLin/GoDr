@@ -23,6 +23,7 @@ import {
   formatGradeShort,
   parseGradeQuery,
 } from '../../utils/grade-label';
+import { ROUTES, routePage } from '../../utils/routes';
 
 interface FeaturePlay {
   id: string;
@@ -323,7 +324,7 @@ Page({
     const { packId, grade } = this.data;
     if (action === 'flash') {
       wx.navigateTo({
-        url: `/pages/flashcard/flashcard?packId=${packId}&grade=${grade}`,
+        url: routePage(ROUTES.flashcard, `packId=${packId}&grade=${grade}`),
       });
       return;
     }
@@ -347,7 +348,7 @@ Page({
     }
     if (action === 'unit') {
       wx.navigateTo({
-        url: `/pages/unit-test/unit-test?packId=${packId}&grade=${grade}`,
+        url: routePage(ROUTES.unitTest, `packId=${packId}&grade=${grade}`),
       });
       return;
     }
@@ -355,27 +356,27 @@ Page({
       const subjectKind = getPackSubjectKind(packId);
       const pathKind =
         subjectKind === 'math' ? 'math' : subjectKind === 'english' ? 'english' : 'pinyin';
-      wx.navigateTo({ url: `/pages/skill-path/skill-path?kind=${pathKind}` });
+      wx.navigateTo({ url: routePage(ROUTES.skillPath, `kind=${pathKind}`) });
       return;
     }
     if (action === 'pinyin') {
-      wx.navigateTo({ url: '/pages/pinyin/pinyin?tab=initial' });
+      wx.navigateTo({ url: routePage(ROUTES.pinyin, 'tab=initial') });
       return;
     }
     if (action === 'pinyinFinal') {
-      wx.navigateTo({ url: '/pages/pinyin/pinyin?tab=final' });
+      wx.navigateTo({ url: routePage(ROUTES.pinyin, 'tab=final') });
       return;
     }
     if (action === 'visual') {
-      wx.navigateTo({ url: '/pages/visual-math/visual-math' });
+      wx.navigateTo({ url: ROUTES.visualMath });
       return;
     }
     if (action === 'puzzle') {
-      wx.navigateTo({ url: '/pages/number-line/number-line' });
+      wx.navigateTo({ url: ROUTES.numberLine });
     }
   },
 
   onGoMono() {
-    wx.navigateTo({ url: '/pages/mono/mono' });
+    wx.navigateTo({ url: ROUTES.mono });
   },
 });

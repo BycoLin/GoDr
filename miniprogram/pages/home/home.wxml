@@ -19,6 +19,20 @@
       </view>
     </view>
 
+    <view class="goal-card {{goalDone ? 'done' : ''}}">
+      <view class="goal-head">
+        <view class="goal-title-wrap">
+          <text class="goal-title">今日目标</text>
+          <text class="goal-scope">全学科</text>
+        </view>
+        <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
+      </view>
+      <view class="goal-bar">
+        <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
+      </view>
+      <view class="goal-tip">{{goalTip}}</view>
+    </view>
+
     <view class="subject-pills">
       <view
         class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
@@ -56,17 +70,6 @@
         <view class="scene-fill" style="width: {{barWidth}};"></view>
       </view>
       <view class="scene-pct">{{percent}}%</view>
-    </view>
-
-    <view class="goal-card {{goalDone ? 'done' : ''}}">
-      <view class="goal-head">
-        <text class="goal-title">今日目标</text>
-        <text class="goal-count">{{goalAnswered}}/{{goalTarget}} 题</text>
-      </view>
-      <view class="goal-bar">
-        <view class="goal-fill" style="width: {{goalBarWidth}};"></view>
-      </view>
-      <view class="goal-tip">{{goalTip}}</view>
     </view>
 
     <view class="adventure-dock adventure-dock--hero">

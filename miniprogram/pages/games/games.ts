@@ -13,6 +13,7 @@ import {
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
+import { ROUTES, routePage } from '../../utils/routes';
 
 interface GameCard {
   mode?: ArcadeMode;
@@ -24,10 +25,10 @@ interface GameCard {
 }
 
 const POETRY_GAMES: GameCard[] = [
-  { link: '/pages/pinyin/pinyin?tab=initial', title: '声母表', desc: '23 个声母认读拼读', tag: '声母', tone: 'm-sky' },
-  { link: '/pages/pinyin/pinyin?tab=final', title: '韵母表', desc: '单韵母到鼻韵母', tag: '韵母', tone: 'm-grass' },
-  { link: '/pages/pinyin-drill/pinyin-drill?kind=initial', title: '声母认读', desc: '看字选声母', tag: '认读', tone: 'm-coral' },
-  { link: '/pages/pinyin-drill/pinyin-drill?kind=final', title: '韵母认读', desc: '看字选韵母', tag: '认读', tone: 'm-sun' },
+  { link: routePage(ROUTES.pinyin, 'tab=initial'), title: '声母表', desc: '23 个声母认读拼读', tag: '声母', tone: 'm-sky' },
+  { link: routePage(ROUTES.pinyin, 'tab=final'), title: '韵母表', desc: '单韵母到鼻韵母', tag: '韵母', tone: 'm-grass' },
+  { link: routePage(ROUTES.pinyinDrill, 'kind=initial'), title: '声母认读', desc: '看字选声母', tag: '认读', tone: 'm-coral' },
+  { link: routePage(ROUTES.pinyinDrill, 'kind=final'), title: '韵母认读', desc: '看字选韵母', tag: '认读', tone: 'm-sun' },
   { mode: 'mixed', title: '综合练', desc: '多种题型搅一搅', tag: '综合', tone: 'm-teal' },
   { mode: 'fillNext', title: '下一句', desc: '上句出来接下句', tag: '接龙', tone: 'm-coral' },
   { mode: 'matchPair', title: '上下句配对', desc: '点一点配对成功', tag: '配对', tone: 'm-sky' },
@@ -154,14 +155,14 @@ Page({
 
   onTapPath() {
     wx.navigateTo({
-      url: `/pages/skill-path/skill-path?kind=${this.data.pathKind}`,
+      url: routePage(ROUTES.skillPath, `kind=${this.data.pathKind}`),
     });
   },
 
   onTapUnitTest() {
     const { packId, grade } = this.data;
     wx.navigateTo({
-      url: `/pages/unit-test/unit-test?packId=${packId}&grade=${grade}`,
+      url: routePage(ROUTES.unitTest, `packId=${packId}&grade=${grade}`),
     });
   },
 
@@ -227,6 +228,6 @@ Page({
 
   onTapWrongbook() {
     const { packId } = this.data;
-    wx.navigateTo({ url: `/pages/wrongbook/wrongbook?packId=${packId}` });
+    wx.navigateTo({ url: routePage(ROUTES.wrongbook, `packId=${packId}`) });
   },
 });

@@ -5,6 +5,7 @@
   "scripts": {
     "extract:poetry": "node scripts/extract-poetry.mjs",
     "fetch:tts": "node scripts/fetch-pinyin-tts.mjs",
+    "audit:pinyin-tts": "node scripts/audit-pinyin-tts.mjs",
     "smoke:quiz": "node scripts/smoke-quiz.mjs",
     "typecheck": "tsc --noEmit"
   },

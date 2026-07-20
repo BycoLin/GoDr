@@ -7,19 +7,34 @@
     "pages/pack/pack",
     "pages/level/level",
     "pages/play/play",
-    "pages/result/result",
-    "pages/wrongbook/wrongbook",
-    "pages/flashcard/flashcard",
-    "pages/tools/tools",
-    "pages/pinyin/pinyin",
-    "pages/pinyin-learn/pinyin-learn",
-    "pages/pinyin-drill/pinyin-drill",
-    "pages/visual-math/visual-math",
-    "pages/number-line/number-line",
-    "pages/mono/mono",
-    "pages/skill-path/skill-path",
-    "pages/unit-test/unit-test"
+    "pages/result/result"
   ],
+  "subPackages": [
+    {
+      "root": "package-pinyin",
+      "name": "pinyin",
+      "pages": [
+        "pages/pinyin/pinyin",
+        "pages/pinyin-learn/pinyin-learn",
+        "pages/pinyin-drill/pinyin-drill"
+      ]
+    },
+    {
+      "root": "package-extra",
+      "name": "extra",
+      "pages": [
+        "pages/wrongbook/wrongbook",
+        "pages/flashcard/flashcard",
+        "pages/tools/tools",
+        "pages/visual-math/visual-math",
+        "pages/number-line/number-line",
+        "pages/mono/mono",
+        "pages/skill-path/skill-path",
+        "pages/unit-test/unit-test"
+      ]
+    }
+  ],
+  "lazyCodeLoading": "requiredComponents",
   "window": {
     "navigationBarBackgroundColor": "#22B8A8",
     "navigationBarTitleText": "闯关叭叭",

@@ -7,8 +7,18 @@
     <view class="top-star">★ {{starSum}}</view>
   </view>
 
-  <scroll-view class="path-scroll" scroll-y>
-    <view class="path">
+  <scroll-view
+    class="path-scroll"
+    scroll-y
+    enhanced
+    show-scrollbar="{{false}}"
+    style="height: {{scrollHeight}}px;"
+  >
+    <view class="path-empty" wx:if="{{!levels.length}}">
+      <view class="path-empty-title">暂无关卡</view>
+      <view class="path-empty-tip">换个年级或学科试试，或返回首页重新进入</view>
+    </view>
+    <view class="path" wx:else>
       <view
         class="node {{item.unlocked ? '' : 'locked'}} {{item.cleared ? 'cleared' : ''}} {{item.id === focusId ? 'focus' : ''}}"
         wx:for="{{levels}}"
