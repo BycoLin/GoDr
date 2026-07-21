@@ -21,6 +21,7 @@ import {
   buildMathArcadeQuiz,
   buildMathBossQuiz,
   buildMathQuizForItem,
+  isDedicatedMathMode,
   MATH_ARCADE_MODE_LABELS,
   nextMathAdaptiveQuestion,
 } from '../../utils/quiz-math';
@@ -64,6 +65,8 @@ import type {
   SessionAnswer,
 } from '../../utils/types';
 import type { PackSubjectKind } from '../../utils/registry';
+import { findThemeGame } from '../../utils/math-themes';
+import { resolveMathDisplayTitle } from '../../utils/math-item-label';
 
 
 interface MatchState {
@@ -154,6 +157,7 @@ Page({
     orderPickedTexts: [] as string[],
     orderAvailable: {} as Record<string, boolean>,
     visualInput: '',
+    bigWriteInput: '',
     sequenceSlots: [] as Array<{ show: boolean; value: number | null; filled: string }>,
     sequenceBlankIndexes: [] as number[],
     sequenceBlankCursor: 0,
@@ -399,7 +403,7 @@ Page({
         }
         if (isMath(item)) {
           questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT, preferTypes as MathQuizType[]);
-          poemTitle = item.title;
+          poemTitle = resolveMathDisplayTitle(item);
           poemAuthor = typesLabel;
         } else if (isEnglish(item)) {
           const enTypes = preferTypes.filter(
@@ -445,17 +449,26 @@ Page({
         wx.setNavigationBarTitle({ title: '同类加练' });
       }
     } else if (arcade) {
+      const dedicatedMath = subjectKind === 'math' && isDedicatedMathMode(quizMode);
+      const arcadeSeed = dedicatedMath ? ROLLING_TARGET : 1;
       if (subjectKind === 'math') {
-        questions = buildMathArcadeQuiz(mathPool, quizMode, 1);
+        questions = buildMathArcadeQuiz(mathPool, quizMode, arcadeSeed);
         poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
+        const themeGame = findThemeGame(mode as MathQuizType);
+        if (themeGame) poemTitle = themeGame.title;
       } else if (subjectKind === 'english') {
-        questions = buildEnglishArcadeQuiz(englishPool, quizMode, 1);
+        questions = buildEnglishArcadeQuiz(englishPool, quizMode, arcadeSeed);
         poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else {
-        questions = buildArcadeQuiz(poetryPool, quizMode, 1);
+        questions = buildArcadeQuiz(poetryPool, quizMode, arcadeSeed);
         poemTitle = ARCADE_MODE_LABELS[mode] || '趣味练习';
       }
-      targetTotal = ROLLING_TARGET;
+      if (dedicatedMath && questions.length >= ROLLING_TARGET) {
+        rolling = false;
+        targetTotal = questions.length;
+      } else {
+        targetTotal = ROLLING_TARGET;
+      }
       poemAuthor = formatGradeLabel(grade);
       modeLabel = poemTitle;
       wx.setNavigationBarTitle({ title: poemTitle });
@@ -468,10 +481,10 @@ Page({
       }
       if (isMath(item)) {
         questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT);
-        poemTitle = item.title;
+        poemTitle = resolveMathDisplayTitle(item);
         poemAuthor = item.subtitle || '数学练习';
         modeLabel = '数学练习';
-        wx.setNavigationBarTitle({ title: item.title });
+        wx.setNavigationBarTitle({ title: resolveMathDisplayTitle(item) });
       } else if (isEnglish(item)) {
         questions = buildEnglishQuizForItem(item, englishPool, LEVEL_QUESTION_COUNT);
         poemTitle = item.word;
@@ -553,6 +566,7 @@ Page({
     this.resetMatchState(questions[0]);
     this.resetOrderState(questions[0]);
     this.resetVisualState();
+    this.resetBigWriteState();
     this.resetSequenceState(questions[0]);
 
     if (timed && limitSec > 0) {
@@ -630,6 +644,34 @@ Page({
 
   resetVisualState() {
     this.setData({ visualInput: '' });
+  },
+
+  resetBigWriteState() {
+    this.setData({ bigWriteInput: '' });
+  },
+
+  onBigWriteKey(e: WechatMiniprogram.CustomEvent) {
+    if (this.data.locked || this.finished) return;
+    const key = e.detail.key as string;
+    const { current } = this.data;
+    if (!current || current.type !== 'mathBigWrite') return;
+
+    if (key === 'clear') {
+      this.setData({ bigWriteInput: '' });
+      return;
+    }
+    if (key === 'ok') {
+      if (this.data.bigWriteInput === '') {
+        wx.showToast({ title: '先输入数字', icon: 'none' });
+        return;
+      }
+      const correct = gradeAnswer(current, this.data.bigWriteInput);
+      this.handleGraded(correct, '拼对啦！超棒！', '再对照读法和数字块～');
+      return;
+    }
+    if (this.data.bigWriteInput.length >= 8) return;
+    if (this.data.bigWriteInput === '' && key === '0') return;
+    this.setData({ bigWriteInput: this.data.bigWriteInput + key });
   },
 
   resetSequenceState(question: Question | null) {
@@ -868,6 +910,14 @@ Page({
         current.type !== 'mathCalc' &&
         current.type !== 'mathCompare' &&
         current.type !== 'mathMissing' &&
+        current.type !== 'mathBigCompare' &&
+        current.type !== 'mathPlaceValue' &&
+        current.type !== 'mathBigRead' &&
+        current.type !== 'mathRound' &&
+        current.type !== 'mathLineType' &&
+        current.type !== 'mathGeoRelation' &&
+        current.type !== 'mathAngleClassify' &&
+        current.type !== 'mathAngleMeasure' &&
         current.type !== 'mathMakeTen' &&
         current.type !== 'mathBreakTen' &&
         current.type !== 'mathFlatTen' &&
@@ -879,7 +929,9 @@ Page({
       return;
     }
     const correct = gradeAnswer(current, optionId);
-    this.handleGraded(correct, '答对啦！超棒！', '差一点点，再试试～');
+    const badTip =
+      current.type === 'mathAngleMeasure' ? '再看看量角器上的刻度～' : '差一点点，再试试～';
+    this.handleGraded(correct, '答对啦！超棒！', badTip);
   },
 
   onTapLeft(e: WechatMiniprogram.TouchEvent) {
@@ -1042,6 +1094,7 @@ Page({
     this.resetMatchState(nextQ);
     this.resetOrderState(nextQ);
     this.resetVisualState();
+    this.resetBigWriteState();
     this.resetSequenceState(nextQ);
   },
 

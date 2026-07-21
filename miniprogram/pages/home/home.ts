@@ -103,11 +103,11 @@ const PANEL_BASE_RPX = 900;
 const PANEL_FEATURE_RPX = 148;
 const PANEL_MORE_RPX = 290;
 const PANEL_CONTINUE_RPX = 56;
-const PANEL_GRADE_WRAP_RPX = 44;
+const PANEL_GRADE_BAR_RPX = 96;
 
 function estimatePanelContentRpx(panel: SubjectPanel): number {
   const dockExtra = panel.continueTip ? PANEL_CONTINUE_RPX : 0;
-  const gradeExtra = panel.gradeOptions.length > 3 ? PANEL_GRADE_WRAP_RPX : 0;
+  const gradeExtra = panel.gradeOptions.length ? PANEL_GRADE_BAR_RPX : 0;
   return (
     PANEL_BASE_RPX +
     dockExtra +

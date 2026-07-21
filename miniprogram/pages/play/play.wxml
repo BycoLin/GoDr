@@ -1,4 +1,4 @@
-<view class="safe-pad play">
+<view class="safe-pad play {{feedback ? 'play--feedback' : ''}}">
   <view class="top">
     <view class="hud">
       <view class="poem-tag" wx:if="{{arcade}}">{{modeLabel}} · {{poemAuthor}}</view>
@@ -159,16 +159,119 @@
       <num-keypad wx:if="{{!locked}}" bind:key="onSequenceKey" />
     </view>
 
+    <!-- mathBigWrite 拼图工坊 -->
+    <view class="card q-card visual-card" wx:if="{{current.type === 'mathBigWrite'}}">
+      <view class="q-type">数字拼图工坊</view>
+      <view class="q-prompt visual-desc">{{current.prompt}}</view>
+      <view class="puzzle-read">读作：{{current.readText}}</view>
+      <view class="puzzle-pieces">
+        <view class="puzzle-piece" wx:for="{{current.puzzlePieces}}" wx:key="id">
+          <view class="puzzle-notch puzzle-notch--tl"></view>
+          <view class="puzzle-notch puzzle-notch--br"></view>
+          <text class="puzzle-text">{{item.text}}</text>
+        </view>
+      </view>
+      <view class="puzzle-tip">把数字块拼起来，写出完整的大数</view>
+      <view class="visual-equation">
+        <view class="visual-num visual-ans puzzle-ans">{{bigWriteInput || '?'}}</view>
+      </view>
+      <num-keypad wx:if="{{!locked}}" bind:key="onBigWriteKey" />
+    </view>
+
+    <!-- mathAngleMeasure 量角器 -->
+    <view class="card q-card visual-card angle-measure-card" wx:if="{{current.type === 'mathAngleMeasure'}}">
+      <view class="q-type">量角器小工匠</view>
+      <view class="q-prompt visual-desc">{{current.prompt}}</view>
+      <view class="angle-measure-diagram">
+        <view class="protractor-stage">
+          <view class="protractor-arc">
+            <view
+              class="protractor-tick {{item.major ? 'major' : ''}}"
+              wx:for="{{current.ticks}}"
+              wx:key="id"
+              style="transform: rotate(-{{item.deg}}deg);"
+            >
+              <view class="tick-mark"></view>
+              <text wx:if="{{item.label}}" class="tick-label">{{item.label}}</text>
+            </view>
+            <view class="protractor-arm-base"></view>
+            <view class="protractor-arm" style="transform: rotate(-{{current.angleDeg}}deg);"></view>
+            <view class="protractor-center"></view>
+          </view>
+        </view>
+        <view class="angle-read-tip">红点在圆心，绿边是这个角的大小</view>
+      </view>
+      <view class="angle-pick angle-pick--grid">
+        <view
+          class="angle-pick-btn {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          wx:for="{{current.options}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onChooseOption"
+        >{{item.text}}</view>
+      </view>
+    </view>
+
+    <!-- mathBigCompare 数字赛车场 -->
+    <view class="card q-card visual-card race-card" wx:if="{{current.type === 'mathBigCompare'}}">
+      <view class="q-type">数字赛车场</view>
+      <view class="q-prompt visual-desc">{{current.prompt}}</view>
+      <view class="race-track">
+        <view class="race-finish">🏁</view>
+        <view class="race-columns">
+          <view class="race-column race-column--left">
+            <view class="race-column-label">左边</view>
+            <view class="race-column-track">
+              <view class="race-car race-car--red">
+                <text class="race-car-icon">🏎</text>
+              </view>
+            </view>
+            <view class="race-num race-num--red">{{current.compareLeft}}</view>
+          </view>
+          <view class="race-column race-column--right">
+            <view class="race-column-label">右边</view>
+            <view class="race-column-track">
+              <view class="race-car race-car--blue">
+                <text class="race-car-icon">🏎</text>
+              </view>
+            </view>
+            <view class="race-num race-num--blue">{{current.compareRight}}</view>
+          </view>
+        </view>
+      </view>
+      <view class="race-formula">
+        <text class="race-formula-num race-num--red">{{current.compareLeft}}</text>
+        <text class="race-formula-gap">□</text>
+        <text class="race-formula-num race-num--blue">{{current.compareRight}}</text>
+      </view>
+      <view class="race-pick-label">左边 □ 右边，选出正确符号</view>
+      <view class="race-pick">
+        <view
+          class="race-pick-btn {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          wx:for="{{current.options}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onChooseOption"
+        >{{item.text}}</view>
+      </view>
+    </view>
+
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
-      class="card q-card"
-      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'mathMakeTen' || current.type === 'mathBreakTen' || current.type === 'mathFlatTen' || current.type === 'mathBorrowTen' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
+      class="card q-card {{current.diagram ? 'visual-card' : ''}}"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'mathPlaceValue' || current.type === 'mathBigRead' || current.type === 'mathRound' || current.type === 'mathLineType' || current.type === 'mathGeoRelation' || current.type === 'mathAngleClassify' || current.type === 'mathMakeTen' || current.type === 'mathBreakTen' || current.type === 'mathFlatTen' || current.type === 'mathBorrowTen' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
     >
       <view class="q-type">
         <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
         <block wx:elif="{{current.type === 'fillBlank'}}">缺字填空</block>
         <block wx:elif="{{current.type === 'mathCalc'}}">速算</block>
         <block wx:elif="{{current.type === 'mathCompare'}}">比大小</block>
+        <block wx:elif="{{current.type === 'mathPlaceValue'}}">数位认识</block>
+        <block wx:elif="{{current.type === 'mathBigRead'}}">大数读法</block>
+        <block wx:elif="{{current.type === 'mathRound'}}">近似数</block>
+        <block wx:elif="{{current.type === 'mathLineType'}}">线的认识</block>
+        <block wx:elif="{{current.type === 'mathGeoRelation'}}">平行垂直</block>
+        <block wx:elif="{{current.type === 'mathAngleClassify'}}">角的分类</block>
         <block wx:elif="{{current.type === 'mathMissing'}}">填空</block>
         <block wx:elif="{{current.type === 'mathMakeTen'}}">凑十法</block>
         <block wx:elif="{{current.type === 'mathBreakTen'}}">破十法</block>
@@ -179,7 +282,71 @@
         <block wx:elif="{{current.type === 'enSpell'}}">缺字母</block>
         <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
       </view>
-      <view class="q-prompt {{current.type === 'fillBlank' ? 'q-prompt-center' : ''}}">{{current.prompt}}</view>
+
+      <!-- 几何示意图：线条 / 平行垂直 / 角的分类 -->
+      <view class="geo-diagram" wx:if="{{current.diagram}}">
+        <block wx:if="{{current.diagram.kind === 'line'}}">
+          <view class="geo-line-stage">
+            <view class="geo-line-bar geo-line-bar--{{current.diagram.lineKind}}">
+              <view class="geo-arrow geo-arrow--left" wx:if="{{current.diagram.lineKind === 'line'}}"></view>
+              <view class="geo-dot geo-dot--a" wx:if="{{current.diagram.lineKind === 'segment' || current.diagram.lineKind === 'ray'}}"></view>
+              <view class="geo-dot geo-dot--b" wx:if="{{current.diagram.lineKind === 'segment'}}"></view>
+              <view class="geo-arrow geo-arrow--right" wx:if="{{current.diagram.lineKind === 'line' || current.diagram.lineKind === 'ray'}}"></view>
+            </view>
+          </view>
+        </block>
+        <block wx:elif="{{current.diagram.kind === 'parallel'}}">
+          <!-- 平行：双轨 / 双边 -->
+          <view class="geo-parallel-stage" wx:if="{{current.diagram.relation === 'parallel'}}">
+            <view class="geo-parallel-line"></view>
+            <view class="geo-parallel-line"></view>
+            <view class="geo-scene-hint" wx:if="{{current.diagram.scene === 'rail'}}">铁轨</view>
+            <view class="geo-scene-hint" wx:elif="{{current.diagram.scene === 'book'}}">书边</view>
+            <view class="geo-scene-hint" wx:elif="{{current.diagram.scene === 'road'}}">路边线</view>
+            <view class="geo-scene-hint" wx:elif="{{current.diagram.scene === 'window'}}">窗框</view>
+          </view>
+          <!-- 垂直·拐角：课桌、长方形邻边 -->
+          <view class="geo-corner-stage" wx:elif="{{current.diagram.scene === 'desk' || current.diagram.scene === 'corner'}}">
+            <view class="geo-desk-surface" wx:if="{{current.diagram.scene === 'desk'}}"></view>
+            <view class="geo-corner-v"></view>
+            <view class="geo-corner-h"></view>
+            <view class="geo-corner-mark"></view>
+            <view class="geo-scene-hint geo-scene-hint--corner">{{current.diagram.scene === 'desk' ? '课桌面' : '邻边'}}</view>
+          </view>
+          <!-- 垂直·旗杆与地面 -->
+          <view class="geo-flag-stage" wx:elif="{{current.diagram.scene === 'flag'}}">
+            <view class="geo-flag-ground"></view>
+            <view class="geo-flag-pole"></view>
+            <view class="geo-flag-mark"></view>
+            <view class="geo-scene-hint">旗杆 · 地面</view>
+          </view>
+          <!-- 垂直·十字路口 -->
+          <view class="geo-cross-stage" wx:else>
+            <view class="geo-cross-h"></view>
+            <view class="geo-cross-v"></view>
+            <view class="geo-cross-mark"></view>
+            <view class="geo-scene-hint">路口</view>
+          </view>
+        </block>
+        <block wx:elif="{{current.diagram.kind === 'angle'}}">
+          <view class="geo-angle-stage">
+            <view class="geo-angle-base"></view>
+            <view class="geo-angle-arm" style="transform: rotate(-{{current.diagram.angleDeg}}deg);"></view>
+            <view class="geo-angle-label">{{current.diagram.angleDeg}}°</view>
+          </view>
+        </block>
+      </view>
+
+      <view class="place-value-num" wx:if="{{current.placeValueChars && current.placeValueChars.length}}">
+        <text
+          class="place-value-char {{item.hi ? 'place-value-char--hi' : ''}}"
+          wx:for="{{current.placeValueChars}}"
+          wx:for-item="item"
+          wx:key="index"
+        >{{item.text}}</text>
+      </view>
+
+      <view class="q-prompt {{current.diagram ? 'visual-desc' : ''}} {{current.type === 'fillBlank' ? 'q-prompt-center' : ''}}">{{current.prompt}}</view>
       <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'options-chars' : ''}}">
         <view
           class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
@@ -252,5 +419,7 @@
     </view>
   </block>
 
-  <view class="feedback {{feedback}}" wx:if="{{feedback}}">{{feedbackText}}</view>
+  <view class="feedback-bar {{feedback}}" wx:if="{{feedback}}">
+    <view class="feedback-inner">{{feedbackText}}</view>
+  </view>
 </view>

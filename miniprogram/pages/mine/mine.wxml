@@ -126,16 +126,16 @@
   </view>
 
   <view class="menu">
-    <view class="menu-item" bindtap="onToggleSfx">
-      <text>{{sfxLabel}}</text>
+    <view class="menu-item" bindtap="onGoWrongbook">
+      <text>{{wrongbookLabel}}</text>
       <text class="arrow">›</text>
     </view>
     <view class="menu-item" bindtap="onToggleFocus">
       <text>{{focusLabel}}</text>
       <text class="arrow">›</text>
     </view>
-    <view class="menu-item" bindtap="onGoWrongbook">
-      <text>{{wrongbookLabel}}</text>
+    <view class="menu-item" bindtap="onToggleSfx">
+      <text>{{sfxLabel}}</text>
       <text class="arrow">›</text>
     </view>
   </view>

@@ -311,20 +311,47 @@
   text-decoration: line-through;
 }
 
-.feedback {
-  margin-top: 28rpx;
+.play {
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.play--feedback {
+  padding-bottom: calc(180rpx + env(safe-area-inset-bottom));
+}
+
+.feedback-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 200;
+  padding: 20rpx 32rpx;
+  padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(247, 255, 252, 0) 0%, rgba(247, 255, 252, 0.92) 28%, #f7fffc 100%);
+  pointer-events: none;
+}
+
+.feedback-inner {
   text-align: center;
-  font-size: 36rpx;
+  font-size: 34rpx;
   font-weight: 900;
+  line-height: 1.35;
+  padding: 22rpx 28rpx;
+  border-radius: 24rpx;
+  background: #fff;
+  box-shadow: 0 8rpx 32rpx rgba(43, 37, 64, 0.12);
   animation: softPulse 0.5s ease;
 }
 
-.feedback.ok {
+.feedback-bar.ok .feedback-inner {
   color: var(--color-ok);
+  border: 4rpx solid rgba(34, 184, 168, 0.35);
 }
 
-.feedback.bad {
+.feedback-bar.bad .feedback-inner {
   color: var(--color-danger);
+  border: 4rpx solid rgba(255, 111, 97, 0.35);
 }
 
 @keyframes softPulse {
@@ -662,3 +689,747 @@
   transform: translateY(4rpx);
   box-shadow: 0 2rpx 0 #cbd5e1;
 }
+
+/* 拼图工坊 */
+.puzzle-read {
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #0f8f82;
+  margin: 8rpx 0 20rpx;
+}
+
+.puzzle-pieces {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14rpx;
+  margin-bottom: 12rpx;
+}
+
+.puzzle-piece {
+  position: relative;
+  min-width: 120rpx;
+  padding: 22rpx 20rpx;
+  border-radius: 16rpx;
+  background: #b8e6b0;
+  border: 4rpx solid #6fbf63;
+  box-shadow: 0 8rpx 0 #4a9a40;
+}
+
+.puzzle-notch {
+  position: absolute;
+  width: 22rpx;
+  height: 22rpx;
+  background: #e8fff8;
+  border: 3rpx solid #6fbf63;
+  border-radius: 50%;
+}
+
+.puzzle-notch--tl {
+  top: -12rpx;
+  left: -12rpx;
+}
+
+.puzzle-notch--br {
+  bottom: -12rpx;
+  right: -12rpx;
+}
+
+.puzzle-text {
+  font-size: 40rpx;
+  font-weight: 900;
+  color: #1a5018;
+  letter-spacing: 2rpx;
+}
+
+.puzzle-tip {
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+  margin-bottom: 8rpx;
+}
+
+.puzzle-ans {
+  min-width: 280rpx;
+  font-size: 40rpx;
+}
+
+/* 数位认识：高亮指定数字 */
+.place-value-num {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin: 16rpx 0 8rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 20rpx;
+  background: #f5f7fb;
+  border: 2rpx solid #e2e8f0;
+}
+
+.place-value-char {
+  font-size: 56rpx;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #334155;
+  letter-spacing: 2rpx;
+}
+
+.place-value-char--hi {
+  color: #e11d48;
+  background: #ffe4e6;
+  border-radius: 12rpx;
+  padding: 0 8rpx;
+  box-shadow: 0 0 0 3rpx rgba(225, 29, 72, 0.15);
+}
+
+/* 数字赛车场 */
+.race-card {
+  background: linear-gradient(180deg, #e8fff8 0%, #fff9e8 100%);
+}
+
+.race-track {
+  position: relative;
+  margin: 8rpx 0 12rpx;
+  padding: 52rpx 20rpx 20rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, #5c6370 0%, #4a5058 100%);
+  border: 4rpx solid #3d4248;
+  box-shadow: inset 0 6rpx 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.race-finish {
+  position: absolute;
+  left: 50%;
+  top: 12rpx;
+  transform: translateX(-50%);
+  font-size: 40rpx;
+  line-height: 1;
+  z-index: 2;
+}
+
+.race-columns {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-height: 280rpx;
+}
+
+.race-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  padding: 0 8rpx;
+}
+
+.race-column--left {
+  border-right: 4rpx dashed rgba(255, 255, 255, 0.4);
+}
+
+.race-column-label {
+  font-size: 24rpx;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 12rpx;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+}
+
+.race-column-track {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 160rpx;
+  position: relative;
+}
+
+.race-column-track::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 40rpx;
+  border-left: 4rpx dashed rgba(255, 255, 255, 0.25);
+  transform: translateX(-50%);
+}
+
+.race-car {
+  flex-shrink: 0;
+  width: 72rpx;
+  height: 52rpx;
+  border-radius: 14rpx 18rpx 10rpx 10rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 0 rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+}
+
+.race-car--red {
+  background: linear-gradient(180deg, #ff6b6b, #e03131);
+}
+
+.race-car--blue {
+  background: linear-gradient(180deg, #74c0fc, #339af0);
+}
+
+.race-car-icon {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+.race-num {
+  margin-top: 12rpx;
+  font-size: 30rpx;
+  font-weight: 900;
+  letter-spacing: 1rpx;
+  text-align: center;
+  word-break: break-all;
+  line-height: 1.3;
+  padding: 0 4rpx;
+}
+
+.race-num--red {
+  color: #ffc9c9;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.35);
+}
+
+.race-num--blue {
+  color: #a5d8ff;
+  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.35);
+}
+
+.race-formula {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  margin-bottom: 16rpx;
+  padding: 16rpx 12rpx;
+  border-radius: 18rpx;
+  background: #fff;
+  border: 3rpx solid #e8eef8;
+}
+
+.race-formula-num {
+  font-size: 28rpx;
+  font-weight: 900;
+  max-width: 38%;
+  word-break: break-all;
+  text-align: center;
+  line-height: 1.25;
+}
+
+.race-formula-num.race-num--red {
+  color: #e03131;
+  text-shadow: none;
+}
+
+.race-formula-num.race-num--blue {
+  color: #339af0;
+  text-shadow: none;
+}
+
+.race-formula-gap {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #94a3b8;
+  flex-shrink: 0;
+}
+
+.race-pick-label {
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #4a4458;
+  margin-bottom: 16rpx;
+}
+
+.race-pick {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+}
+
+.race-pick-btn {
+  min-width: 120rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 22rpx;
+  background: #fff;
+  border: 4rpx solid #ffc93c;
+  font-size: 48rpx;
+  font-weight: 900;
+  color: #1a1430;
+  text-align: center;
+  box-shadow: 0 8rpx 0 #e6a800;
+}
+
+.race-pick-btn.correct {
+  border-color: #22b8a8;
+  background: #effffb;
+  color: #0f8f82;
+  box-shadow: 0 8rpx 0 #1a9e8f;
+}
+
+.race-pick-btn.dim {
+  opacity: 0.45;
+}
+
+.race-pick-btn:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 4rpx 0 #e6a800;
+}
+
+/* 量角器 */
+.angle-measure-card .q-prompt {
+  margin-bottom: 16rpx;
+}
+
+.angle-measure-diagram {
+  flex-shrink: 0;
+  min-height: 240rpx;
+  margin-bottom: 8rpx;
+}
+
+.protractor-stage {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  min-height: 210rpx;
+  margin: 0;
+  padding-top: 12rpx;
+  overflow: hidden;
+}
+
+.protractor-arc {
+  position: relative;
+  width: 340rpx;
+  height: 180rpx;
+  border: 5rpx solid #5b8cff;
+  border-bottom: none;
+  border-radius: 170rpx 170rpx 0 0;
+  background: linear-gradient(180deg, #eef4ff 0%, #fff 100%);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.protractor-tick {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 0;
+  height: 0;
+  transform-origin: center bottom;
+}
+
+.tick-mark {
+  position: absolute;
+  left: -2rpx;
+  bottom: 0;
+  width: 4rpx;
+  height: 14rpx;
+  background: #94a3b8;
+  transform: translateY(-148rpx);
+}
+
+.protractor-tick.major .tick-mark {
+  height: 20rpx;
+  width: 5rpx;
+  background: #5b8cff;
+}
+
+.tick-label {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translate(-50%, -168rpx);
+  font-size: 18rpx;
+  font-weight: 800;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.protractor-arm-base {
+  position: absolute;
+  left: 50%;
+  bottom: 8rpx;
+  width: 155rpx;
+  height: 8rpx;
+  background: #1a1430;
+  transform-origin: left center;
+  border-radius: 4rpx;
+  z-index: 1;
+}
+
+.protractor-arm {
+  position: absolute;
+  left: 50%;
+  bottom: 8rpx;
+  width: 148rpx;
+  height: 8rpx;
+  background: #22b8a8;
+  transform-origin: left center;
+  border-radius: 4rpx;
+  z-index: 2;
+  box-shadow: 0 0 0 3rpx rgba(34, 184, 168, 0.25);
+}
+
+.protractor-center {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 20rpx;
+  height: 20rpx;
+  margin-left: -10rpx;
+  margin-bottom: -2rpx;
+  background: #ff6f61;
+  border: 4rpx solid #fff;
+  border-radius: 50%;
+  z-index: 3;
+  box-shadow: 0 4rpx 8rpx rgba(255, 111, 97, 0.35);
+}
+
+.angle-read-tip {
+  text-align: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #4a4458;
+  margin: 12rpx 0 0;
+}
+
+.angle-pick {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 14rpx;
+}
+
+.angle-pick--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16rpx;
+  margin-top: 20rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx dashed #dce4ef;
+}
+
+.angle-pick-btn {
+  min-width: 0;
+  width: 100%;
+  padding: 24rpx 16rpx;
+  border-radius: 20rpx;
+  background: #fff;
+  border: 4rpx solid #e2e8f0;
+  font-size: 34rpx;
+  font-weight: 900;
+  color: #1a1430;
+  text-align: center;
+  box-shadow: 0 6rpx 0 #cbd5e1;
+  box-sizing: border-box;
+}
+
+.angle-pick-btn.correct {
+  border-color: #22b8a8;
+  background: #effffb;
+  color: #0f8f82;
+}
+
+.angle-pick-btn.dim {
+  opacity: 0.45;
+}
+
+.angle-pick-btn:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 2rpx 0 #cbd5e1;
+}
+
+/* 几何示意图 */
+.geo-diagram {
+  margin: 8rpx 0 16rpx;
+}
+
+.geo-line-stage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 120rpx;
+  padding: 16rpx 0;
+}
+
+.geo-line-bar {
+  position: relative;
+  width: 420rpx;
+  height: 8rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+}
+
+.geo-line-bar--segment {
+  width: 320rpx;
+}
+
+.geo-line-bar--ray {
+  width: 360rpx;
+  margin-left: 40rpx;
+}
+
+.geo-dot {
+  position: absolute;
+  top: 50%;
+  width: 22rpx;
+  height: 22rpx;
+  background: #ff6b6b;
+  border: 4rpx solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3rpx #ff6b6b;
+  transform: translate(-50%, -50%);
+}
+
+.geo-dot--a {
+  left: 0;
+}
+
+.geo-dot--b {
+  right: 0;
+  transform: translate(50%, -50%);
+}
+
+.geo-arrow {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform: translateY(-50%);
+}
+
+.geo-arrow--right {
+  right: -4rpx;
+  border-top: 14rpx solid transparent;
+  border-bottom: 14rpx solid transparent;
+  border-left: 22rpx solid #2d3748;
+}
+
+.geo-arrow--left {
+  left: -4rpx;
+  border-top: 14rpx solid transparent;
+  border-bottom: 14rpx solid transparent;
+  border-right: 22rpx solid #2d3748;
+}
+
+.geo-parallel-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48rpx;
+  min-height: 180rpx;
+  padding: 20rpx 0;
+}
+
+.geo-parallel-line {
+  width: 360rpx;
+  height: 8rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+}
+
+.geo-scene-hint {
+  position: absolute;
+  right: 24rpx;
+  bottom: 8rpx;
+  font-size: 22rpx;
+  font-weight: 800;
+  color: #64748b;
+  background: rgba(255, 255, 255, 0.88);
+  padding: 4rpx 12rpx;
+  border-radius: 999rpx;
+}
+
+.geo-scene-hint--corner {
+  left: 50%;
+  right: auto;
+  bottom: 12rpx;
+  transform: translateX(-50%);
+}
+
+/* 垂直·拐角（课桌 / 邻边） */
+.geo-corner-stage {
+  position: relative;
+  width: 340rpx;
+  height: 240rpx;
+  margin: 0 auto;
+}
+
+.geo-desk-surface {
+  position: absolute;
+  left: 48rpx;
+  top: 24rpx;
+  width: 250rpx;
+  height: 168rpx;
+  background: linear-gradient(145deg, #e8d5b5 0%, #d4bc96 100%);
+  border: 4rpx solid #b8956a;
+  border-radius: 12rpx 12rpx 4rpx 4rpx;
+  box-shadow: inset 0 -8rpx 0 rgba(0, 0, 0, 0.06);
+}
+
+.geo-corner-v {
+  position: absolute;
+  left: 48rpx;
+  bottom: 36rpx;
+  width: 10rpx;
+  height: 188rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+  z-index: 2;
+}
+
+.geo-corner-h {
+  position: absolute;
+  left: 48rpx;
+  bottom: 36rpx;
+  width: 268rpx;
+  height: 10rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+  z-index: 2;
+}
+
+.geo-corner-mark {
+  position: absolute;
+  left: 58rpx;
+  bottom: 46rpx;
+  width: 32rpx;
+  height: 32rpx;
+  border-right: 5rpx solid #22b8a8;
+  border-top: 5rpx solid #22b8a8;
+  z-index: 3;
+}
+
+/* 垂直·十字路口 */
+.geo-cross-stage {
+  position: relative;
+  width: 300rpx;
+  height: 260rpx;
+  margin: 0 auto;
+}
+
+.geo-cross-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 10rpx;
+  background: #64748b;
+  border-radius: 4rpx;
+  transform: translateY(-50%);
+}
+
+.geo-cross-v {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 10rpx;
+  height: 100%;
+  background: #64748b;
+  border-radius: 4rpx;
+  transform: translateX(-50%);
+}
+
+.geo-cross-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32rpx;
+  height: 32rpx;
+  border-right: 5rpx solid #22b8a8;
+  border-bottom: 5rpx solid #22b8a8;
+  transform: translate(calc(-50% + 10rpx), calc(-50% - 10rpx));
+}
+
+/* 垂直·旗杆与地面 */
+.geo-flag-stage {
+  position: relative;
+  width: 300rpx;
+  height: 240rpx;
+  margin: 0 auto;
+}
+
+.geo-flag-ground {
+  position: absolute;
+  left: 0;
+  bottom: 48rpx;
+  width: 100%;
+  height: 10rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+}
+
+.geo-flag-pole {
+  position: absolute;
+  left: 50%;
+  bottom: 48rpx;
+  width: 10rpx;
+  height: 170rpx;
+  background: #ef4444;
+  border-radius: 4rpx;
+  transform: translateX(-50%);
+}
+
+.geo-flag-mark {
+  position: absolute;
+  left: 50%;
+  bottom: 58rpx;
+  width: 32rpx;
+  height: 32rpx;
+  border-right: 5rpx solid #22b8a8;
+  border-top: 5rpx solid #22b8a8;
+  transform: translateX(2rpx);
+}
+
+.geo-angle-stage {
+  position: relative;
+  width: 320rpx;
+  height: 180rpx;
+  margin: 0 auto;
+}
+
+.geo-angle-base {
+  position: absolute;
+  left: 24rpx;
+  bottom: 0;
+  width: 260rpx;
+  height: 8rpx;
+  background: #2d3748;
+  border-radius: 4rpx;
+}
+
+.geo-angle-arm {
+  position: absolute;
+  left: 24rpx;
+  bottom: 0;
+  width: 200rpx;
+  height: 8rpx;
+  background: #22b8a8;
+  border-radius: 4rpx;
+  transform-origin: left center;
+}
+
+.geo-angle-label {
+  position: absolute;
+  left: 80rpx;
+  bottom: 24rpx;
+  font-size: 32rpx;
+  font-weight: 900;
+  color: #0f8f82;
+}
+

@@ -163,6 +163,17 @@
   box-shadow: 0 4rpx 0 #e0ad20;
 }
 
+.theme-block {
+  margin-bottom: 8rpx;
+}
+
+.theme-unit-label {
+  font-size: 24rpx;
+  font-weight: 800;
+  color: #9a93a8;
+  margin: 0 0 12rpx 4rpx;
+}
+
 .side-left {
   flex: 1;
   min-width: 0;

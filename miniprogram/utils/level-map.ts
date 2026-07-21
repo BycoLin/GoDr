@@ -9,6 +9,7 @@ import {
 import { loadPackProgress } from './progress';
 import { isFavorite } from './favorites';
 import { getItemSemester, getItemUnit } from './unit-test';
+import { resolveMathDisplayTitle } from './math-item-label';
 import type { KnowledgeItem } from './types';
 
 export interface LevelRow {
@@ -76,7 +77,7 @@ export function buildLevelSnapshot(packId: string, grade: number): LevelSnapshot
     }
     return {
       id: item.id,
-      title: item.title,
+      title: isMath(item) ? resolveMathDisplayTitle(item) : item.title,
       meta,
       stars: itemProg?.stars || 0,
       cleared: Boolean(itemProg?.cleared),

@@ -14,7 +14,7 @@ const dataDir = path.join(root, 'miniprogram', 'data', 'packs');
 const require = createRequire(import.meta.url);
 
 const MIN_PER_GRADE = 50;
-const GRADES = [0, 1, 2, 3];
+const GRADES = [0, 1, 2, 3, 4];
 
 const SKILL_NAMES = {
   add: '加法',
@@ -26,7 +26,29 @@ const SKILL_NAMES = {
   breakTen: '破十法',
   flatTen: '平十法',
   borrowTen: '借十法',
+  bigNumber: '大数的认识',
+  placeValue: '数位与计数',
+  angle: '角的认识',
+  line: '线的认识',
 };
+
+function formatMaxChinese(max) {
+  if (max >= 100000000 && max % 100000000 === 0) return `${max / 100000000}亿`;
+  if (max >= 10000 && max % 10000 === 0) return `${max / 10000}万`;
+  if (max >= 10000) {
+    const wan = max / 10000;
+    return Number.isInteger(wan) ? `${wan}万` : `${wan.toFixed(1).replace(/\.0$/, '')}万`;
+  }
+  return String(max);
+}
+
+function mathDisplayTitle(grade, max, skill, label) {
+  const maxLabel = formatMaxChinese(max);
+  if (grade >= 4 || max >= 10000 || ['bigNumber', 'placeValue', 'angle', 'line'].includes(skill)) {
+    return `${label}·${maxLabel}`;
+  }
+  return `${maxLabel}以内${label}`;
+}
 
 const MATH_CFG = {
   0: {
@@ -47,6 +69,11 @@ const MATH_CFG = {
   3: {
     skills: ['add', 'sub', 'mix', 'compare', 'missing', 'makeTen', 'breakTen', 'flatTen', 'borrowTen'],
     maxes: [20, 50, 100, 200, 500, 1000],
+    units: [1, 2, 3, 4, 5, 6],
+  },
+  4: {
+    skills: ['bigNumber', 'placeValue', 'angle', 'line'],
+    maxes: [10000, 100000, 1000000, 10000000],
     units: [1, 2, 3, 4, 5, 6],
   },
 };
@@ -446,11 +473,11 @@ function buildMathExtras(existing, existingIds) {
           extras.push({
             id,
             grade,
-            title: `${max}以内${label}`,
+            title: mathDisplayTitle(grade, max, skill, label),
             subtitle: subtitles[seq % subtitles.length],
             skill,
             max,
-            tags: grade === 0 ? ['幼小衔接', label] : ['速算', label],
+            tags: grade === 0 ? ['幼小衔接', label] : grade >= 4 ? [label, '四年级'] : ['速算', label],
             unit: cfg.units[seq % cfg.units.length],
           });
           existingIds.add(id);
@@ -468,11 +495,11 @@ function buildMathExtras(existing, existingIds) {
       extras.push({
         id,
         grade,
-        title: `${max}以内${label}·${seq}`,
+        title: `${mathDisplayTitle(grade, max, skill, label)}·${seq}`,
         subtitle: '综合练习',
         skill,
         max,
-        tags: grade === 0 ? ['幼小衔接', label] : ['速算', label],
+        tags: grade === 0 ? ['幼小衔接', label] : grade >= 4 ? [label, '四年级'] : ['速算', label],
         unit: cfg.units[seq % cfg.units.length],
       });
       existingIds.add(id);
@@ -487,8 +514,8 @@ function buildEnglishExtras(existing, existingIds) {
   const extras = [];
 
   for (const grade of GRADES) {
-    // 一至三年级英语由 PEP 词表同步脚本维护
-    if (grade >= 1 && grade <= 3) continue;
+    // 一至四年级英语由 PEP 词表同步脚本维护
+    if (grade >= 1 && grade <= 4) continue;
     const need = MIN_PER_GRADE - counts[grade];
     if (need <= 0) continue;
 
@@ -540,7 +567,7 @@ function buildEnglishExtras(existing, existingIds) {
 
 function reportCounts(label, items) {
   const c = countByGrade(items);
-  console.log(`${label}：g0=${c[0]} g1=${c[1]} g2=${c[2]} g3=${c[3]} 合计=${items.length}`);
+  console.log(`${label}：g0=${c[0]} g1=${c[1]} g2=${c[2]} g3=${c[3]} g4=${c[4] || 0} 合计=${items.length}`);
   for (const g of GRADES) {
     if (c[g] < MIN_PER_GRADE) {
       console.warn(`  ⚠ ${label} ${g} 年级仅 ${c[g]} 条，未达 ${MIN_PER_GRADE}`);

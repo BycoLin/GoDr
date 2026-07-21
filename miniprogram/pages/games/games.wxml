@@ -45,6 +45,28 @@
     <view class="path-entry-go">开</view>
   </view>
 
+  <block wx:if="{{themeUnits.length}}">
+    <view class="sec-title">主题闯关</view>
+    <view class="theme-block" wx:for="{{themeUnits}}" wx:key="id">
+      <view class="theme-unit-label">{{item.title}}</view>
+      <view
+        class="play-row {{game.tone}} pressable"
+        wx:for="{{item.games}}"
+        wx:for-item="game"
+        wx:key="id"
+        data-mode="{{game.mode}}"
+        bindtap="onTapThemeGame"
+      >
+        <view class="play-icon">{{game.tag}}</view>
+        <view class="play-body">
+          <view class="play-name">{{game.title}}</view>
+          <view class="play-tip">{{game.subtitle}}</view>
+        </view>
+        <view class="play-go">开</view>
+      </view>
+    </view>
+  </block>
+
   <view class="sec-title">专项练习</view>
   <view
     class="play-row {{item.tone}} pressable"

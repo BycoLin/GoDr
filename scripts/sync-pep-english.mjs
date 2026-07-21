@@ -1,5 +1,5 @@
 /**
- * 将 PEP 一至三年级英语单元词表同步到 english-g1-g2/items.js
+ * 将 PEP 一至四年级英语单元词表同步到 english-g1-g2/items.js
  * 用法：npm run sync:pep-english
  */
 import fs from 'fs';
@@ -8,9 +8,10 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { PEP_ENGLISH_G1 } from './data/pep-english-g1.mjs';
 import { PEP_ENGLISH_G2 } from './data/pep-english-g2.mjs';
 import { PEP_ENGLISH_G3 } from './data/pep-english-g3.mjs';
+import { PEP_ENGLISH_G4 } from './data/pep-english-g4.mjs';
 import { flattenPepBook } from './data/pep-english-utils.mjs';
 
-const PEP_GRADES = [1, 2, 3];
+const PEP_GRADES = [1, 2, 3, 4];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
@@ -51,7 +52,7 @@ function formatItem(item) {
     title: '${item.title.replace(/'/g, "\\'")}',
     word: '${item.word.replace(/'/g, "\\'")}',
     meaning: '${item.meaning.replace(/'/g, "\\'")}',
-    phonetic: '${item.phonetic}',
+    phonetic: '${item.phonetic.replace(/'/g, "\\'")}',
     category: '${item.category}',
     tags: [${tagsStr}],
     unit: ${item.unit},
@@ -70,6 +71,7 @@ async function main() {
     ...flattenPepBook(PEP_ENGLISH_G1, 1),
     ...flattenPepBook(PEP_ENGLISH_G2, 2),
     ...flattenPepBook(PEP_ENGLISH_G3, 3),
+    ...flattenPepBook(PEP_ENGLISH_G4, 4),
   ].map(pepToItem);
 
   const pepIds = new Set(pepItems.map((i) => i.id));

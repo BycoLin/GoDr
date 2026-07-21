@@ -1,0 +1,107 @@
+/**
+ * 人教版 PEP 四年级英语单元词表（三年级起点，上下册）
+ * 每项：[word, meaning, category]
+ */
+export const PEP_ENGLISH_G4 = {
+  1: {
+    1: [
+      ['classroom', '教室', 'school'], ['window', '窗户', 'school'], ['door', '门', 'school'],
+      ['picture', '图画', 'school'], ['blackboard', '黑板', 'school'], ['light', '灯', 'school'],
+      ['computer', '计算机', 'school'], ['fan', '风扇', 'school'], ['wall', '墙壁', 'school'],
+      ['floor', '地板', 'school'], ['really', '真的', 'adv'], ['near', '距离近', 'prep'],
+      ['clean', '打扫', 'verb'], ['help', '帮助', 'verb'], ['teacher desk', '讲台', 'school'],
+      ['schoolbag', '书包', 'school'],
+    ],
+    2: [
+      ['schoolbag', '书包', 'school'], ['maths book', '数学书', 'school'],
+      ['English book', '英语书', 'school'], ['Chinese book', '语文书', 'school'],
+      ['storybook', '故事书', 'school'], ['candy', '糖果', 'food'], ['notebook', '笔记本', 'school'],
+      ['toy', '玩具', 'toy'], ['key', '钥匙', 'daily'], ['wow', '哇', 'interj'],
+      ['lost', '丢失', 'adj'], ['so much', '非常地', 'phrase'], ['cute', '可爱的', 'adj'],
+      ['pen', '钢笔', 'school'], ['pencil', '铅笔', 'school'], ['ruler', '尺子', 'school'],
+      ['eraser', '橡皮', 'school'],
+    ],
+    3: [
+      ['strong', '强壮的', 'adj'], ['friendly', '友好的', 'adj'], ['quiet', '安静的', 'adj'],
+      ['hair', '头发', 'body'], ['shoe', '鞋', 'clothes'], ['glasses', '眼镜', 'daily'],
+      ['his', '他的', 'pronoun'], ['or', '或者', 'conj'], ['right', '对的', 'adj'],
+      ['hat', '帽子', 'clothes'], ['her', '她的', 'pronoun'], ['boy', '男孩', 'people'],
+      ['girl', '女孩', 'people'], ['friend', '朋友', 'people'],
+    ],
+    4: [
+      ['bedroom', '卧室', 'home'], ['living room', '客厅', 'home'], ['study', '书房', 'home'],
+      ['kitchen', '厨房', 'home'], ['bathroom', '浴室', 'home'], ['bed', '床', 'furniture'],
+      ['phone', '电话', 'daily'], ['table', '桌子', 'furniture'], ['sofa', '沙发', 'furniture'],
+      ['fridge', '冰箱', 'home'], ['find', '找到', 'verb'], ['them', '他（她、它）们', 'pronoun'],
+      ['home', '家', 'home'], ['room', '房间', 'home'],
+    ],
+    5: [
+      ['beef', '牛肉', 'food'], ['chicken', '鸡肉', 'food'], ['noodles', '面条', 'food'],
+      ['soup', '汤', 'food'], ['vegetable', '蔬菜', 'food'], ['chopsticks', '筷子', 'daily'],
+      ['bowl', '碗', 'daily'], ['fork', '餐叉', 'daily'], ['knife', '刀', 'daily'],
+      ['spoon', '勺', 'daily'], ['dinner', '正餐', 'food'], ['ready', '准备好', 'adj'],
+      ['help yourself', '为（自己）取用', 'phrase'], ['pass', '给', 'verb'], ['try', '试', 'verb'],
+      ['rice', '米饭', 'food'],
+    ],
+    6: [
+      ['parents', '父母', 'family'], ['cousin', '同辈表亲', 'family'], ['uncle', '舅父', 'family'],
+      ['aunt', '姑母', 'family'], ['baby brother', '婴儿小弟弟', 'family'],
+      ['doctor', '医生', 'job'], ['cook', '厨师', 'job'], ['driver', '司机', 'job'],
+      ['farmer', '农民', 'job'], ['nurse', '护士', 'job'], ['people', '人们', 'people'],
+      ['but', '但是', 'conj'], ['little', '小的', 'adj'], ['puppy', '小狗', 'animal'],
+      ['football player', '足球运动员', 'job'], ['job', '工作', 'job'],
+      ['basketball', '篮球', 'sport'],
+    ],
+  },
+  2: {
+    1: [
+      ['first floor', '一楼', 'place'], ['second floor', '二楼', 'place'],
+      ['teachers office', '教师办公室', 'school'], ['library', '图书馆', 'school'],
+      ['playground', '操场', 'school'], ['computer room', '计算机房', 'school'],
+      ['art room', '美术教室', 'school'], ['music room', '音乐教室', 'school'],
+      ['next to', '紧邻', 'prep'], ['homework', '作业', 'school'], ['class', '班级', 'school'],
+      ['forty', '四十', 'number'], ['way', '方向', 'daily'],
+    ],
+    2: [
+      ['London', '伦敦', 'place'], ['Paris', '巴黎', 'place'], ['New York', '纽约', 'place'],
+      ['Moscow', '莫斯科', 'place'], ['Singapore', '新加坡', 'place'], ['Sydney', '悉尼', 'place'],
+      ['Tokyo', '东京', 'place'], ['Washington', '华盛顿', 'place'],
+      ['go to school', '去上学', 'phrase'], ['go home', '回家', 'phrase'],
+      ['go to bed', '上床睡觉', 'phrase'], ['hurry up', '快点', 'phrase'],
+      ['come on', '快', 'phrase'], ['oclock', '…点钟', 'time'],
+      ['time', '时间', 'time'], ['just a minute', '稍等一会儿', 'phrase'],
+      ['breakfast', '早餐', 'food'], ['lunch', '午餐', 'food'], ['dinner', '晚餐', 'food'],
+    ],
+    3: [
+      ['warm', '温暖的', 'weather'], ['cool', '凉爽的', 'weather'], ['hot', '热的', 'weather'],
+      ['cold', '冷的', 'weather'], ['sunny', '阳光充足的', 'weather'], ['windy', '多风的', 'weather'],
+      ['cloudy', '多云的', 'weather'], ['snowy', '下雪的', 'weather'], ['rainy', '阴雨的', 'weather'],
+      ['outside', '在户外', 'adv'], ['be careful', '小心', 'phrase'],
+      ['weather', '天气', 'weather'], ['degree', '度', 'weather'], ['world', '世界', 'place'],
+    ],
+    4: [
+      ['carrot', '胡萝卜', 'food'], ['horse', '马', 'animal'], ['cow', '母牛', 'animal'],
+      ['sheep', '羊', 'animal'], ['hen', '母鸡', 'animal'], ['these', '这些', 'pronoun'],
+      ['those', '那些', 'pronoun'], ['yum', '味道好', 'interj'], ['animal', '动物', 'animal'],
+      ['vegetable', '蔬菜', 'food'], ['garden', '花园', 'place'], ['farm', '农场', 'place'],
+      ['goat', '山羊', 'animal'], ['eat', '吃', 'verb'],
+    ],
+    5: [
+      ['clothes', '衣服', 'clothes'], ['pants', '裤子', 'clothes'], ['hat', '帽子', 'clothes'],
+      ['dress', '连衣裙', 'clothes'], ['skirt', '女裙', 'clothes'], ['coat', '外套', 'clothes'],
+      ['sweater', '毛衣', 'clothes'], ['sock', '短袜', 'clothes'], ['shorts', '短裤', 'clothes'],
+      ['jacket', '夹克衫', 'clothes'], ['shirt', '衬衫', 'clothes'], ['yours', '你的', 'pronoun'],
+      ['whose', '谁的', 'pronoun'], ['mine', '我的', 'pronoun'], ['pack', '收拾', 'verb'],
+      ['wait', '等待', 'verb'],
+    ],
+    6: [
+      ['glove', '手套', 'clothes'], ['scarf', '围巾', 'clothes'], ['umbrella', '伞', 'daily'],
+      ['sunglasses', '太阳镜', 'daily'], ['pretty', '美观的', 'adj'], ['expensive', '昂贵的', 'adj'],
+      ['cheap', '便宜的', 'adj'], ['nice', '好的', 'adj'], ['try on', '试穿', 'phrase'],
+      ['size', '尺码', 'daily'], ['of course', '当然', 'phrase'], ['too', '太', 'adv'],
+      ['just', '正好', 'adv'], ['how much', '多少钱', 'phrase'], ['eighty', '八十', 'number'],
+      ['dollar', '元', 'money'], ['sale', '特价销售', 'daily'], ['more', '更多的', 'adj'],
+      ['us', '我们', 'pronoun'],
+    ],
+  },
+};

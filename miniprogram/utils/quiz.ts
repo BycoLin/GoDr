@@ -424,6 +424,9 @@ export function gradeAnswer(
     if (payload.length !== question.answers.length) return false;
     return question.answers.every((ans, i) => Number(payload[i]) === ans);
   }
+  if (question.type === 'mathBigWrite') {
+    return typeof payload === 'string' && Number(payload) === question.answer;
+  }
   if (
     question.type === 'fillNext' ||
     question.type === 'titleAuthor' ||
@@ -431,6 +434,14 @@ export function gradeAnswer(
     question.type === 'mathCalc' ||
     question.type === 'mathCompare' ||
     question.type === 'mathMissing' ||
+    question.type === 'mathBigCompare' ||
+    question.type === 'mathPlaceValue' ||
+    question.type === 'mathBigRead' ||
+    question.type === 'mathRound' ||
+    question.type === 'mathLineType' ||
+    question.type === 'mathGeoRelation' ||
+    question.type === 'mathAngleClassify' ||
+    question.type === 'mathAngleMeasure' ||
     question.type === 'mathMakeTen' ||
     question.type === 'mathBreakTen' ||
     question.type === 'mathFlatTen' ||
@@ -483,6 +494,15 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   mathSequence: '数字排队',
   mathCompare: '比大小',
   mathMissing: '算式填空',
+  mathBigCompare: '大数比较',
+  mathPlaceValue: '数位认识',
+  mathBigRead: '大数读法',
+  mathBigWrite: '大数写法',
+  mathRound: '近似数',
+  mathLineType: '线的认识',
+  mathGeoRelation: '平行垂直',
+  mathAngleClassify: '角的分类',
+  mathAngleMeasure: '角的度量',
   mathMakeTen: '凑十法',
   mathBreakTen: '破十法',
   mathFlatTen: '平十法',

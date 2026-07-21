@@ -8,11 +8,15 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import { MEIYUWEN_POETRY } from './data/meiyuwen-g1-g2.mjs';
 import { MEIYUWEN_G3_POETRY } from './data/meiyuwen-g3.mjs';
 import { MEIYUWEN_G3_XIA_POETRY } from './data/meiyuwen-g3-xia.mjs';
+import { MEIYUWEN_G4_POETRY } from './data/meiyuwen-g4.mjs';
+import { MEIYUWEN_G4_XIA_POETRY } from './data/meiyuwen-g4-xia.mjs';
 
 const ALL_MEIYUWEN = [
   ...MEIYUWEN_POETRY,
   ...MEIYUWEN_G3_POETRY,
   ...MEIYUWEN_G3_XIA_POETRY,
+  ...MEIYUWEN_G4_POETRY,
+  ...MEIYUWEN_G4_XIA_POETRY,
 ];
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -120,8 +124,12 @@ ${body},
   const g3 = merged.filter((i) => i.grade === 3);
   const g3Upper = g3.filter((i) => inferSemester(i) === 1);
   const g3Lower = g3.filter((i) => inferSemester(i) === 2);
+  const g4 = merged.filter((i) => i.grade === 4);
+  const g4Upper = g4.filter((i) => inferSemester(i) === 1);
+  const g4Lower = g4.filter((i) => inferSemester(i) === 2);
   console.log(`梅语文同步完成：新增 ${added}，更新 ${updated}，移除占位 ${purged} 条`);
   console.log(`  三年级上册 ${g3Upper.length} 条，下册 ${g3Lower.length} 条，合计 ${g3.length} 条`);
+  console.log(`  四年级上册 ${g4Upper.length} 条，下册 ${g4Lower.length} 条，合计 ${g4.length} 条`);
   console.log(`题库合计 ${merged.length} 条（课内必背优先排序）`);
 }
 

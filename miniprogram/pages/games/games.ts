@@ -13,6 +13,7 @@ import {
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
+import { listMathThemeUnits, type MathThemeUnit } from '../../utils/math-themes';
 import { ROUTES, routePage } from '../../utils/routes';
 
 interface GameCard {
@@ -88,6 +89,7 @@ Page({
     pathKind: 'pinyin' as PathKind,
     pathTitle: '拼音进阶',
     pathDesc: '学 → 练 → 测',
+    themeUnits: [] as MathThemeUnit[],
   },
 
   onShow() {
@@ -152,6 +154,7 @@ Page({
       pathTitle:
         pathKind === 'math' ? '口算进阶' : pathKind === 'english' ? '单词进阶' : '拼音进阶',
       pathDesc: done > 0 ? `已完成 ${done}/3 · 学 → 练 → 测` : '学 → 练 → 测，循序巩固',
+      themeUnits: kind === 'math' ? listMathThemeUnits(grade) : [],
     });
   },
 
@@ -195,6 +198,15 @@ Page({
       return;
     }
     this.onTapDaily();
+  },
+
+  onTapThemeGame(e: WechatMiniprogram.TouchEvent) {
+    const mode = e.currentTarget.dataset.mode as ArcadeMode;
+    const { packId, grade } = this.data;
+    if (!mode) return;
+    wx.navigateTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
+    });
   },
 
   onTapGame(e: WechatMiniprogram.TouchEvent) {

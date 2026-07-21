@@ -80,15 +80,20 @@
           style="height: {{subjectScrollHeight}}px;"
         >
         <view class="subject-slide">
-          <view class="grade-pills">
-            <view
-              class="gp {{panel.gradeKey === item.key ? 'on' : ''}} {{item.pre ? 'gp-pre' : ''}}"
-              wx:for="{{panel.gradeOptions}}"
-              wx:for-index="idx"
-              wx:key="key"
-              data-grade="{{item.value}}"
-              bindtap="onSelectGrade"
-            >{{item.label}}</view>
+          <view class="grade-bar {{panel.toneClass}}">
+            <view class="grade-bar-label">选择年级</view>
+            <scroll-view class="grade-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+              <view class="grade-pills">
+                <view
+                  class="gp {{panel.gradeKey === item.key ? 'on' : ''}} {{item.pre ? 'gp-pre' : ''}}"
+                  wx:for="{{panel.gradeOptions}}"
+                  wx:for-index="idx"
+                  wx:key="key"
+                  data-grade="{{item.value}}"
+                  bindtap="onSelectGrade"
+                >{{item.label}}</view>
+              </view>
+            </scroll-view>
           </view>
 
           <view class="scene-card {{panel.toneClass}}">

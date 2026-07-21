@@ -1,5 +1,6 @@
-import { getPackItems, getPackManifest } from '../../utils/registry';
+import { getPackItems, getPackManifest, isMath } from '../../utils/registry';
 import { loadPackProgress } from '../../utils/progress';
+import { resolveMathDisplayTitle } from '../../utils/math-item-label';
 import {
   getActiveGrade,
   getActivePackId,
@@ -59,7 +60,7 @@ Page({
         const p = progress.items[item.id];
         return {
           id: item.id,
-          title: item.title,
+          title: isMath(item) ? resolveMathDisplayTitle(item) : item.title,
           grade: Number(item.grade),
           stars: p?.stars || 0,
           cleared: Boolean(p?.cleared),

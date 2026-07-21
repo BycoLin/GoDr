@@ -12,7 +12,29 @@ export function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-/** 同局去重键：item + 题型 + 题干 */
+/** 数学题为程序随机生成，同局应按「内容」去重，不能绑 itemId */
+const MATH_CONTENT_DEDUP_TYPES = new Set<string>([
+  'mathCalc',
+  'mathCompare',
+  'mathMissing',
+  'mathMakeTen',
+  'mathBreakTen',
+  'mathFlatTen',
+  'mathBorrowTen',
+  'mathVisual',
+  'mathSequence',
+  'mathBigCompare',
+  'mathPlaceValue',
+  'mathBigRead',
+  'mathBigWrite',
+  'mathRound',
+  'mathLineType',
+  'mathGeoRelation',
+  'mathAngleClassify',
+  'mathAngleMeasure',
+]);
+
+/** 同局去重键：item + 题型 + 题干 + 配图/答案 */
 export function questionSessionKey(q: Question): string {
   if (q.type === 'matchPair') {
     const ids = [...q.itemIds].sort().join(',');
@@ -24,7 +46,40 @@ export function questionSessionKey(q: Question): string {
   }
   const itemId = 'itemId' in q ? q.itemId : '';
   const prompt = 'prompt' in q ? String(q.prompt || '') : '';
-  return `${itemId}:${q.type}:${prompt}`;
+  let extra = '';
+  if ('diagram' in q && q.diagram) {
+    extra += `:d:${JSON.stringify(q.diagram)}`;
+  }
+  if ('angleDeg' in q && typeof q.angleDeg === 'number') {
+    extra += `:deg:${q.angleDeg}`;
+  }
+  if ('answerId' in q && q.answerId) {
+    extra += `:a:${q.answerId}`;
+  }
+  if ('options' in q && Array.isArray(q.options)) {
+    const ans = q.options.find((o) => o.id === ('answerId' in q ? q.answerId : ''));
+    if (ans) extra += `:o:${ans.text}`;
+  }
+  if ('readText' in q && q.readText) {
+    extra += `:r:${q.readText}`;
+  }
+  if ('compareLeft' in q && q.compareLeft) {
+    extra += `:l:${q.compareLeft}`;
+  }
+  if ('compareRight' in q && q.compareRight) {
+    extra += `:r2:${q.compareRight}`;
+  }
+  if ('placeValueChars' in q && q.placeValueChars?.length) {
+    extra += `:pv:${q.placeValueChars.map((c) => (c.hi ? `[${c.text}]` : c.text)).join('')}`;
+  }
+  if ('answer' in q && typeof q.answer === 'number') {
+    extra += `:n:${q.answer}`;
+  }
+  // 数学/几何题为程序生成，按「内容」去重，不因关卡 item 不同而重复
+  if (MATH_CONTENT_DEDUP_TYPES.has(q.type)) {
+    return `${q.type}:${prompt}${extra}`;
+  }
+  return `${itemId}:${q.type}:${prompt}${extra}`;
 }
 
 export function keysFromQuestions(questions: Question[]): Set<string> {

@@ -37,7 +37,11 @@ export type MathSkill =
   | 'makeTen'
   | 'breakTen'
   | 'flatTen'
-  | 'borrowTen';
+  | 'borrowTen'
+  | 'bigNumber'
+  | 'placeValue'
+  | 'angle'
+  | 'line';
 
 export interface MathItem {
   id: string;
@@ -89,7 +93,16 @@ export type MathQuizType =
   | 'mathFlatTen'
   | 'mathBorrowTen'
   | 'mathVisual'
-  | 'mathSequence';
+  | 'mathSequence'
+  | 'mathBigCompare'
+  | 'mathPlaceValue'
+  | 'mathBigRead'
+  | 'mathBigWrite'
+  | 'mathRound'
+  | 'mathLineType'
+  | 'mathGeoRelation'
+  | 'mathAngleClassify'
+  | 'mathAngleMeasure';
 
 export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
 
@@ -162,16 +175,33 @@ export interface FillBlankQuestion {
 }
 
 /** 数学选择题（计算 / 比较 / 填空）共用 */
+export interface MathDiagram {
+  kind: 'line' | 'parallel' | 'angle';
+  lineKind?: 'segment' | 'ray' | 'line';
+  relation?: 'parallel' | 'perpendicular';
+  angleDeg?: number;
+  /** 情境标识，便于同题型多场景去重 */
+  scene?: string;
+}
+
 export interface MathChoiceQuestion {
   id: string;
   type: Exclude<
     MathQuizType,
-    'mathVisual' | 'mathSequence'
+    'mathVisual' | 'mathSequence' | 'mathBigWrite' | 'mathAngleMeasure'
   >;
   itemId: string;
   prompt: string;
   options: ChoiceOption[];
   answerId: string;
+  /** 几何题配图（线条 / 平行垂直 / 角的分类） */
+  diagram?: MathDiagram;
+  /** 大数比大小：左侧数字 */
+  compareLeft?: string;
+  /** 大数比大小：右侧数字 */
+  compareRight?: string;
+  /** 数位认识：带高亮的数字展示 */
+  placeValueChars?: Array<{ text: string; hi: boolean }>;
 }
 
 /** 看图口算（数图 / 凑十 / 数轴） */
@@ -217,6 +247,29 @@ export interface MathSequenceQuestion {
   answers: number[];
 }
 
+/** 拼图工坊：按读法写大数 */
+export interface MathBigWriteQuestion {
+  id: string;
+  type: 'mathBigWrite';
+  itemId: string;
+  prompt: string;
+  readText: string;
+  puzzlePieces: Array<{ id: number; text: string }>;
+  answer: number;
+}
+
+/** 量角器：图形读度数 */
+export interface MathAngleMeasureQuestion {
+  id: string;
+  type: 'mathAngleMeasure';
+  itemId: string;
+  prompt: string;
+  angleDeg: number;
+  options: ChoiceOption[];
+  answerId: string;
+  ticks: Array<{ id: number; deg: number; label: string; major: boolean }>;
+}
+
 /** 英语选择题（看词选义 / 看义选词 / 缺字母）共用 */
 export interface EnglishChoiceQuestion {
   id: string;
@@ -236,6 +289,8 @@ export type Question =
   | MathChoiceQuestion
   | MathVisualQuestion
   | MathSequenceQuestion
+  | MathBigWriteQuestion
+  | MathAngleMeasureQuestion
   | EnglishChoiceQuestion;
 
 export interface SessionAnswer {
