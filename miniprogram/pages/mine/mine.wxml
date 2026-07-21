@@ -138,14 +138,11 @@
       <text>{{wrongbookLabel}}</text>
       <text class="arrow">›</text>
     </view>
-    <view class="menu-item danger" bindtap="onClearAll">
-      <text>清空全部进度</text>
-      <text class="arrow">›</text>
-    </view>
   </view>
 
   <view class="about">
     <view>闯关叭叭 · v{{version}}</view>
     <view class="about-desc">趣味闯关练习工具：语文、数学、英语自测，本地记录学习进度。</view>
+    <view class="about-danger" bindtap="onClearAll">重置全部数据</view>
   </view>
 </view>

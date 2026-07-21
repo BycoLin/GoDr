@@ -4,9 +4,17 @@ import type {
   MathChoiceQuestion,
   MathItem,
   MathQuizType,
+  MathSequenceQuestion,
+  MathVisualQuestion,
   Question,
   QuizType,
 } from './types';
+import {
+  buildTypeSchedule,
+  pickItemsForSession,
+  registerQuestion,
+  shuffle as sessionShuffle,
+} from './quiz-session';
 
 function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -255,6 +263,204 @@ export function makeMathBorrowTen(item: MathItem): MathChoiceQuestion | null {
   };
 }
 
+const VISUAL_ICONS = ['🍓', '🍎', '🍊', '🍇', '🍒', '🍑', '⭐', '🐤'];
+
+function pctOnLine(value: number, min: number, max: number): number {
+  if (max <= min) return 50;
+  return Math.round(((value - min) / (max - min)) * 100);
+}
+
+function buildLineTicks(min: number, max: number): Array<{ value: number; pct: number }> {
+  const span = max - min;
+  const step = span <= 10 ? 1 : span <= 20 ? 2 : 5;
+  const ticks: Array<{ value: number; pct: number }> = [];
+  for (let v = min; v <= max; v += step) {
+    ticks.push({ value: v, pct: pctOnLine(v, min, max) });
+  }
+  if (ticks[ticks.length - 1]?.value !== max) {
+    ticks.push({ value: max, pct: 100 });
+  }
+  return ticks;
+}
+
+function makeVisualMakeTen(item: MathItem): MathVisualQuestion | null {
+  const { a, b, sum, toTen, rest } = pickMakeTen();
+  const tenFrame = Array.from({ length: 10 }, (_, i) => ({
+    id: i,
+    filled: i < a + toTen,
+    highlight: i >= a && i < a + toTen,
+  }));
+  return {
+    id: uid('mvis'),
+    type: 'mathVisual',
+    itemId: item.id,
+    op: 'makeTen',
+    prompt: '凑十法：先凑满十格，再算一共多少？',
+    a,
+    b,
+    answer: sum,
+    icon: '●',
+    tenFrame,
+    outsideDots: Array.from({ length: rest }, (_, i) => ({ id: i })),
+  };
+}
+
+function makeVisualCompare(item: MathItem): MathVisualQuestion | null {
+  let left = randInt(0, item.max);
+  let right = randInt(0, item.max);
+  if (left === right) {
+    right = Math.min(item.max, right + randInt(1, Math.max(1, Math.min(3, item.max - right))));
+  }
+  const compareAnswer = left > right ? '>' : left < right ? '<' : '=';
+  const lineMin = 0;
+  const lineMax = Math.max(10, item.max, left, right);
+  return {
+    id: uid('mvis'),
+    type: 'mathVisual',
+    itemId: item.id,
+    op: 'compare',
+    prompt: '看数轴：左边的数和右边的数，哪个更大？',
+    a: left,
+    b: right,
+    answer: 0,
+    icon: '',
+    lineMin,
+    lineMax,
+    left,
+    right,
+    leftPct: pctOnLine(left, lineMin, lineMax),
+    rightPct: pctOnLine(right, lineMin, lineMax),
+    lineTicks: buildLineTicks(lineMin, lineMax),
+    compareAnswer,
+  };
+}
+
+export function makeMathVisual(item: MathItem): MathVisualQuestion | null {
+  if (item.skill === 'makeTen') return makeVisualMakeTen(item);
+  if (item.skill === 'compare') return makeVisualCompare(item);
+  if (item.max > 20) return null;
+  const cap = Math.min(item.max, 10);
+  const icon = VISUAL_ICONS[randInt(0, VISUAL_ICONS.length - 1)];
+  const useAdd =
+    item.skill === 'add' ||
+    (item.skill === 'mix' && Math.random() < 0.5);
+
+  if (useAdd && item.skill !== 'sub') {
+    let a = 0;
+    let b = 0;
+    let ans = 0;
+    let guard = 0;
+    while ((a < 1 || b < 1) && guard < 20) {
+      const picked = pickAdd(cap);
+      a = picked.a;
+      b = picked.b;
+      ans = picked.ans;
+      guard += 1;
+    }
+    if (a < 1 || b < 1) {
+      a = randInt(1, Math.max(1, cap - 1));
+      b = randInt(1, cap - a);
+      ans = a + b;
+    }
+    return {
+      id: uid('mvis'),
+      type: 'mathVisual',
+      itemId: item.id,
+      op: 'add',
+      prompt: '数一数，一共多少个？',
+      a,
+      b,
+      answer: ans,
+      icon,
+      iconsA: Array.from({ length: a }, (_, i) => ({ id: i })),
+      iconsB: Array.from({ length: b }, (_, i) => ({ id: i + 100 })),
+    };
+  }
+
+  let a = 0;
+  let b = 0;
+  let ans = 0;
+  let subGuard = 0;
+  while (subGuard < 20) {
+    const picked = pickSub(cap);
+    a = picked.a;
+    b = picked.b;
+    ans = picked.ans;
+    if (a >= 1 && b >= 1) break;
+    subGuard += 1;
+  }
+  if (a < 1 || b < 1) {
+    a = randInt(2, cap);
+    b = randInt(1, a - 1);
+    ans = a - b;
+  }
+  const icons = Array.from({ length: a }, (_, i) => ({
+    id: i,
+    gone: i < b,
+  }));
+  return {
+    id: uid('mvis'),
+    type: 'mathVisual',
+    itemId: item.id,
+    op: 'sub',
+    prompt: '拿走一些，还剩多少？',
+    a,
+    b,
+    answer: ans,
+    icon,
+    icons,
+  };
+}
+
+/** 数字排队：按规律填空缺 */
+export function makeMathSequence(item: MathItem): MathSequenceQuestion {
+  const len = 4;
+  let step = 1;
+  let maxStart = Math.min(item.max, 20);
+
+  if (item.max <= 10) {
+    step = 1;
+    maxStart = 8;
+  } else if (item.max <= 20) {
+    step = Math.random() < 0.75 ? 1 : 2;
+    maxStart = 15;
+  } else if (item.max <= 50) {
+    step = shuffle([1, 2, 3, 5])[0];
+    maxStart = Math.min(30, item.max - len * step);
+  } else {
+    step = shuffle([2, 5, 10])[0];
+    maxStart = Math.min(50, item.max - len * step);
+  }
+
+  maxStart = Math.max(1, maxStart);
+  const start = randInt(1, maxStart);
+  const values = Array.from({ length: len }, (_, i) => start + i * step);
+
+  const patterns = [
+    [2, 3],
+    [1, 3],
+    [1, 2],
+  ];
+  const blankIndexes = patterns[randInt(0, patterns.length - 1)];
+
+  const slots = values.map((value, i) => ({
+    index: i,
+    show: !blankIndexes.includes(i),
+    value,
+  }));
+
+  return {
+    id: uid('mseq'),
+    type: 'mathSequence',
+    itemId: item.id,
+    prompt: '观察数字顺序，把空缺的位置补完整。',
+    step,
+    slots,
+    blankIndexes,
+    answers: blankIndexes.map((i) => values[i]),
+  };
+}
+
 export function makeMathCalc(item: MathItem): MathChoiceQuestion | null {
   let useAdd = true;
   if (item.skill === 'sub') useAdd = false;
@@ -371,6 +577,8 @@ const STRATEGY_SKILL_BY_MODE: Partial<Record<ArcadeMode, MathItem['skill']>> = {
 };
 
 const ALL_MATH_QUIZ_TYPES: MathQuizType[] = [
+  'mathVisual',
+  'mathSequence',
   'mathCalc',
   'mathCompare',
   'mathMissing',
@@ -380,27 +588,53 @@ const ALL_MATH_QUIZ_TYPES: MathQuizType[] = [
   'mathBorrowTen',
 ];
 
-function poolForMode(pool: MathItem[], mode: ArcadeMode): MathItem[] {
-  const skill = STRATEGY_SKILL_BY_MODE[mode];
-  if (!skill) return pool;
-  const filtered = pool.filter((p) => p.skill === skill);
-  return filtered.length ? filtered : pool;
+function visualModesFor(item: MathItem): MathQuizType[] {
+  if (item.skill === 'makeTen') return ['mathVisual', 'mathMakeTen'];
+  if (item.skill === 'compare') return ['mathVisual', 'mathCompare', 'mathCalc'];
+  if (item.max <= 20 && ['add', 'sub', 'mix', 'missing'].includes(item.skill)) {
+    return ['mathVisual', 'mathSequence', 'mathCalc', 'mathMissing', 'mathCompare'];
+  }
+  return [];
 }
 
-function skillToModes(skill: MathItem['skill']): MathQuizType[] {
+function skillToModes(skill: MathItem['skill'], item?: MathItem): MathQuizType[] {
+  if (item) {
+    const visual = visualModesFor(item);
+    if (visual.length) return visual;
+  }
   if (skill === 'makeTen') return ['mathMakeTen'];
   if (skill === 'breakTen') return ['mathBreakTen'];
   if (skill === 'flatTen') return ['mathFlatTen'];
   if (skill === 'borrowTen') return ['mathBorrowTen'];
   if (skill === 'compare') return ['mathCompare', 'mathCalc'];
-  if (skill === 'missing') return ['mathMissing', 'mathCalc'];
+  if (skill === 'missing') return ['mathSequence', 'mathMissing', 'mathCalc'];
   if (skill === 'add' || skill === 'sub' || skill === 'mix') {
     return ['mathCalc', 'mathMissing', 'mathCompare'];
   }
   return ['mathCalc', 'mathCompare', 'mathMissing'];
 }
 
+function poolForMode(pool: MathItem[], mode: ArcadeMode): MathItem[] {
+  if (mode === 'mathVisual') {
+    const visual = pool.filter((p) => {
+      if (p.skill === 'makeTen' || p.skill === 'compare') return true;
+      return p.max <= 20 && ['add', 'sub', 'mix'].includes(p.skill);
+    });
+    return visual.length ? visual : pool;
+  }
+  if (mode === 'mathSequence') {
+    const seq = pool.filter((p) => p.max <= 50);
+    return seq.length ? seq : pool;
+  }
+  const skill = STRATEGY_SKILL_BY_MODE[mode];
+  if (!skill) return pool;
+  const filtered = pool.filter((p) => p.skill === skill);
+  return filtered.length ? filtered : pool;
+}
+
 function makeByMathType(type: MathQuizType, item: MathItem): Question | null {
+  if (type === 'mathVisual') return makeMathVisual(item);
+  if (type === 'mathSequence') return makeMathSequence(item);
   if (type === 'mathCalc') return makeMathCalc(item);
   if (type === 'mathCompare') return makeMathCompare(item);
   if (type === 'mathMissing') return makeMathMissing(item);
@@ -411,34 +645,25 @@ function makeByMathType(type: MathQuizType, item: MathItem): Question | null {
   return null;
 }
 
-function preferredType(item: MathItem, index: number): MathQuizType {
-  const modes = skillToModes(item.skill);
-  if (item.skill === 'makeTen') return 'mathMakeTen';
-  if (item.skill === 'breakTen') return 'mathBreakTen';
-  if (item.skill === 'flatTen') return 'mathFlatTen';
-  if (item.skill === 'borrowTen') return 'mathBorrowTen';
-  if (index >= 3) return modes[index % modes.length];
-  // 前半程主练本关技能
-  if (item.skill === 'compare') return 'mathCompare';
-  if (item.skill === 'missing') return 'mathMissing';
-  return 'mathCalc';
-}
-
 export function buildMathQuizForItem(
   item: MathItem,
-  count = 5,
+  count = 8,
   preferTypes?: MathQuizType[],
 ): Question[] {
   const types = preferTypes?.filter((t) => ALL_MATH_QUIZ_TYPES.includes(t));
+  const skillModes = skillToModes(item.skill, item);
+  const typeSchedule = buildTypeSchedule(
+    types?.length ? types : skillModes.length ? skillModes : ALL_MATH_QUIZ_TYPES,
+    count * 3,
+  );
+  const usedKeys = new Set<string>();
   const questions: Question[] = [];
   let guard = 0;
-  while (questions.length < count && guard < count * 12) {
+  while (questions.length < count && guard < count * 20) {
     guard += 1;
-    const type = types?.length
-      ? types[questions.length % types.length]
-      : preferredType(item, questions.length);
+    const type = typeSchedule[guard % typeSchedule.length];
     const q = makeByMathType(type, item);
-    if (q) questions.push(q);
+    if (q && registerQuestion(usedKeys, q)) questions.push(q);
   }
   return questions;
 }
@@ -448,37 +673,31 @@ export function buildMathArcadeQuiz(
   mode: ArcadeMode,
   count = 8,
   preferModes?: QuizType[],
+  usedKeys?: Set<string>,
 ): Question[] {
   if (!pool.length) return [];
   const mathPrefer = preferModes?.filter((t): t is MathQuizType =>
     ALL_MATH_QUIZ_TYPES.includes(t as MathQuizType),
   );
+  const keys = usedKeys ?? new Set<string>();
+  const typeSchedule =
+    mathPrefer?.length
+      ? buildTypeSchedule(mathPrefer, count * 2)
+      : ALL_MATH_QUIZ_TYPES.includes(mode as MathQuizType)
+        ? buildTypeSchedule([mode as MathQuizType], count * 2)
+        : buildTypeSchedule(ALL_MATH_QUIZ_TYPES, count * 2);
+  const itemOrder = pickItemsForSession(poolForMode(pool, mode), count * 2);
   const questions: Question[] = [];
   let guard = 0;
-  while (questions.length < count && guard < count * 12) {
+  let itemCursor = 0;
+  while (questions.length < count && guard < count * 24) {
     guard += 1;
     const pickFrom = poolForMode(pool, mode);
-    const picked = pickFrom[Math.floor(Math.random() * pickFrom.length)];
-    let type: MathQuizType;
-    if (mathPrefer?.length) {
-      type = mathPrefer[questions.length % mathPrefer.length];
-    } else if (ALL_MATH_QUIZ_TYPES.includes(mode as MathQuizType)) {
-      type = mode as MathQuizType;
-    } else if (
-      mode === 'mixed' ||
-      mode === 'boss' ||
-      mode === 'daily' ||
-      mode === 'duel' ||
-      mode === 'sprint' ||
-      mode === 'exam' ||
-      mode === 'unit'
-    ) {
-      type = ALL_MATH_QUIZ_TYPES[questions.length % ALL_MATH_QUIZ_TYPES.length];
-    } else {
-      type = preferredType(picked, questions.length);
-    }
+    const picked = itemOrder[itemCursor % itemOrder.length] || pickFrom[guard % pickFrom.length];
+    itemCursor += 1;
+    const type = typeSchedule[guard % typeSchedule.length];
     const q = makeByMathType(type, picked);
-    if (q) questions.push(q);
+    if (q && registerQuestion(keys, q)) questions.push(q);
   }
   return questions;
 }
@@ -486,23 +705,16 @@ export function buildMathArcadeQuiz(
 export function buildMathBossQuiz(
   wrongPool: Array<{ itemId: string; quizType: string }>,
   pool: MathItem[],
-  count = 8,
 ): Question[] {
   if (!pool.length || !wrongPool.length) return [];
   const byId = new Map(pool.map((p) => [p.id, p]));
   const questions: Question[] = [];
-  let guard = 0;
-  let cursor = 0;
-  while (questions.length < count && guard < count * 15) {
-    guard += 1;
-    const hint = wrongPool[cursor % wrongPool.length];
-    cursor += 1;
+
+  for (const hint of wrongPool) {
     const item = byId.get(hint.itemId);
     if (!item) continue;
-    const type: MathQuizType = ALL_MATH_QUIZ_TYPES.includes(hint.quizType as MathQuizType)
-      ? (hint.quizType as MathQuizType)
-      : preferredType(item, questions.length);
-    const q = makeByMathType(type, item);
+    if (!ALL_MATH_QUIZ_TYPES.includes(hint.quizType as MathQuizType)) continue;
+    const q = makeByMathType(hint.quizType as MathQuizType, item);
     if (q) questions.push(q);
   }
   return questions;
@@ -518,6 +730,7 @@ export function nextMathAdaptiveQuestion(
     preferModes?: QuizType[];
   },
   wrongHints?: Array<{ itemId: string; quizType: string }>,
+  usedKeys?: Set<string>,
 ): Question | null {
   if (!pool.length) return null;
   if (baseMode === 'boss' && !wrongHints?.length) return null;
@@ -543,24 +756,38 @@ export function nextMathAdaptiveQuestion(
     type = shuffle(ALL_MATH_QUIZ_TYPES)[0];
   }
 
-  let item = pool[Math.floor(Math.random() * pool.length)];
-  if (wrongHints?.length && (!ctx.lastCorrect || baseMode === 'boss')) {
-    const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
-    const found = pool.find((p) => p.id === hint.itemId);
-    if (found) {
-      item = found;
-      if (ALL_MATH_QUIZ_TYPES.includes(hint.quizType as MathQuizType)) {
-        type = hint.quizType as MathQuizType;
+  const keys = usedKeys ?? new Set<string>();
+  const itemOrder = sessionShuffle(pool);
+  let guard = 0;
+  let itemCursor = 0;
+
+  while (guard < 24) {
+    guard += 1;
+    let item = itemOrder[itemCursor % itemOrder.length];
+    itemCursor += 1;
+    if (wrongHints?.length && (!ctx.lastCorrect || baseMode === 'boss')) {
+      const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
+      const found = pool.find((p) => p.id === hint.itemId);
+      if (found) {
+        item = found;
+        if (ALL_MATH_QUIZ_TYPES.includes(hint.quizType as MathQuizType)) {
+          type = hint.quizType as MathQuizType;
+        }
+      } else if (baseMode === 'boss') {
+        continue;
       }
-    } else if (baseMode === 'boss') {
-      return null;
     }
+    const q = makeByMathType(type, item);
+    if (q && registerQuestion(keys, q)) return q;
+    type = shuffle(ALL_MATH_QUIZ_TYPES)[0];
   }
-  return makeByMathType(type, item);
+  return null;
 }
 
 export const MATH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
   mixed: '数学综合练',
+  mathVisual: '看图口算',
+  mathSequence: '数字排队',
   mathCalc: '口算练习',
   mathCompare: '比大小',
   mathMissing: '算式填空',

@@ -21,6 +21,8 @@ export interface PoetryItem {
   dynasty?: string;
   lines: string[];
   tags?: string[];
+  /** 1=上册（默认），2=下册 */
+  semester?: 1 | 2;
   /** 课本单元序号，从 1 起 */
   unit?: number;
 }
@@ -47,6 +49,8 @@ export interface MathItem {
   /** 运算数上限，如 10 / 20 / 100 */
   max: number;
   tags?: string[];
+  /** 1=上册（默认），2=下册 */
+  semester?: 1 | 2;
   unit?: number;
 }
 
@@ -61,6 +65,8 @@ export interface EnglishItem {
   phonetic?: string;
   category?: string;
   tags?: string[];
+  /** 1=上册（默认），2=下册 */
+  semester?: 1 | 2;
   unit?: number;
 }
 
@@ -81,7 +87,9 @@ export type MathQuizType =
   | 'mathMakeTen'
   | 'mathBreakTen'
   | 'mathFlatTen'
-  | 'mathBorrowTen';
+  | 'mathBorrowTen'
+  | 'mathVisual'
+  | 'mathSequence';
 
 export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
 
@@ -156,11 +164,57 @@ export interface FillBlankQuestion {
 /** 数学选择题（计算 / 比较 / 填空）共用 */
 export interface MathChoiceQuestion {
   id: string;
-  type: MathQuizType;
+  type: Exclude<
+    MathQuizType,
+    'mathVisual' | 'mathSequence'
+  >;
   itemId: string;
   prompt: string;
   options: ChoiceOption[];
   answerId: string;
+}
+
+/** 看图口算（数图 / 凑十 / 数轴） */
+export interface MathVisualQuestion {
+  id: string;
+  type: 'mathVisual';
+  itemId: string;
+  op: 'sub' | 'add' | 'makeTen' | 'compare';
+  prompt: string;
+  a: number;
+  b: number;
+  answer: number;
+  icon: string;
+  /** 减法：图标列表，gone 表示被拿走 */
+  icons?: Array<{ id: number; gone: boolean }>;
+  /** 加法：两组图标 */
+  iconsA?: Array<{ id: number }>;
+  iconsB?: Array<{ id: number }>;
+  /** 凑十法：十格框 */
+  tenFrame?: Array<{ id: number; filled: boolean; highlight: boolean }>;
+  /** 凑十法：十格框外的圆点 */
+  outsideDots?: Array<{ id: number }>;
+  /** 比大小：数轴刻度 */
+  lineTicks?: Array<{ value: number; pct: number }>;
+  lineMin?: number;
+  lineMax?: number;
+  left?: number;
+  right?: number;
+  leftPct?: number;
+  rightPct?: number;
+  compareAnswer?: '>' | '<' | '=';
+}
+
+/** 数字排队：按规律填空缺 */
+export interface MathSequenceQuestion {
+  id: string;
+  type: 'mathSequence';
+  itemId: string;
+  prompt: string;
+  step: number;
+  slots: Array<{ index: number; show: boolean; value: number | null }>;
+  blankIndexes: number[];
+  answers: number[];
 }
 
 /** 英语选择题（看词选义 / 看义选词 / 缺字母）共用 */
@@ -180,6 +234,8 @@ export type Question =
   | OrderLinesQuestion
   | FillBlankQuestion
   | MathChoiceQuestion
+  | MathVisualQuestion
+  | MathSequenceQuestion
   | EnglishChoiceQuestion;
 
 export interface SessionAnswer {

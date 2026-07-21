@@ -1,9 +1,12 @@
 /**
- * 从 doc 中的 1-3 年级闯关表 DOC 粗抽文本，便于人工校对题库。
- * 实际题库以 miniprogram/data/packs/poetry-g1-g2/items.js 为准。
+ * 从 doc/梅语文 资料抽取文本，供校对或同步题库。
  *
- * 用法：npm run extract:poetry
- * 依赖：系统需安装 antiword（Git Bash / MSYS2 常见自带）
+ * 用法：
+ *   npm run extract:poetry      # 抽取 1-3 年级 DOC 文本
+ *   npm run sync:meiyuwen       # 按梅语文闯关表同步课内必背到 items.js
+ *
+ * 资料目录：doc/梅语文：统编版语文1-6年级…/
+ * 正式题库：miniprogram/data/packs/poetry-g1-g2/items.js
  */
 import { spawnSync } from 'child_process';
 import fs from 'fs';
@@ -12,12 +15,12 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '..');
-const docPath = path.join(
+const docDir = path.join(
   root,
   'doc',
   '梅语文：统编版语文1-6年级语文上册必背课文梳理+闯关表(1)',
-  '梅语文：统编版1-3年级语文上册课文背诵梳理+闯关表.doc',
 );
+const docPath = path.join(docDir, '梅语文：统编版1-3年级语文上册课文背诵梳理+闯关表.doc');
 const outPath = path.join(root, 'scripts', 'extract-poetry.raw.txt');
 
 if (!fs.existsSync(docPath)) {
@@ -34,4 +37,5 @@ if (result.error || result.status !== 0) {
 
 fs.writeFileSync(outPath, result.stdout, 'utf8');
 console.log('已写出粗抽文本：', outPath);
-console.log('请对照教材校对后更新 miniprogram/data/packs/poetry-g1-g2/items.js');
+console.log('课内必背结构化数据：scripts/data/meiyuwen-g1-g2.mjs');
+console.log('同步到题库：npm run sync:meiyuwen');

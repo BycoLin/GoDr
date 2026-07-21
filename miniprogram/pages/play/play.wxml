@@ -30,6 +30,135 @@
   </view>
 
   <block wx:if="{{current}}">
+    <!-- mathVisual 看图口算 / 凑十 / 数轴 -->
+    <view class="card q-card visual-card" wx:if="{{current.type === 'mathVisual'}}">
+      <view class="q-type">
+        <block wx:if="{{current.op === 'makeTen'}}">凑十法</block>
+        <block wx:elif="{{current.op === 'compare'}}">数轴比大小</block>
+        <block wx:else>看图口算</block>
+      </view>
+      <view class="q-prompt visual-desc">{{current.prompt}}</view>
+
+      <block wx:if="{{current.op === 'sub'}}">
+        <view class="visual-icons">
+          <view
+            class="visual-icon {{item.gone ? 'gone' : ''}}"
+            wx:for="{{current.icons}}"
+            wx:key="id"
+          >{{current.icon}}</view>
+        </view>
+        <view class="visual-equation">
+          <view class="visual-num">{{current.a}}</view>
+          <view class="visual-op">-</view>
+          <view class="visual-num">{{current.b}}</view>
+          <view class="visual-op">=</view>
+          <view class="visual-num visual-ans">{{visualInput || '?'}}</view>
+        </view>
+        <num-keypad wx:if="{{!locked}}" bind:key="onVisualKey" />
+      </block>
+
+      <block wx:elif="{{current.op === 'add'}}">
+        <view class="visual-add-row">
+          <view class="visual-icons">
+            <view class="visual-icon" wx:for="{{current.iconsA}}" wx:key="id">{{current.icon}}</view>
+          </view>
+          <view class="visual-op">+</view>
+          <view class="visual-icons">
+            <view class="visual-icon" wx:for="{{current.iconsB}}" wx:key="id">{{current.icon}}</view>
+          </view>
+        </view>
+        <view class="visual-equation">
+          <view class="visual-num">{{current.a}}</view>
+          <view class="visual-op">+</view>
+          <view class="visual-num">{{current.b}}</view>
+          <view class="visual-op">=</view>
+          <view class="visual-num visual-ans">{{visualInput || '?'}}</view>
+        </view>
+        <num-keypad wx:if="{{!locked}}" bind:key="onVisualKey" />
+      </block>
+
+      <block wx:elif="{{current.op === 'makeTen'}}">
+        <view class="make-ten-groups">
+          <view class="make-ten-tag">{{current.a}}</view>
+          <view class="visual-op">+</view>
+          <view class="make-ten-tag make-ten-tag--b">{{current.b}}</view>
+        </view>
+        <view class="ten-frame">
+          <view
+            class="ten-cell {{item.filled ? 'on' : ''}} {{item.highlight ? 'hi' : ''}}"
+            wx:for="{{current.tenFrame}}"
+            wx:key="id"
+          >
+            <text wx:if="{{item.filled}}">●</text>
+          </view>
+        </view>
+        <view class="ten-frame-label">凑满十格</view>
+        <view class="ten-outside" wx:if="{{current.outsideDots.length}}">
+          <text class="ten-outside-dot" wx:for="{{current.outsideDots}}" wx:key="id">●</text>
+          <text class="ten-outside-tip">十格外 +{{current.outsideDots.length}}</text>
+        </view>
+        <view class="visual-equation">
+          <view class="visual-num">{{current.a}}</view>
+          <view class="visual-op">+</view>
+          <view class="visual-num">{{current.b}}</view>
+          <view class="visual-op">=</view>
+          <view class="visual-num visual-ans">{{visualInput || '?'}}</view>
+        </view>
+        <num-keypad wx:if="{{!locked}}" bind:key="onVisualKey" />
+      </block>
+
+      <block wx:elif="{{current.op === 'compare'}}">
+        <view class="numberline-wrap">
+          <view class="numberline-bar"></view>
+          <view
+            class="numberline-tick"
+            wx:for="{{current.lineTicks}}"
+            wx:key="value"
+            style="left: {{item.pct}}%;"
+          >
+            <view class="numberline-tick-mark"></view>
+            <text class="numberline-tick-num">{{item.value}}</text>
+          </view>
+          <view class="numberline-marker left" style="left: {{current.leftPct}}%;">
+            <view class="numberline-bubble">{{current.left}}</view>
+            <view class="numberline-pin"></view>
+          </view>
+          <view class="numberline-marker right" style="left: {{current.rightPct}}%;">
+            <view class="numberline-bubble">{{current.right}}</view>
+            <view class="numberline-pin"></view>
+          </view>
+        </view>
+        <view class="compare-pick">
+          <view class="compare-num compare-num--left">{{current.left}}</view>
+          <view class="compare-symbol-row" wx:if="{{!locked}}">
+            <view class="compare-symbol-btn" data-symbol="gt" bindtap="onVisualCompare">＞</view>
+            <view class="compare-symbol-btn" data-symbol="eq" bindtap="onVisualCompare">＝</view>
+            <view class="compare-symbol-btn" data-symbol="lt" bindtap="onVisualCompare">＜</view>
+          </view>
+          <view class="compare-num compare-num--right">{{current.right}}</view>
+        </view>
+      </block>
+    </view>
+
+    <!-- mathSequence 数字排队 -->
+    <view class="card q-card visual-card" wx:if="{{current.type === 'mathSequence'}}">
+      <view class="q-type">数字排队</view>
+      <view class="q-prompt visual-desc">{{current.prompt}}</view>
+      <view class="seq-row">
+        <view
+          class="seq-slot {{item.show ? 'show' : 'blank'}} {{!item.show && sequenceFocusIndex === index ? 'focus' : ''}}"
+          wx:for="{{sequenceSlots}}"
+          wx:key="index"
+          data-index="{{index}}"
+          bindtap="onTapSequenceSlot"
+        >
+          <block wx:if="{{item.show}}">{{item.value}}</block>
+          <block wx:else>{{item.filled || '?'}}</block>
+        </view>
+      </view>
+      <num-keypad wx:if="{{!locked}}" bind:key="onSequenceKey" />
+    </view>
+
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
       class="card q-card"

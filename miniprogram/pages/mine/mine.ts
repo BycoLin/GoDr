@@ -264,24 +264,36 @@ Page({
 
   onClearAll() {
     wx.showModal({
-      title: '清空全部进度？',
-      content: '将清除练习进度、错题本、积分、成就、每日自测、周报与收藏关，不可恢复',
+      title: '要重置全部数据吗？',
+      content: '将清除所有学科的练习进度、错题本、积分、成就、每日自测、周报与收藏关，且无法恢复。',
+      confirmText: '继续',
+      cancelText: '取消',
       success: (res) => {
         if (!res.confirm) return;
-        const ids = listPacks().map((p) => p.id);
-        ids.forEach((id) => {
-          wx.removeStorageSync(`progress:${id}`);
+        wx.showModal({
+          title: '最后确认',
+          content: '确定清空全部进度？此操作不可撤销。',
+          confirmText: '确认清空',
+          confirmColor: '#e84b6a',
+          cancelText: '我再想想',
+          success: (res2) => {
+            if (!res2.confirm) return;
+            const ids = listPacks().map((p) => p.id);
+            ids.forEach((id) => {
+              wx.removeStorageSync(`progress:${id}`);
+            });
+            clearAllWrongBooks(ids);
+            clearWallet();
+            clearBadges();
+            clearDailyRecords();
+            clearStreak();
+            clearPracticeLog();
+            clearFavorites();
+            wx.removeStorageSync('lastPlaySession');
+            this.onShow();
+            wx.showToast({ title: '已清空', icon: 'success' });
+          },
         });
-        clearAllWrongBooks(ids);
-        clearWallet();
-        clearBadges();
-        clearDailyRecords();
-        clearStreak();
-        clearPracticeLog();
-        clearFavorites();
-        wx.removeStorageSync('lastPlaySession');
-        this.onShow();
-        wx.showToast({ title: '已清空', icon: 'success' });
       },
     });
   },

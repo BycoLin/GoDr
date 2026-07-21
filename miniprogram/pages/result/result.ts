@@ -11,7 +11,9 @@ import { goPathHub, markPathStep, buildStepUrl, isPathKind } from '../../utils/s
 import { parseGradeQuery } from '../../utils/grade-label';
 import { getActiveGrade } from '../../utils/active-subject';
 import {
+  buildInviteShare,
   buildResultShare,
+  enableShareMenus,
   toShareAppMessage,
   toShareTimeline,
 } from '../../utils/share';
@@ -50,6 +52,7 @@ Page({
     exam: false,
     unitTest: false,
     unitNo: 0,
+    unitSemester: 1 as 1 | 2,
     unitBestText: '',
     userScore: 0,
     rivalScore: 0,
@@ -88,6 +91,7 @@ Page({
     const exam = query.exam === '1' || mode === 'exam';
     const unitTest = query.unitTest === '1' || mode === 'unit';
     const unitNo = Math.max(0, Number(query.unit || 0));
+    const unitSemester = Number(query.semester || 1) === 2 ? 2 : 1;
     const fromPath = isPathKind(query.fromPath) ? query.fromPath : '';
     const pathStep = query.pathStep || '';
     const userScore = Number(query.userScore || 0);
@@ -113,7 +117,7 @@ Page({
 
     let unitBestText = '';
     if (unitTest && unitNo > 0) {
-      const rec = recordUnitTestResult(packId, grade, unitNo, correct, total);
+      const rec = recordUnitTestResult(packId, grade, unitNo, correct, total, unitSemester);
       unitBestText = `本单元最佳 ${rec.bestCorrect}/${rec.bestTotal}`;
     }
 
@@ -170,9 +174,9 @@ Page({
     } else if (unitTest) {
       encouragement =
         stars >= 3
-          ? `${unitTitle(unitNo)}全对！本单元掌握了！`
+          ? `${unitTitle(unitNo, unitSemester)}全对！本单元掌握了！`
           : stars >= 2
-            ? `${unitTitle(unitNo)}完成！再测一次冲满分～`
+            ? `${unitTitle(unitNo, unitSemester)}完成！再测一次冲满分～`
             : '错题已进错题本，回头再巩固本单元～';
     } else if (exam) {
       encouragement =
@@ -252,6 +256,7 @@ Page({
       exam,
       unitTest,
       unitNo,
+      unitSemester,
       unitBestText,
       userScore,
       rivalScore,
@@ -277,6 +282,14 @@ Page({
     }
   },
 
+  onShow() {
+    try {
+      enableShareMenus();
+    } catch {
+      /* ignore */
+    }
+  },
+
   buildSharePayload() {
     const { title, stars, ratioText, duel, isPoetry, packId, grade, itemId, arcade } = this.data;
     return buildResultShare({
@@ -293,11 +306,19 @@ Page({
   },
 
   onShareAppMessage() {
-    return toShareAppMessage(this.buildSharePayload());
+    try {
+      return toShareAppMessage(this.buildSharePayload());
+    } catch {
+      return toShareAppMessage(buildInviteShare());
+    }
   },
 
   onShareTimeline() {
-    return toShareTimeline(this.buildSharePayload());
+    try {
+      return toShareTimeline(this.buildSharePayload());
+    } catch {
+      return toShareTimeline(buildInviteShare());
+    }
   },
 
   onPathHub() {
@@ -316,7 +337,7 @@ Page({
   },
 
   onRematchSame() {
-    const { packId, grade, itemId, arcade, unitTest, unitNo, wrongTypes } = this.data;
+    const { packId, grade, itemId, arcade, unitTest, unitNo, unitSemester, wrongTypes } = this.data;
     if (!wrongTypes.length) {
       wx.showToast({ title: '暂无薄弱题型', icon: 'none' });
       return;
@@ -330,12 +351,13 @@ Page({
         arcade,
         unitTest,
         unitNo,
+        unitSemester,
       }),
     });
   },
 
   onRetry() {
-    const { packId, grade, itemId, arcade, mode, boss, daily, duel, sprint, exam, unitTest, unitNo } = this.data;
+    const { packId, grade, itemId, arcade, mode, boss, daily, duel, sprint, exam, unitTest, unitNo, unitSemester } = this.data;
     if (boss) {
       wx.redirectTo({
         url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=boss&boss=1&arcade=1`,
@@ -368,7 +390,7 @@ Page({
     }
     if (unitTest && unitNo > 0) {
       wx.redirectTo({
-        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=unit&unit=${unitNo}&arcade=1`,
+        url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=unit&unit=${unitNo}&semester=${unitSemester}&arcade=1`,
       });
       return;
     }

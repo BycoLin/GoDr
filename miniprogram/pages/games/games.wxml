@@ -18,6 +18,15 @@
     <view class="side-go">去练</view>
   </view>
 
+  <view class="path-entry pressable q-duel" bindtap="onTapDuel">
+    <view class="path-entry-tag">对练</view>
+    <view class="path-entry-body">
+      <view class="path-entry-title">趣味对练</view>
+      <view class="path-entry-desc">90 秒比一比，看谁答得又快又准</view>
+    </view>
+    <view class="path-entry-go">开</view>
+  </view>
+
   <view class="path-entry pressable q-exam" bindtap="onTapUnitTest">
     <view class="path-entry-tag">单元</view>
     <view class="path-entry-body">

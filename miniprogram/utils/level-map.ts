@@ -8,6 +8,7 @@ import {
 } from './registry';
 import { loadPackProgress } from './progress';
 import { isFavorite } from './favorites';
+import { getItemSemester, getItemUnit } from './unit-test';
 import type { KnowledgeItem } from './types';
 
 export interface LevelRow {
@@ -47,11 +48,18 @@ export function buildLevelSnapshot(packId: string, grade: number): LevelSnapshot
   const toneClass =
     kind === 'math' ? 'tone-math' : kind === 'english' ? 'tone-en' : 'tone-cn';
 
-  const items = getItemsByGrade(packId, grade).filter((item) => {
-    if (subject === '数学') return isMath(item);
-    if (subject === '英语') return isEnglish(item);
-    return isPoetry(item);
-  }) as KnowledgeItem[];
+  const items = getItemsByGrade(packId, grade)
+    .filter((item) => {
+      if (subject === '数学') return isMath(item);
+      if (subject === '英语') return isEnglish(item);
+      return isPoetry(item);
+    })
+    .sort(
+      (a, b) =>
+        getItemSemester(a) - getItemSemester(b) ||
+        getItemUnit(a) - getItemUnit(b) ||
+        a.id.localeCompare(b.id),
+    ) as KnowledgeItem[];
   const progress = loadPackProgress(packId);
 
   const levels: LevelRow[] = items.map((item, index) => {

@@ -10,9 +10,10 @@
       <view class="compare-tag">单元测验</view>
       <view class="compare-text">指定单元 · 固定 {{units[0].questionCount || 10}} 题</view>
     </view>
-    <view class="compare-item muted">
+    <view class="compare-item compare-item--exam pressable" bindtap="onTapExam">
       <view class="compare-tag">模拟小测</view>
-      <view class="compare-text">全年级随机 · 综合抽题</view>
+      <view class="compare-text">全年级随机 · 综合 10 题</view>
+      <view class="compare-go">去</view>
     </view>
   </view>
 
@@ -20,11 +21,12 @@
     <view
       class="unit-row pressable"
       wx:for="{{units}}"
-      wx:key="unit"
+      wx:key="semester-unit"
       data-unit="{{item.unit}}"
+      data-semester="{{item.semester}}"
       bindtap="onTapUnit"
     >
-      <view class="unit-idx">{{item.unit}}</view>
+      <view class="unit-idx">{{item.semester === 2 ? '下' : '上'}}{{item.unit}}</view>
       <view class="unit-body">
         <view class="unit-title">{{item.title}}</view>
         <view class="unit-tip">{{item.itemCount}} 个知识点 · {{item.questionCount}} 题</view>

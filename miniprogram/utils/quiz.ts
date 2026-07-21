@@ -10,6 +10,12 @@ import type {
   QuizType,
   TitleAuthorQuestion,
 } from './types';
+import {
+  buildTypeSchedule,
+  pickItemsForSession,
+  registerQuestion,
+  shuffle as sessionShuffle,
+} from './quiz-session';
 
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -30,16 +36,28 @@ function uid(prefix: string): string {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 100000)}`;
 }
 
+const PLACEHOLDER_LINE = /^第[一二三四五六七八九十\d]+句$/;
+const META_AUTHORS = new Set(['积累', '课文', '识字', '童谣', '文言文', '佚名', '北朝民歌']);
+
+function quizLines(item: PoetryItem): string[] {
+  return item.lines.filter((l) => l && !PLACEHOLDER_LINE.test(l.trim()) && l.trim().length >= 2);
+}
+
+function isRealAuthor(author: string): boolean {
+  return Boolean(author && author.length >= 2 && !META_AUTHORS.has(author));
+}
+
 /** 生成「选下一句」 */
 export function makeFillNext(item: PoetryItem, pool: PoetryItem[]): FillNextQuestion | null {
-  if (item.lines.length < 2) return null;
-  const idx = Math.floor(Math.random() * (item.lines.length - 1));
-  const prompt = item.lines[idx];
-  const answer = item.lines[idx + 1];
+  const lines = quizLines(item);
+  if (lines.length < 2) return null;
+  const idx = Math.floor(Math.random() * (lines.length - 1));
+  const prompt = lines[idx];
+  const answer = lines[idx + 1];
 
   const distractors = pool
     .filter((p) => p.id !== item.id)
-    .flatMap((p) => p.lines)
+    .flatMap((p) => quizLines(p))
     .filter((line) => line !== answer && line !== prompt);
 
   const options: ChoiceOption[] = shuffle([
@@ -63,6 +81,27 @@ export function makeMatchPair(pool: PoetryItem[], pairCount = 3): MatchPairQuest
   if (candidates.length < 2) return null;
 
   const selected = pickN(candidates, Math.min(pairCount, candidates.length));
+  return buildMatchPairFromPoems(selected);
+}
+
+/** 错题复习：配对题必须包含指定篇目 */
+export function makeMatchPairForItem(
+  item: PoetryItem,
+  pool: PoetryItem[],
+  pairCount = 3,
+): MatchPairQuestion | null {
+  const gradePool = pool.filter((p) => p.grade === item.grade && p.lines.length >= 2);
+  if (!gradePool.some((p) => p.id === item.id)) return null;
+  const others = gradePool.filter((p) => p.id !== item.id);
+  const selected = [
+    item,
+    ...pickN(others, Math.min(pairCount - 1, others.length)),
+  ];
+  return buildMatchPairFromPoems(selected);
+}
+
+function buildMatchPairFromPoems(selected: PoetryItem[]): MatchPairQuestion | null {
+  if (selected.length < 2) return null;
   const left: ChoiceOption[] = [];
   const right: ChoiceOption[] = [];
   const answerMap: Record<string, string> = {};
@@ -92,14 +131,18 @@ export function makeTitleAuthor(
   pool: PoetryItem[],
   mode: 'title' | 'author' = 'title',
 ): TitleAuthorQuestion | null {
-  const line = item.lines[Math.floor(Math.random() * item.lines.length)];
-  const answerText = mode === 'title' ? item.title : item.author;
+  const lines = quizLines(item);
+  if (!lines.length) return null;
+  const line = lines[Math.floor(Math.random() * lines.length)];
+  const useAuthor = mode === 'author' && isRealAuthor(item.author);
+  const quizMode: 'title' | 'author' = useAuthor ? 'author' : 'title';
+  const answerText = quizMode === 'title' ? item.title : item.author;
   const answerId = 'ans';
 
   const distractorTexts = pool
     .filter((p) => p.id !== item.id)
-    .map((p) => (mode === 'title' ? p.title : p.author))
-    .filter((t) => t !== answerText);
+    .map((p) => (quizMode === 'title' ? p.title : p.author))
+    .filter((t) => t && t !== answerText && (quizMode === 'title' || isRealAuthor(t)));
 
   const unique = Array.from(new Set(distractorTexts));
   if (unique.length < 1) return null;
@@ -113,8 +156,8 @@ export function makeTitleAuthor(
     id: uid('ta'),
     type: 'titleAuthor',
     itemId: item.id,
-    mode,
-    prompt: mode === 'title' ? `诗句「${line}」出自哪首诗？` : `诗句「${line}」的作者是？`,
+    mode: quizMode,
+    prompt: quizMode === 'title' ? `诗句「${line}」出自哪首诗？` : `诗句「${line}」的作者是？`,
     options,
     answerId,
   };
@@ -146,7 +189,7 @@ export function makeOrderLines(item: PoetryItem): OrderLinesQuestion | null {
 
 /** 缺一字填空 */
 export function makeFillBlank(item: PoetryItem, pool: PoetryItem[]): FillBlankQuestion | null {
-  const candidates = item.lines.filter((line) => line.length >= 2);
+  const candidates = quizLines(item).filter((line) => line.length >= 2);
   if (!candidates.length) return null;
   const line = candidates[Math.floor(Math.random() * candidates.length)];
   const blankIdx = Math.floor(Math.random() * line.length);
@@ -205,10 +248,7 @@ function makeByType(
     return makeTitleAuthor(item, pool, modeTA);
   }
   if (mode === 'matchPair') {
-    return makeMatchPair(
-      pool.filter((p) => p.grade === item.grade),
-      3,
-    );
+    return makeMatchPairForItem(item, pool.filter((p) => p.grade === item.grade), 3);
   }
   if (mode === 'orderLines') return makeOrderLines(item);
   if (mode === 'fillBlank') return makeFillBlank(item, pool);
@@ -241,23 +281,26 @@ export function buildQuizForItem(
   pool: PoetryItem[],
   options: BuildQuizOptions = {},
 ): Question[] {
-  const count = options.count ?? 5;
+  const count = options.count ?? 8;
   const preferTitle = options.preferTitle !== false;
   const rampHard = options.rampHard !== false;
+  const easyFirst: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+  const modePool = options.modes?.length ? options.modes : easyFirst;
+  const typeSchedule = buildTypeSchedule(
+    rampHard
+      ? [...modePool, ...HARD_MODES]
+      : modePool,
+    count * 2,
+  );
+  const usedKeys = new Set<string>();
   const questions: Question[] = [];
   let guard = 0;
 
-  while (questions.length < count && guard < count * 10) {
+  while (questions.length < count && guard < count * 20) {
     guard += 1;
-    let mode: QuizType;
-    if (rampHard && questions.length >= Math.floor(count / 2)) {
-      mode = HARD_MODES[questions.length % HARD_MODES.length];
-    } else {
-      const easyFirst: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
-      mode = (options.modes || easyFirst)[questions.length % (options.modes || easyFirst).length];
-    }
+    const mode = typeSchedule[guard % typeSchedule.length];
     const q = makeByType(mode, item, pool, preferTitle);
-    if (q) questions.push(q);
+    if (q && registerQuestion(usedKeys, q)) questions.push(q);
   }
 
   return questions;
@@ -269,34 +312,35 @@ export function buildArcadeQuiz(
   mode: ArcadeMode,
   count = 8,
   preferModes?: QuizType[],
+  usedKeys?: Set<string>,
 ): Question[] {
   if (!pool.length) return [];
   const preferTitle = pool[0].grade <= 1;
+  const keys = usedKeys ?? new Set<string>();
+  const mixedTypes: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+  const typeSchedule = preferModes?.length
+    ? buildTypeSchedule(preferModes, count * 2)
+    : mode === 'mixed' ||
+        mode === 'boss' ||
+        mode === 'daily' ||
+        mode === 'duel' ||
+        mode === 'sprint' ||
+        mode === 'exam' ||
+        mode === 'unit'
+      ? buildTypeSchedule(mixedTypes, count * 2)
+      : buildTypeSchedule([mode], count * 2);
+  const itemOrder = pickItemsForSession(pool, count * 2);
   const questions: Question[] = [];
   let guard = 0;
+  let itemCursor = 0;
 
-  while (questions.length < count && guard < count * 12) {
+  while (questions.length < count && guard < count * 24) {
     guard += 1;
-    const item = pool[Math.floor(Math.random() * pool.length)];
-    let quizType: QuizType;
-    if (preferModes?.length) {
-      quizType = preferModes[questions.length % preferModes.length];
-    } else if (
-      mode === 'mixed' ||
-      mode === 'boss' ||
-      mode === 'daily' ||
-      mode === 'duel' ||
-      mode === 'sprint' ||
-      mode === 'exam' ||
-      mode === 'unit'
-    ) {
-      const all: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
-      quizType = all[questions.length % all.length];
-    } else {
-      quizType = mode;
-    }
+    const item = itemOrder[itemCursor % itemOrder.length] || pool[guard % pool.length];
+    itemCursor += 1;
+    const quizType = typeSchedule[guard % typeSchedule.length];
     const q = makeByType(quizType, item, pool, preferTitle);
-    if (q) questions.push(q);
+    if (q && registerQuestion(keys, q)) questions.push(q);
   }
 
   return questions;
@@ -307,23 +351,17 @@ export interface WrongHint {
   quizType: QuizType;
 }
 
-/** 错题 Boss：围绕薄弱条目与题型出题 */
+/** 错题 Boss：每道错题对应一题，沿用原题型 */
 export function buildBossQuiz(
   wrongPool: WrongHint[],
   pool: PoetryItem[],
-  count = 8,
 ): Question[] {
   if (!pool.length || !wrongPool.length) return [];
   const preferTitle = pool[0].grade <= 1;
   const byId = new Map(pool.map((p) => [p.id, p]));
   const questions: Question[] = [];
-  let guard = 0;
-  let cursor = 0;
 
-  while (questions.length < count && guard < count * 15) {
-    guard += 1;
-    const hint = wrongPool[cursor % wrongPool.length];
-    cursor += 1;
+  for (const hint of wrongPool) {
     const item = byId.get(hint.itemId);
     if (!item) continue;
     const q = makeByType(hint.quizType, item, pool, preferTitle);
@@ -339,28 +377,33 @@ export function nextAdaptiveQuestion(
   baseMode: ArcadeMode,
   ctx: AdaptiveContext,
   wrongHints?: WrongHint[],
+  usedKeys?: Set<string>,
 ): Question | null {
   if (!pool.length) return null;
   if (baseMode === 'boss' && !wrongHints?.length) return null;
   const preferTitle = pool[0].grade <= 1;
   const modes = resolvePreferModes(ctx, baseMode);
+  const keys = usedKeys ?? new Set<string>();
+  const itemOrder = sessionShuffle(pool);
   let guard = 0;
+  let itemCursor = 0;
 
-  while (guard < 12) {
+  while (guard < 24) {
     guard += 1;
     const quizType = modes[Math.floor(Math.random() * modes.length)];
-    let item = pool[Math.floor(Math.random() * pool.length)];
+    let item = itemOrder[itemCursor % itemOrder.length];
+    itemCursor += 1;
     if (wrongHints?.length && (baseMode === 'boss' || !ctx.lastCorrect)) {
       const hint = wrongHints[Math.floor(Math.random() * wrongHints.length)];
       const found = pool.find((p) => p.id === hint.itemId);
       if (found) {
         const q = makeByType(hint.quizType, found, pool, preferTitle);
-        if (q) return q;
+        if (q && registerQuestion(keys, q)) return q;
       }
       if (baseMode === 'boss') continue;
     }
     const q = makeByType(quizType, item, pool, preferTitle);
-    if (q) return q;
+    if (q && registerQuestion(keys, q)) return q;
   }
   return null;
 }
@@ -370,6 +413,17 @@ export function gradeAnswer(
   question: Question,
   payload: string | string[] | Record<string, string>,
 ): boolean {
+  if (question.type === 'mathVisual') {
+    if (question.op === 'compare') {
+      return typeof payload === 'string' && payload === question.compareAnswer;
+    }
+    return typeof payload === 'string' && Number(payload) === question.answer;
+  }
+  if (question.type === 'mathSequence') {
+    if (!Array.isArray(payload)) return false;
+    if (payload.length !== question.answers.length) return false;
+    return question.answers.every((ans, i) => Number(payload[i]) === ans);
+  }
   if (
     question.type === 'fillNext' ||
     question.type === 'titleAuthor' ||
@@ -425,6 +479,8 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   orderLines: '诗句排序',
   fillBlank: '缺字填空',
   mathCalc: '口算练习',
+  mathVisual: '看图口算',
+  mathSequence: '数字排队',
   mathCompare: '比大小',
   mathMissing: '算式填空',
   mathMakeTen: '凑十法',

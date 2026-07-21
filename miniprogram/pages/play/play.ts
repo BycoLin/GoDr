@@ -32,14 +32,14 @@ import {
   nextEnglishAdaptiveQuestion,
 } from '../../utils/quiz-english';
 import { saveLastSession } from '../../utils/progress';
-import { pickBossPool, recordFix, recordWrong } from '../../utils/wrongbook';
+import { listActiveWrongs, recordFix, recordWrong } from '../../utils/wrongbook';
 import { pointsForCorrect } from '../../utils/wallet';
 import {
   DAILY_LIMIT_SEC,
   DAILY_QUESTION_COUNT,
-  pickSeededIndex,
   todayKey,
 } from '../../utils/daily';
+import { keysFromQuestions, pickSeededItemsForSession } from '../../utils/quiz-session';
 import { playAnswerSfx } from '../../utils/sfx';
 import { triggerFocusRemindIfDue } from '../../utils/focus-timer';
 import { isPathKind } from '../../utils/skill-path';
@@ -75,6 +75,7 @@ interface MatchState {
 }
 
 const ROLLING_TARGET = 8;
+const LEVEL_QUESTION_COUNT = 8;
 const SPRINT_LIMIT_SEC = 60;
 const SPRINT_TARGET = 20;
 const EXAM_COUNT = 10;
@@ -116,6 +117,7 @@ Page({
     exam: false,
     unitTest: false,
     unitNo: 1,
+    unitSemester: 1 as 1 | 2,
     timed: false,
     limitSec: 0,
     remainSec: 0,
@@ -151,6 +153,11 @@ Page({
     orderPicked: [] as string[],
     orderPickedTexts: [] as string[],
     orderAvailable: {} as Record<string, boolean>,
+    visualInput: '',
+    sequenceSlots: [] as Array<{ show: boolean; value: number | null; filled: string }>,
+    sequenceBlankIndexes: [] as number[],
+    sequenceBlankCursor: 0,
+    sequenceFocusIndex: -1,
     fromPath: '',
     pathStep: '',
   },
@@ -178,6 +185,7 @@ Page({
     const exam = mode === 'exam' || query.exam === '1';
     const unitTest = mode === 'unit';
     const unitNo = Math.max(1, Number(query.unit || 1));
+    const unitSemester = Number(query.semester || 1) === 2 ? 2 : 1;
     const preferTypes = parseTypesQuery(query.types);
     const rematch = query.rematch === '1' && preferTypes.length > 0;
     this.preferTypes = preferTypes;
@@ -220,7 +228,7 @@ Page({
     }
 
     const poolIds = new Set(pool.map((p) => p.id));
-    const wrongHints = pickBossPool(packId, 12)
+    const wrongHints = listActiveWrongs(packId)
       .filter((e) => poolIds.has(e.itemId))
       .map((e) => ({
         itemId: e.itemId,
@@ -246,46 +254,46 @@ Page({
         return;
       }
       if (subjectKind === 'math') {
-        questions = buildMathBossQuiz(wrongHints, mathPool, 1);
+        questions = buildMathBossQuiz(wrongHints, mathPool);
       } else if (subjectKind === 'english') {
-        questions = buildEnglishBossQuiz(wrongHints, englishPool, 1);
+        questions = buildEnglishBossQuiz(wrongHints, englishPool);
       } else {
-        questions = buildBossQuiz(wrongHints, poetryPool, 1);
+        questions = buildBossQuiz(wrongHints, poetryPool);
       }
-      targetTotal = ROLLING_TARGET;
+      if (!questions.length) {
+        wx.showToast({ title: '错题暂时无法出题', icon: 'none' });
+        setTimeout(() => wx.navigateBack(), 900);
+        return;
+      }
+      targetTotal = questions.length;
+      rolling = false;
       poemTitle = '错题复习';
-      poemAuthor = `${wrongHints.length} 个薄弱点`;
+      poemAuthor = `${wrongHints.length} 道待巩固`;
       modeLabel = '错题复习';
       wx.setNavigationBarTitle({ title: '错题复习' });
     } else if (daily) {
       const seed = todayKey();
-      const seededPool = pool.slice().sort((a, b) => a.id.localeCompare(b.id));
-      const rotated: KnowledgeItem[] = [];
-      for (let i = 0; i < Math.min(DAILY_QUESTION_COUNT, seededPool.length * 2); i += 1) {
-        rotated.push(seededPool[pickSeededIndex(seed, i, seededPool.length)]);
-      }
-      const dailyPool =
-        subjectKind === 'math'
-          ? (rotated.filter(isMath) as MathItem[]).length
-            ? (rotated.filter(isMath) as MathItem[])
-            : mathPool
-          : subjectKind === 'english'
-            ? (rotated.filter(isEnglish) as EnglishItem[]).length
-              ? (rotated.filter(isEnglish) as EnglishItem[])
-              : englishPool
-            : (rotated.filter(isPoetry) as PoetryItem[]).length
-              ? (rotated.filter(isPoetry) as PoetryItem[])
-              : poetryPool;
       if (subjectKind === 'math') {
-        questions = buildMathArcadeQuiz(dailyPool as MathItem[], 'mixed', DAILY_QUESTION_COUNT);
+        const dailyPool = pickSeededItemsForSession(mathPool, DAILY_QUESTION_COUNT, seed);
+        questions = buildMathArcadeQuiz(
+          dailyPool.length ? dailyPool : mathPool,
+          'mixed',
+          DAILY_QUESTION_COUNT,
+        );
       } else if (subjectKind === 'english') {
+        const dailyPool = pickSeededItemsForSession(englishPool, DAILY_QUESTION_COUNT, seed);
         questions = buildEnglishArcadeQuiz(
-          dailyPool as EnglishItem[],
+          dailyPool.length ? dailyPool : englishPool,
           'mixed',
           DAILY_QUESTION_COUNT,
         );
       } else {
-        questions = buildArcadeQuiz(dailyPool as PoetryItem[], 'mixed', DAILY_QUESTION_COUNT);
+        const dailyPool = pickSeededItemsForSession(poetryPool, DAILY_QUESTION_COUNT, seed);
+        questions = buildArcadeQuiz(
+          dailyPool.length ? dailyPool : poetryPool,
+          'mixed',
+          DAILY_QUESTION_COUNT,
+        );
       }
       targetTotal = questions.length || DAILY_QUESTION_COUNT;
       poemTitle = '每日自测';
@@ -337,21 +345,21 @@ Page({
       modeLabel = '模拟小测';
       wx.setNavigationBarTitle({ title: '模拟小测' });
     } else if (unitTest) {
-      questions = buildUnitQuiz(packId, grade, unitNo);
+      questions = buildUnitQuiz(packId, grade, unitNo, unitSemester);
       if (!questions.length) {
         wx.showToast({ title: '该单元暂无题目', icon: 'none' });
         setTimeout(() => wx.navigateBack(), 900);
         return;
       }
       targetTotal = questions.length;
-      poemTitle = unitTestNavTitle(packId, grade, unitNo);
+      poemTitle = unitTestNavTitle(packId, grade, unitNo, unitSemester);
       poemAuthor = `${targetTotal} 题 · 只考本单元`;
       modeLabel = '单元测验';
       wx.setNavigationBarTitle({ title: '单元测验' });
     } else if (rematch) {
       const typesLabel = formatTypesLabel(preferTypes);
       if (unitTest) {
-        const unitItems = getUnitItems(packId, grade, unitNo);
+        const unitItems = getUnitItems(packId, grade, unitNo, unitSemester);
         const uMath = unitItems.filter(isMath) as MathItem[];
         const uEnglish = unitItems.filter(isEnglish) as EnglishItem[];
         const uPoetry = unitItems.filter(isPoetry) as PoetryItem[];
@@ -380,7 +388,7 @@ Page({
         targetTotal = questions.length || UNIT_QUESTION_COUNT;
         arcade = true;
         rolling = false;
-        poemTitle = `${unitTestNavTitle(packId, grade, unitNo)} · 同类加练`;
+        poemTitle = `${unitTestNavTitle(packId, grade, unitNo, unitSemester)} · 同类加练`;
         poemAuthor = typesLabel;
       } else if (itemId) {
         const item = getItemById(packId, itemId);
@@ -390,7 +398,7 @@ Page({
           return;
         }
         if (isMath(item)) {
-          questions = buildMathQuizForItem(item, 5, preferTypes as MathQuizType[]);
+          questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT, preferTypes as MathQuizType[]);
           poemTitle = item.title;
           poemAuthor = typesLabel;
         } else if (isEnglish(item)) {
@@ -401,12 +409,12 @@ Page({
               t === 'enMeanWord' ||
               t === 'enSpell',
           );
-          questions = buildEnglishQuizForItem(item, englishPool, 5, enTypes);
+          questions = buildEnglishQuizForItem(item, englishPool, LEVEL_QUESTION_COUNT, enTypes);
           poemTitle = item.word;
           poemAuthor = typesLabel;
         } else {
           questions = buildQuizForItem(item, poetryPool, {
-            count: 5,
+            count: LEVEL_QUESTION_COUNT,
             modes: preferTypes,
             rampHard: false,
           });
@@ -459,19 +467,19 @@ Page({
         return;
       }
       if (isMath(item)) {
-        questions = buildMathQuizForItem(item, 5);
+        questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT);
         poemTitle = item.title;
         poemAuthor = item.subtitle || '数学练习';
         modeLabel = '数学练习';
         wx.setNavigationBarTitle({ title: item.title });
       } else if (isEnglish(item)) {
-        questions = buildEnglishQuizForItem(item, englishPool, 5);
+        questions = buildEnglishQuizForItem(item, englishPool, LEVEL_QUESTION_COUNT);
         poemTitle = item.word;
         poemAuthor = item.meaning;
         modeLabel = '英语练习';
         wx.setNavigationBarTitle({ title: item.word });
       } else if (isPoetry(item)) {
-        questions = buildQuizForItem(item, poetryPool, { count: 5, rampHard: true });
+        questions = buildQuizForItem(item, poetryPool, { count: LEVEL_QUESTION_COUNT, rampHard: true });
         poemTitle = item.title;
         poemAuthor = item.author;
         modeLabel = '诗词练习';
@@ -518,6 +526,7 @@ Page({
       exam,
       unitTest,
       unitNo,
+      unitSemester,
       timed,
       limitSec,
       remainSec: limitSec,
@@ -543,6 +552,8 @@ Page({
     });
     this.resetMatchState(questions[0]);
     this.resetOrderState(questions[0]);
+    this.resetVisualState();
+    this.resetSequenceState(questions[0]);
 
     if (timed && limitSec > 0) {
       this.startTimer();
@@ -617,6 +628,126 @@ Page({
     }
   },
 
+  resetVisualState() {
+    this.setData({ visualInput: '' });
+  },
+
+  resetSequenceState(question: Question | null) {
+    if (!question || question.type !== 'mathSequence') {
+      this.setData({
+        sequenceSlots: [],
+        sequenceBlankIndexes: [],
+        sequenceBlankCursor: 0,
+        sequenceFocusIndex: -1,
+      });
+      return;
+    }
+    const slots = question.slots.map((s) => ({
+      show: s.show,
+      value: s.value,
+      filled: '',
+    }));
+    this.setData({
+      sequenceSlots: slots,
+      sequenceBlankIndexes: question.blankIndexes,
+      sequenceBlankCursor: 0,
+      sequenceFocusIndex: question.blankIndexes[0],
+    });
+  },
+
+  onTapSequenceSlot(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.locked || this.finished) return;
+    const index = Number(e.currentTarget.dataset.index);
+    const pos = this.data.sequenceBlankIndexes.indexOf(index);
+    if (pos < 0) return;
+    this.setData({ sequenceBlankCursor: pos, sequenceFocusIndex: index });
+  },
+
+  onSequenceKey(e: WechatMiniprogram.CustomEvent) {
+    if (this.data.locked || this.finished) return;
+    const key = e.detail.key as string;
+    const { current } = this.data;
+    if (!current || current.type !== 'mathSequence') return;
+
+    if (key === 'clear') {
+      const sequenceSlots = this.data.sequenceSlots.map((s) =>
+        s.show ? s : { ...s, filled: '' },
+      );
+      this.setData({
+        sequenceSlots,
+        sequenceBlankCursor: 0,
+        sequenceFocusIndex: this.data.sequenceBlankIndexes[0],
+      });
+      return;
+    }
+
+    if (key === 'ok') {
+      const { sequenceSlots, sequenceBlankIndexes } = this.data;
+      if (sequenceBlankIndexes.some((idx) => !sequenceSlots[idx].filled)) {
+        wx.showToast({ title: '先填完整', icon: 'none' });
+        return;
+      }
+      const payload = sequenceBlankIndexes.map((idx) => sequenceSlots[idx].filled);
+      const correct = gradeAnswer(current, payload);
+      this.handleGraded(correct, '排对啦！超棒！', '再观察一下顺序～');
+      return;
+    }
+
+    const { sequenceBlankIndexes, sequenceBlankCursor, sequenceSlots } = this.data;
+    if (sequenceBlankCursor >= sequenceBlankIndexes.length) return;
+    const idx = sequenceBlankIndexes[sequenceBlankCursor];
+    const nextSlots = sequenceSlots.slice();
+    const prev = nextSlots[idx].filled;
+    if (prev.length >= 2) return;
+    const filled = prev + key;
+    nextSlots[idx] = { ...nextSlots[idx], filled };
+
+    let nextCursor = sequenceBlankCursor;
+    if (filled.length >= 2) {
+      nextCursor = Math.min(sequenceBlankCursor + 1, sequenceBlankIndexes.length - 1);
+    }
+
+    this.setData({
+      sequenceSlots: nextSlots,
+      sequenceBlankCursor: nextCursor,
+      sequenceFocusIndex: sequenceBlankIndexes[nextCursor],
+    });
+  },
+
+  onVisualKey(e: WechatMiniprogram.CustomEvent) {
+    if (this.data.locked || this.finished) return;
+    const key = e.detail.key as string;
+    const { current } = this.data;
+    if (!current || current.type !== 'mathVisual') return;
+
+    if (key === 'clear') {
+      this.setData({ visualInput: '' });
+      return;
+    }
+    if (key === 'ok') {
+      if (this.data.visualInput === '') {
+        wx.showToast({ title: '先输入答案', icon: 'none' });
+        return;
+      }
+      const correct = gradeAnswer(current, this.data.visualInput);
+      this.handleGraded(correct, '答对啦！超棒！', '再数一数～');
+      return;
+    }
+    if (this.data.visualInput.length >= 2) return;
+    this.setData({ visualInput: this.data.visualInput + key });
+  },
+
+  onVisualCompare(e: WechatMiniprogram.TouchEvent) {
+    if (this.data.locked || this.finished) return;
+    const raw = String(e.currentTarget.dataset.symbol || '');
+    const symbolMap: Record<string, string> = { gt: '>', lt: '<', eq: '=' };
+    const symbol = symbolMap[raw] || raw;
+    const { current } = this.data;
+    if (!current || current.type !== 'mathVisual' || current.op !== 'compare') return;
+    const correct = gradeAnswer(current, symbol);
+    this.handleGraded(correct, '判断正确！', '再看看数轴上的位置～');
+  },
+
   resetMatchState(question: Question | null) {
     this.setData({
       match: {
@@ -660,13 +791,17 @@ Page({
     const quizType = current.type as QuizType;
 
     if (correct) {
-      if (itemId) recordFix(packId, itemId, quizType);
+      if (current.type === 'matchPair' && current.itemIds?.length) {
+        current.itemIds.forEach((id) => recordFix(packId, id, 'matchPair'));
+      } else if (itemId) {
+        recordFix(packId, itemId, quizType);
+      }
     } else if (itemId) {
       recordWrong(packId, itemId, quizType);
     }
 
     if (boss) {
-      this.wrongHints = pickBossPool(packId, 12).map((e) => ({
+      this.wrongHints = listActiveWrongs(packId).map((e) => ({
         itemId: e.itemId,
         quizType: e.quizType,
       }));
@@ -835,6 +970,7 @@ Page({
     let nextQuestions = questions;
     if (this.data.rolling && nextIndex < total && nextIndex >= questions.length) {
       const adaptMode = this.quizMode || this.data.mode;
+      const usedKeys = keysFromQuestions(questions);
       let q: Question | null = null;
       if (this.subjectKind === 'math') {
         q = nextMathAdaptiveQuestion(
@@ -847,6 +983,7 @@ Page({
             preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
+          usedKeys,
         );
       } else if (this.subjectKind === 'english') {
         q = nextEnglishAdaptiveQuestion(
@@ -859,6 +996,7 @@ Page({
             preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
+          usedKeys,
         );
       } else {
         q = nextAdaptiveQuestion(
@@ -871,6 +1009,7 @@ Page({
             preferModes: this.preferTypes.length ? this.preferTypes : undefined,
           },
           this.wrongHints,
+          usedKeys,
         );
       }
       if (q) {
@@ -902,6 +1041,8 @@ Page({
     });
     this.resetMatchState(nextQ);
     this.resetOrderState(nextQ);
+    this.resetVisualState();
+    this.resetSequenceState(nextQ);
   },
 
   finish(answers: SessionAnswer[], timedOut = false) {
@@ -925,6 +1066,7 @@ Page({
       exam,
       unitTest,
       unitNo,
+      unitSemester,
       sessionPoints,
       bestCombo,
       total,
@@ -954,6 +1096,7 @@ Page({
       daily,
       unitTest,
       unitNo: unitTest ? unitNo : undefined,
+      unitSemester: unitTest ? unitSemester : undefined,
       sessionPoints,
       bestCombo,
       timedOut,
@@ -962,7 +1105,7 @@ Page({
     saveLastSession(session);
     const title = encodeURIComponent(poemTitle);
     wx.redirectTo({
-      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&unit=${unitNo}&unitTest=${unitTest ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}&fromPath=${fromPath}&pathStep=${pathStep}`,
+      url: `/pages/result/result?packId=${packId}&grade=${grade}&itemId=${itemId}&correct=${correct}&total=${answeredTotal}&title=${title}&arcade=${arcade ? 1 : 0}&mode=${mode}&boss=${boss ? 1 : 0}&daily=${daily ? 1 : 0}&duel=${duel ? 1 : 0}&sprint=${sprint ? 1 : 0}&exam=${exam ? 1 : 0}&unit=${unitNo}&semester=${unitSemester}&unitTest=${unitTest ? 1 : 0}&userScore=${userScore}&rivalScore=${rivalScore}&points=${sessionPoints}&bestCombo=${bestCombo}&timedOut=${timedOut ? 1 : 0}&fromPath=${fromPath}&pathStep=${pathStep}`,
     });
   },
 });

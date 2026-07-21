@@ -508,10 +508,6 @@
   border-bottom: none;
 }
 
-.menu-item.danger {
-  color: var(--color-danger);
-}
-
 .arrow {
   color: #9a93a8;
   font-size: 36rpx;
@@ -532,4 +528,13 @@
   font-weight: 600;
   color: #b0a9bc;
   padding: 0 24rpx;
+}
+
+.about-danger {
+  display: inline-block;
+  margin-top: 28rpx;
+  padding: 12rpx 20rpx;
+  font-size: 22rpx;
+  font-weight: 700;
+  color: #c8c2d4;
 }

@@ -1,4 +1,6 @@
 {
   "navigationBarTitleText": "答题",
-  "usingComponents": {}
+  "usingComponents": {
+    "num-keypad": "/components/num-keypad/num-keypad"
+  }
 }

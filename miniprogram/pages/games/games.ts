@@ -39,6 +39,8 @@ const POETRY_GAMES: GameCard[] = [
 
 const MATH_GAMES: GameCard[] = [
   { mode: 'mixed', title: '综合练', desc: '速算比较填空一起', tag: '综合', tone: 'm-teal' },
+  { mode: 'mathVisual', title: '看图口算', desc: '数图列式算结果', tag: '图形', tone: 'm-grass' },
+  { mode: 'mathSequence', title: '数字排队', desc: '按顺序填空缺', tag: '数列', tone: 'm-teal' },
   { mode: 'mathMakeTen', title: '凑十法', desc: '先凑成 10 再相加', tag: '凑十', tone: 'm-grass' },
   { mode: 'mathBreakTen', title: '破十法', desc: '先减 10 再合并', tag: '破十', tone: 'm-orange' },
   { mode: 'mathFlatTen', title: '平十法', desc: '先减到 10 再算', tag: '平十', tone: 'm-teal' },
@@ -223,6 +225,13 @@ Page({
     const { packId, grade } = this.data;
     wx.navigateTo({
       url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=daily&daily=1&timed=1&limitSec=${DAILY_LIMIT_SEC}&arcade=1`,
+    });
+  },
+
+  onTapDuel() {
+    const { packId, grade } = this.data;
+    wx.navigateTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=duel&duel=1&arcade=1`,
     });
   },
 

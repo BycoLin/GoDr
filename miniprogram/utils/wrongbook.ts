@@ -21,6 +21,8 @@ const QUIZ_TYPE_LABELS: Record<QuizType, string> = {
   orderLines: '排序',
   fillBlank: '填空',
   mathCalc: '速算',
+  mathVisual: '看图口算',
+  mathSequence: '数字排队',
   mathCompare: '比大小',
   mathMissing: '数学填空',
   mathMakeTen: '凑十法',
@@ -89,7 +91,7 @@ export function recordWrong(packId: string, itemId: string, quizType: QuizType):
   return book;
 }
 
-/** 答对后移出错题本（同一条目答对即攻克） */
+/** 答对后移出错题本（同一条目 + 题型答对即攻克） */
 export function recordFix(packId: string, itemId: string, quizType: QuizType): WrongBook {
   const book = loadWrongBook(packId);
   const k = entryKey(itemId, quizType);

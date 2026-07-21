@@ -9,6 +9,7 @@ import {
 
 interface UnitView {
   unit: number;
+  semester: 1 | 2;
   title: string;
   itemCount: number;
   questionCount: number;
@@ -42,7 +43,7 @@ Page({
     const manifest = getPackManifest(packId);
     const packSubject = manifest?.subject || '语文';
     const units = listUnits(packId, grade).map((u) => {
-      const rec = getUnitRecord(packId, grade, u.unit);
+      const rec = getUnitRecord(packId, grade, u.unit, u.semester);
       return {
         ...u,
         bestText: rec ? `最佳 ${rec.bestCorrect}/${rec.bestTotal}` : '未测验',
@@ -63,9 +64,17 @@ Page({
 
   onTapUnit(e: WechatMiniprogram.TouchEvent) {
     const unit = Number(e.currentTarget.dataset.unit || 1);
+    const semester = Number(e.currentTarget.dataset.semester || 1) === 2 ? 2 : 1;
     const { packId, grade } = this.data;
     wx.navigateTo({
-      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=unit&unit=${unit}&arcade=1`,
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=unit&unit=${unit}&semester=${semester}&arcade=1`,
+    });
+  },
+
+  onTapExam() {
+    const { packId, grade } = this.data;
+    wx.navigateTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=exam&exam=1&arcade=1`,
     });
   },
 });

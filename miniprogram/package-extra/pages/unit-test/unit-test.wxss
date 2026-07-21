@@ -42,16 +42,42 @@
 
 .compare-item {
   flex: 1;
+  position: relative;
   background: #effffb;
   border: 3rpx solid #9ee5db;
   border-radius: 24rpx;
-  padding: 18rpx 16rpx;
+  padding: 18rpx 56rpx 18rpx 16rpx;
+  min-height: 108rpx;
+  box-sizing: border-box;
 }
 
-.compare-item.muted {
+.compare-item--exam {
   background: #fff;
-  border-color: #ece7df;
-  opacity: 0.88;
+  border-color: #ffc93c;
+  box-shadow: 0 6rpx 0 rgba(224, 173, 32, 0.35);
+}
+
+.compare-item--exam:active {
+  transform: translateY(4rpx);
+  box-shadow: 0 2rpx 0 rgba(224, 173, 32, 0.35);
+}
+
+.compare-go {
+  position: absolute;
+  right: 12rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #ffc93c;
+  color: #5a4300;
+  font-size: 22rpx;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 0 #e0ad20;
 }
 
 .compare-tag {
@@ -60,8 +86,8 @@
   color: #0f8f82;
 }
 
-.compare-item.muted .compare-tag {
-  color: #9a93a8;
+.compare-item--exam .compare-tag {
+  color: #c87800;
 }
 
 .compare-text {

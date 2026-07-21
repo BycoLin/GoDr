@@ -5,6 +5,7 @@
     <view class="deco deco-cloud b"></view>
     <view class="deco deco-star"></view>
 
+    <view class="home-header">
     <view class="status-row">
       <view class="avatar">
         <image class="avatar-img" src="/assets/miniprogram-avatar.png" mode="aspectFill" />
@@ -33,95 +34,118 @@
       <view class="goal-tip">{{goalTip}}</view>
     </view>
 
-    <view class="subject-pills">
-      <view
-        class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
-        data-pack-id="poetry-g1-g2"
-        bindtap="onSelectSubject"
-      >语文</view>
-      <view
-        class="sp {{packId === 'math-g1-g2' ? 'on math' : ''}}"
-        data-pack-id="math-g1-g2"
-        bindtap="onSelectSubject"
-      >数学</view>
-      <view
-        class="sp {{packId === 'english-g1-g2' ? 'on en' : ''}}"
-        data-pack-id="english-g1-g2"
-        bindtap="onSelectSubject"
-      >英语</view>
-    </view>
-
-    <view class="grade-pills">
-      <view
-        class="gp {{gradeKey === item.key ? 'on' : ''}} {{item.pre ? 'gp-pre' : ''}}"
-        wx:for="{{gradeOptions}}"
-        wx:for-index="idx"
-        wx:key="key"
-        data-index="{{idx}}"
-        bindtap="onSelectGrade"
-      >{{item.label}}</view>
-    </view>
-
-    <view class="scene-card {{toneClass}}">
-      <view class="scene-mark">{{iconText}}</view>
-      <view class="scene-title">{{worldName}}</view>
-      <view class="scene-desc">已通关 {{clearedCount}}/{{totalCount}}</view>
-      <view class="scene-bar">
-        <view class="scene-fill" style="width: {{barWidth}};"></view>
+    <view class="subject-head">
+      <view class="subject-pills">
+        <view
+          class="sp {{packId === 'poetry-g1-g2' ? 'on cn' : ''}}"
+          data-pack-id="poetry-g1-g2"
+          bindtap="onSelectSubject"
+        >语文</view>
+        <view
+          class="sp {{packId === 'math-g1-g2' ? 'on math' : ''}}"
+          data-pack-id="math-g1-g2"
+          bindtap="onSelectSubject"
+        >数学</view>
+        <view
+          class="sp {{packId === 'english-g1-g2' ? 'on en' : ''}}"
+          data-pack-id="english-g1-g2"
+          bindtap="onSelectSubject"
+        >英语</view>
       </view>
-      <view class="scene-pct">{{percent}}%</view>
-    </view>
-
-    <view class="adventure-dock adventure-dock--hero">
-      <view class="adventure-bubble">{{adventureBubble}}</view>
-      <view class="btn btn-cta cta-btn {{toneClass}}" bindtap="onEnterMap">开始冒险</view>
-      <view class="adventure-sub" bindtap="onContinue" wx:if="{{continueTip}}">或继续上次地图</view>
-    </view>
-
-    <view class="sec-title">趣味玩法</view>
-    <view class="feature-list">
-      <view
-        class="feature-item {{item.tone}} pressable"
-        wx:for="{{features}}"
-        wx:key="id"
-        data-action="{{item.action}}"
-        bindtap="onTapFeature"
-      >
-        <view class="feature-icon">{{item.tag}}</view>
-        <view class="feature-body">
-          <view class="feature-name">{{item.title}}</view>
-          <view class="feature-tip">{{item.desc}}</view>
+      <view class="subject-swipe-tip">
+        <view class="subject-dots">
+          <view class="subject-dot {{subjectIndex === 0 ? 'on cn' : ''}}"></view>
+          <view class="subject-dot {{subjectIndex === 1 ? 'on math' : ''}}"></view>
+          <view class="subject-dot {{subjectIndex === 2 ? 'on en' : ''}}"></view>
         </view>
-        <view class="feature-go">开</view>
+        <text class="subject-swipe-text">左右滑切换学科岛</text>
       </view>
+    </view>
     </view>
 
-    <view class="more-list">
-      <view class="more-item e-review pressable" bindtap="onTapReview" wx:if="{{reviewTotal > 0}}">
-        <view class="more-icon">复</view>
-        <view class="more-body">
-          <view class="more-name">智能复习</view>
-          <view class="more-tip">{{reviewTip}}</view>
+    <swiper
+      class="subject-swiper"
+      style="height: {{subjectScrollHeight}}px;"
+      current="{{subjectIndex}}"
+      bindchange="onSubjectSwipe"
+      duration="280"
+      easing-function="easeOutCubic"
+    >
+      <swiper-item wx:for="{{subjectPanels}}" wx:key="packId" wx:for-item="panel">
+        <scroll-view
+          class="subject-scroll"
+          scroll-y="{{subjectScrollable}}"
+          enhanced
+          show-scrollbar="{{false}}"
+          style="height: {{subjectScrollHeight}}px;"
+        >
+        <view class="subject-slide">
+          <view class="grade-pills">
+            <view
+              class="gp {{panel.gradeKey === item.key ? 'on' : ''}} {{item.pre ? 'gp-pre' : ''}}"
+              wx:for="{{panel.gradeOptions}}"
+              wx:for-index="idx"
+              wx:key="key"
+              data-grade="{{item.value}}"
+              bindtap="onSelectGrade"
+            >{{item.label}}</view>
+          </view>
+
+          <view class="scene-card {{panel.toneClass}}">
+            <view class="scene-mark">{{panel.iconText}}</view>
+            <view class="scene-title">{{panel.worldName}}</view>
+            <view class="scene-desc">已通关 {{panel.clearedCount}}/{{panel.totalCount}}</view>
+            <view class="scene-bar">
+              <view class="scene-fill" style="width: {{panel.barWidth}};"></view>
+            </view>
+            <view class="scene-pct">{{panel.percent}}%</view>
+          </view>
+
+          <view class="adventure-dock adventure-dock--hero">
+            <view class="adventure-bubble">{{panel.adventureBubble}}</view>
+            <view class="btn btn-cta cta-btn {{panel.toneClass}}" bindtap="onEnterMap">开始冒险</view>
+            <view class="adventure-sub" bindtap="onContinue" wx:if="{{panel.continueTip}}">或继续上次地图</view>
+          </view>
+
+          <view class="sec-title">趣味玩法</view>
+          <view class="feature-list">
+            <view
+              class="feature-item {{item.tone}} pressable"
+              wx:for="{{panel.features}}"
+              wx:key="id"
+              data-action="{{item.action}}"
+              bindtap="onTapFeature"
+            >
+              <view class="feature-icon">{{item.tag}}</view>
+              <view class="feature-body">
+                <view class="feature-name">{{item.title}}</view>
+                <view class="feature-tip">{{item.desc}}</view>
+              </view>
+              <view class="feature-go">开</view>
+            </view>
+          </view>
+
+          <view class="more-list">
+            <view class="more-item e-mono pressable" bindtap="onGoMono">
+              <view class="more-icon">棋</view>
+              <view class="more-body">
+                <view class="more-name">趣味棋盘</view>
+                <view class="more-tip">走走答</view>
+              </view>
+              <view class="more-go">去</view>
+            </view>
+            <button class="more-item e-share" open-type="share" hover-class="more-item-active">
+              <view class="more-icon">享</view>
+              <view class="more-body">
+                <view class="more-name">分享给朋友</view>
+                <view class="more-tip">邀请一起闯关练</view>
+              </view>
+              <view class="more-go">发</view>
+            </button>
+          </view>
         </view>
-        <view class="more-go">去</view>
-      </view>
-      <view class="more-item e-mono pressable" bindtap="onGoMono">
-        <view class="more-icon">棋</view>
-        <view class="more-body">
-          <view class="more-name">趣味棋盘</view>
-          <view class="more-tip">走走答</view>
-        </view>
-        <view class="more-go">去</view>
-      </view>
-      <view class="more-item e-share pressable">
-        <view class="more-icon">享</view>
-        <view class="more-body">
-          <view class="more-name">分享给朋友</view>
-          <view class="more-tip">邀请一起闯关练</view>
-        </view>
-        <view class="more-go">发</view>
-        <button class="share-overlay" open-type="share" hover-class="none"></button>
-      </view>
-    </view>
+        </scroll-view>
+      </swiper-item>
+    </swiper>
   </view>
 </view>

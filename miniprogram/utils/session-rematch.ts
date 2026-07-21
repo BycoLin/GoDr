@@ -9,6 +9,8 @@ const QUESTION_TYPES: QuizType[] = [
   'orderLines',
   'fillBlank',
   'mathCalc',
+  'mathVisual',
+  'mathSequence',
   'mathCompare',
   'mathMissing',
   'mathMakeTen',
@@ -99,14 +101,16 @@ export function buildRematchPlayUrl(opts: {
   itemId?: string;
   arcade?: boolean;
   unitNo?: number;
+  unitSemester?: 1 | 2;
   unitTest?: boolean;
 }): string {
-  const { packId, grade, wrongTypes, itemId, arcade, unitNo, unitTest } = opts;
+  const { packId, grade, wrongTypes, itemId, arcade, unitNo, unitSemester, unitTest } = opts;
   const types = encodeTypesQuery(wrongTypes);
   let url =
     `/pages/play/play?packId=${packId}&grade=${grade}&rematch=1&types=${types}`;
   if (unitTest && unitNo && unitNo > 0) {
-    url += `&mode=unit&unit=${unitNo}&arcade=1`;
+    const sem = unitSemester === 2 ? 2 : 1;
+    url += `&mode=unit&unit=${unitNo}&semester=${sem}&arcade=1`;
   } else if (itemId && !arcade) {
     url += `&itemId=${itemId}`;
   } else {

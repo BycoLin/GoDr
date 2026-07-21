@@ -1,7 +1,7 @@
 <view class="safe-pad wrongbook">
   <view class="card summary">
     <view class="summary-title">错题本</view>
-    <view class="summary-desc">集中复习答错的题目，巩固薄弱点</view>
+    <view class="summary-desc">按错题原题复习，答对即从错题本移除</view>
     <view class="summary-count">待复习 {{wrongCount}} 题</view>
   </view>
 

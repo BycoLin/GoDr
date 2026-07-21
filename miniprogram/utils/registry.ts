@@ -41,7 +41,9 @@ export function getPackManifest(packId: string): PackManifest | undefined {
 }
 
 export function getPackItems(packId: string): KnowledgeItem[] {
-  return itemsByPack[packId as PackId] || [];
+  return (itemsByPack[packId as PackId] || []).filter(
+    (item): item is KnowledgeItem => Boolean(item?.id),
+  );
 }
 
 export function getItemsByGrade(packId: string, grade: number): KnowledgeItem[] {

@@ -10,17 +10,7 @@
     </view>
   </view>
 
-  <view class="grade-row">
-    <view
-      class="grade-chip {{grade === item.value ? 'on' : ''}} {{item.pre ? 'grade-chip-pre' : ''}}"
-      wx:for="{{gradeOptions}}"
-      wx:for-index="idx"
-      wx:key="value"
-      data-index="{{idx}}"
-      bindtap="onSelectGrade"
-    >{{item.label}}</view>
-  </view>
-  <view class="subject-line">当前：{{subjectLabel}}（首页可切换）</view>
+  <view class="subject-line">当前：{{subjectLabel}} · {{gradeLabel}}（首页可切换学科与年级）</view>
 
   <view class="board-wrap {{celebrate ? 'celebrate' : ''}} {{sad ? 'sad' : ''}}">
     <view class="board">
@@ -38,7 +28,7 @@
         <view class="dice {{diceRolling ? 'rolling' : ''}}">{{dice}}</view>
         <view class="dice-tip">步数</view>
         <button class="btn btn-primary roll-btn" bindtap="onRoll" disabled="{{busy || showQuiz}}">
-          {{diceRolling ? '摇一摇' : '摇一摇前进'}}
+          <text class="roll-btn-text">{{diceRolling ? '摇一摇' : '摇一摇前进'}}</text>
         </button>
       </view>
     </view>
