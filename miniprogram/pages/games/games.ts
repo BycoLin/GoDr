@@ -14,6 +14,7 @@ import {
   toShareTimeline,
 } from '../../utils/share';
 import { listMathThemeUnits, type MathThemeUnit } from '../../utils/math-themes';
+import { listPoetryGames, poetryPathEnabled, poetryPathTitle } from '../../utils/poetry-games';
 import { ROUTES, routePage } from '../../utils/routes';
 
 interface GameCard {
@@ -24,19 +25,6 @@ interface GameCard {
   tag: string;
   tone: string;
 }
-
-const POETRY_GAMES: GameCard[] = [
-  { link: routePage(ROUTES.pinyin, 'tab=initial'), title: '声母表', desc: '23 个声母认读拼读', tag: '声母', tone: 'm-sky' },
-  { link: routePage(ROUTES.pinyin, 'tab=final'), title: '韵母表', desc: '单韵母到鼻韵母', tag: '韵母', tone: 'm-grass' },
-  { link: routePage(ROUTES.pinyinDrill, 'kind=initial'), title: '声母认读', desc: '看字选声母', tag: '认读', tone: 'm-coral' },
-  { link: routePage(ROUTES.pinyinDrill, 'kind=final'), title: '韵母认读', desc: '看字选韵母', tag: '认读', tone: 'm-sun' },
-  { mode: 'mixed', title: '综合练', desc: '多种题型搅一搅', tag: '综合', tone: 'm-teal' },
-  { mode: 'fillNext', title: '下一句', desc: '上句出来接下句', tag: '接龙', tone: 'm-coral' },
-  { mode: 'matchPair', title: '上下句配对', desc: '点一点配对成功', tag: '配对', tone: 'm-sky' },
-  { mode: 'orderLines', title: '诗句排队', desc: '打乱了排回正确', tag: '排序', tone: 'm-sun' },
-  { mode: 'fillBlank', title: '缺字填空', desc: '缺的字藏哪儿了', tag: '填空', tone: 'm-orange' },
-  { mode: 'titleAuthor', title: '猜诗名作者', desc: '看见诗句猜是谁', tag: '猜猜', tone: 'm-grass' },
-];
 
 const MATH_GAMES: GameCard[] = [
   { mode: 'mixed', title: '综合练', desc: '速算比较填空一起', tag: '综合', tone: 'm-teal' },
@@ -52,18 +40,21 @@ const MATH_GAMES: GameCard[] = [
 ];
 
 const ENGLISH_GAMES: GameCard[] = [
-  { mode: 'mixed', title: '综合练', desc: '选义选词拼写一起', tag: '综合', tone: 'm-teal' },
+  { mode: 'mixed', title: '综合练', desc: '看图、音标、拼写一起', tag: '综合', tone: 'm-teal' },
+  { mode: 'enPictureMean', title: '看图选义', desc: 'emoji 图选中文', tag: '看图', tone: 'm-grass' },
+  { mode: 'enPictureWord', title: '看图选词', desc: 'emoji 图选英文', tag: '看图', tone: 'm-sky' },
+  { mode: 'enPhoneticWord', title: '音标选词', desc: '看音标找单词', tag: '音标', tone: 'm-coral' },
   { mode: 'enWordMean', title: '看词选意思', desc: '英文对中文', tag: '词汇', tone: 'm-sky' },
   { mode: 'enMeanWord', title: '看义找单词', desc: '中文找英文', tag: '记忆', tone: 'm-sun' },
   { mode: 'enSpell', title: '缺字母填空', desc: '把字母补回来', tag: '拼写', tone: 'm-orange' },
   { mode: 'matchPair', title: '中英配对', desc: '一对一对上', tag: '配对', tone: 'm-coral' },
 ];
 
-function gamesForPack(packId: string): GameCard[] {
+function gamesForPack(packId: string, grade: number): GameCard[] {
   const kind = getPackSubjectKind(packId);
   if (kind === 'math') return MATH_GAMES;
   if (kind === 'english') return ENGLISH_GAMES;
-  return POETRY_GAMES;
+  return listPoetryGames(grade);
 }
 
 Page({
@@ -72,7 +63,7 @@ Page({
     gradeLabel: '1 年级',
     packId: 'poetry-g1-g2',
     packSubject: '语文',
-    games: POETRY_GAMES,
+    games: listPoetryGames(1),
     wrongCount: 0,
     heroAction: 'daily' as 'daily' | 'boss',
     heroTone: 'tone-sun',
@@ -109,9 +100,12 @@ Page({
     const grade = getActiveGrade(pack.id);
     const wrongCount = countActiveWrongs(pack.id);
     const daily = loadDailyRecord();
-    const games = gamesForPack(pack.id);
+    const games = gamesForPack(pack.id, grade);
     const kind = getPackSubjectKind(pack.id);
-    const showPath = kind === 'math' || kind === 'poetry' || kind === 'english';
+    const showPath =
+      kind === 'math' ||
+      kind === 'english' ||
+      (kind === 'poetry' && poetryPathEnabled(grade));
     const pathKind: PathKind =
       kind === 'math' ? 'math' : kind === 'english' ? 'english' : 'pinyin';
     const pathState = showPath ? loadPathState(pathKind) : null;
@@ -152,7 +146,11 @@ Page({
       showPath,
       pathKind,
       pathTitle:
-        pathKind === 'math' ? '口算进阶' : pathKind === 'english' ? '单词进阶' : '拼音进阶',
+        pathKind === 'math'
+          ? '口算进阶'
+          : pathKind === 'english'
+            ? '单词进阶'
+            : poetryPathTitle(grade),
       pathDesc: done > 0 ? `已完成 ${done}/3 · 学 → 练 → 测` : '学 → 练 → 测，循序巩固',
       themeUnits: kind === 'math' ? listMathThemeUnits(grade) : [],
     });
@@ -216,10 +214,13 @@ Page({
       return;
     }
     const mode = e.currentTarget.dataset.mode as ArcadeMode;
+    const label = String(e.currentTarget.dataset.label || '');
+    const theme = String(e.currentTarget.dataset.theme || '');
     const { packId, grade } = this.data;
-    wx.navigateTo({
-      url: `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`,
-    });
+    let url = `/pages/play/play?packId=${packId}&grade=${grade}&mode=${mode}&arcade=1`;
+    if (label) url += `&label=${encodeURIComponent(label)}`;
+    if (theme) url += `&poolTheme=${encodeURIComponent(theme)}`;
+    wx.navigateTo({ url });
   },
 
   onTapBoss() {

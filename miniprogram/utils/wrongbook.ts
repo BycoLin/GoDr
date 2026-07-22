@@ -20,6 +20,8 @@ const QUIZ_TYPE_LABELS: Record<QuizType, string> = {
   titleAuthor: '诗名作者',
   orderLines: '排序',
   fillBlank: '填空',
+  similarChar: '形近字',
+  poetryPicture: '看图猜篇',
   mathCalc: '速算',
   mathVisual: '看图口算',
   mathSequence: '数字排队',
@@ -41,6 +43,9 @@ const QUIZ_TYPE_LABELS: Record<QuizType, string> = {
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
   enSpell: '缺字母',
+  enPictureMean: '看图选义',
+  enPictureWord: '看图选词',
+  enPhoneticWord: '音标选词',
 };
 
 export function quizTypeLabel(type: QuizType): string {

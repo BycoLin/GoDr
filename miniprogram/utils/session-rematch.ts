@@ -8,6 +8,7 @@ const QUESTION_TYPES: QuizType[] = [
   'titleAuthor',
   'orderLines',
   'fillBlank',
+  'similarChar',
   'mathCalc',
   'mathVisual',
   'mathSequence',

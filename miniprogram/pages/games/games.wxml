@@ -74,6 +74,8 @@
     wx:key="title"
     data-mode="{{item.mode}}"
     data-link="{{item.link}}"
+    data-label="{{item.title}}"
+    data-theme="{{item.poolTheme}}"
     bindtap="onTapGame"
   >
     <view class="play-icon">{{item.tag}}</view>

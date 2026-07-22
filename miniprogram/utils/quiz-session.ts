@@ -72,8 +72,14 @@ export function questionSessionKey(q: Question): string {
   if ('placeValueChars' in q && q.placeValueChars?.length) {
     extra += `:pv:${q.placeValueChars.map((c) => (c.hi ? `[${c.text}]` : c.text)).join('')}`;
   }
-  if ('answer' in q && typeof q.answer === 'number') {
-    extra += `:n:${q.answer}`;
+  if (q.type === 'similarChar' && 'displayLine' in q && q.displayLine) {
+    extra += `:dl:${q.displayLine}`;
+  }
+  if (q.type === 'titleAuthor' && 'excerpt' in q && q.excerpt) {
+    extra += `:ex:${q.excerpt}`;
+  }
+  if ('visualEmoji' in q && q.visualEmoji) {
+    extra += `:em:${q.visualEmoji}`;
   }
   // 数学/几何题为程序生成，按「内容」去重，不因关卡 item 不同而重复
   if (MATH_CONTENT_DEDUP_TYPES.has(q.type)) {

@@ -82,7 +82,9 @@ export type PoetryQuizType =
   | 'matchPair'
   | 'titleAuthor'
   | 'orderLines'
-  | 'fillBlank';
+  | 'fillBlank'
+  | 'similarChar'
+  | 'poetryPicture';
 
 export type MathQuizType =
   | 'mathCalc'
@@ -104,7 +106,13 @@ export type MathQuizType =
   | 'mathAngleClassify'
   | 'mathAngleMeasure';
 
-export type EnglishQuizType = 'enWordMean' | 'enMeanWord' | 'enSpell';
+export type EnglishQuizType =
+  | 'enWordMean'
+  | 'enMeanWord'
+  | 'enSpell'
+  | 'enPictureMean'
+  | 'enPictureWord'
+  | 'enPhoneticWord';
 
 export type QuizType = PoetryQuizType | MathQuizType | EnglishQuizType;
 
@@ -128,6 +136,8 @@ export interface FillNextQuestion {
   id: string;
   type: 'fillNext';
   itemId: string;
+  /**  arcade 专项练时展示出处 */
+  sourceTitle?: string;
   prompt: string;
   options: ChoiceOption[];
   answerId: string;
@@ -141,6 +151,8 @@ export interface MatchPairQuestion {
   right: ChoiceOption[];
   /** leftId -> rightId */
   answerMap: Record<string, string>;
+  /** 日积月累对联配对 */
+  couplet?: boolean;
 }
 
 export interface TitleAuthorQuestion {
@@ -149,6 +161,10 @@ export interface TitleAuthorQuestion {
   itemId: string;
   mode: 'title' | 'author';
   prompt: string;
+  /** 题型角标，如猜故事 / 猜篇名 */
+  typeLabel?: string;
+  /** 展示用的诗句/文段摘录 */
+  excerpt: string;
   options: ChoiceOption[];
   answerId: string;
 }
@@ -162,6 +178,8 @@ export interface OrderLinesQuestion {
   options: ChoiceOption[];
   /** 正确顺序的 option id 列表 */
   answerOrder: string[];
+  /** 课文/故事排序（非古诗） */
+  narrative?: boolean;
 }
 
 /** 诗句缺字填空 */
@@ -170,6 +188,35 @@ export interface FillBlankQuestion {
   type: 'fillBlank';
   itemId: string;
   prompt: string;
+  options: ChoiceOption[];
+  answerId: string;
+}
+
+/** 形近字找茬：句中混入形近错字，选出正确字 */
+export interface SimilarCharQuestion {
+  id: string;
+  type: 'similarChar';
+  itemId: string;
+  sourceTitle?: string;
+  /** 题干说明 */
+  prompt: string;
+  /** 含错字的句子，单独展示 */
+  displayLine: string;
+  /** 错字在 displayLine 中的下标 */
+  wrongIdx: number;
+  /** 逐字展示用 */
+  displayChars: string[];
+  options: ChoiceOption[];
+  answerId: string;
+}
+
+/** 看图猜篇：emoji 场景选诗名/童谣名 */
+export interface PoetryPictureQuestion {
+  id: string;
+  type: 'poetryPicture';
+  itemId: string;
+  prompt: string;
+  visualEmoji: string;
   options: ChoiceOption[];
   answerId: string;
 }
@@ -270,7 +317,7 @@ export interface MathAngleMeasureQuestion {
   ticks: Array<{ id: number; deg: number; label: string; major: boolean }>;
 }
 
-/** 英语选择题（看词选义 / 看义选词 / 缺字母）共用 */
+/** 英语选择题（看词选义 / 看义选词 / 缺字母 / 看图 / 音标）共用 */
 export interface EnglishChoiceQuestion {
   id: string;
   type: EnglishQuizType;
@@ -278,6 +325,8 @@ export interface EnglishChoiceQuestion {
   prompt: string;
   options: ChoiceOption[];
   answerId: string;
+  /** 看图题：大 emoji 展示 */
+  visualEmoji?: string;
 }
 
 export type Question =
@@ -286,6 +335,8 @@ export type Question =
   | TitleAuthorQuestion
   | OrderLinesQuestion
   | FillBlankQuestion
+  | SimilarCharQuestion
+  | PoetryPictureQuestion
   | MathChoiceQuestion
   | MathVisualQuestion
   | MathSequenceQuestion

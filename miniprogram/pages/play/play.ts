@@ -13,6 +13,7 @@ import {
   buildBossQuiz,
   buildQuizForItem,
   gradeAnswer,
+  isDedicatedPoetryMode,
   nextAdaptiveQuestion,
   questionItemId,
   starsFromScore,
@@ -30,8 +31,10 @@ import {
   buildEnglishBossQuiz,
   buildEnglishQuizForItem,
   ENGLISH_ARCADE_MODE_LABELS,
+  isDedicatedEnglishMode,
   nextEnglishAdaptiveQuestion,
 } from '../../utils/quiz-english';
+import { expandPoetryThemePool, type PoetryPoolTheme } from '../../utils/poetry-games';
 import { saveLastSession } from '../../utils/progress';
 import { listActiveWrongs, recordFix, recordWrong } from '../../utils/wrongbook';
 import { pointsForCorrect } from '../../utils/wallet';
@@ -182,6 +185,8 @@ Page({
     const grade = parseGradeQuery(query.grade, getActiveGrade(packId));
     const itemId = query.itemId || '';
     const mode = (query.mode || 'mixed') as ArcadeMode;
+    const modeLabelOverride = query.label ? decodeURIComponent(query.label) : '';
+    const poolTheme = (query.poolTheme || '') as PoetryPoolTheme | '';
     const boss = mode === 'boss' || query.boss === '1';
     const daily = mode === 'daily' || query.daily === '1';
     const duel = mode === 'duel' || query.duel === '1';
@@ -223,6 +228,15 @@ Page({
       pool = pool.filter(isEnglish);
     } else {
       pool = pool.filter(isPoetry);
+    }
+
+    if (subjectKind === 'poetry' && poolTheme) {
+      pool = expandPoetryThemePool(
+        packId,
+        grade,
+        pool as PoetryItem[],
+        poolTheme,
+      );
     }
 
     if (!pool.length) {
@@ -450,7 +464,10 @@ Page({
       }
     } else if (arcade) {
       const dedicatedMath = subjectKind === 'math' && isDedicatedMathMode(quizMode);
-      const arcadeSeed = dedicatedMath ? ROLLING_TARGET : 1;
+      const dedicatedPoetry = subjectKind === 'poetry' && isDedicatedPoetryMode(quizMode);
+      const dedicatedEnglish = subjectKind === 'english' && isDedicatedEnglishMode(quizMode);
+      const dedicatedMode = dedicatedMath || dedicatedPoetry || dedicatedEnglish;
+      const arcadeSeed = dedicatedMode ? ROLLING_TARGET : 1;
       if (subjectKind === 'math') {
         questions = buildMathArcadeQuiz(mathPool, quizMode, arcadeSeed);
         poemTitle = MATH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
@@ -461,11 +478,12 @@ Page({
         poemTitle = ENGLISH_ARCADE_MODE_LABELS[mode] || ARCADE_MODE_LABELS[mode] || '趣味练习';
       } else {
         questions = buildArcadeQuiz(poetryPool, quizMode, arcadeSeed);
-        poemTitle = ARCADE_MODE_LABELS[mode] || '趣味练习';
+        poemTitle =
+          modeLabelOverride || ARCADE_MODE_LABELS[mode] || '趣味练习';
       }
-      if (dedicatedMath && questions.length >= ROLLING_TARGET) {
-        rolling = false;
-        targetTotal = questions.length;
+      if (dedicatedMode) {
+        targetTotal = ROLLING_TARGET;
+        rolling = questions.length < ROLLING_TARGET;
       } else {
         targetTotal = ROLLING_TARGET;
       }
@@ -480,19 +498,30 @@ Page({
         return;
       }
       if (isMath(item)) {
-        questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT);
+        questions = buildMathQuizForItem(item, LEVEL_QUESTION_COUNT, undefined, {
+          enrich: true,
+          pool: mathPool,
+          grade,
+        });
         poemTitle = resolveMathDisplayTitle(item);
         poemAuthor = item.subtitle || '数学练习';
         modeLabel = '数学练习';
         wx.setNavigationBarTitle({ title: resolveMathDisplayTitle(item) });
       } else if (isEnglish(item)) {
-        questions = buildEnglishQuizForItem(item, englishPool, LEVEL_QUESTION_COUNT);
+        questions = buildEnglishQuizForItem(item, englishPool, LEVEL_QUESTION_COUNT, undefined, {
+          enrich: true,
+        });
         poemTitle = item.word;
         poemAuthor = item.meaning;
         modeLabel = '英语练习';
         wx.setNavigationBarTitle({ title: item.word });
       } else if (isPoetry(item)) {
-        questions = buildQuizForItem(item, poetryPool, { count: LEVEL_QUESTION_COUNT, rampHard: true });
+        questions = buildQuizForItem(item, poetryPool, {
+          count: LEVEL_QUESTION_COUNT,
+          rampHard: true,
+          enrich: true,
+          packId,
+        });
         poemTitle = item.title;
         poemAuthor = item.author;
         modeLabel = '诗词练习';
@@ -907,6 +936,7 @@ Page({
       (current.type !== 'fillNext' &&
         current.type !== 'titleAuthor' &&
         current.type !== 'fillBlank' &&
+        current.type !== 'similarChar' &&
         current.type !== 'mathCalc' &&
         current.type !== 'mathCompare' &&
         current.type !== 'mathMissing' &&
@@ -924,7 +954,11 @@ Page({
         current.type !== 'mathBorrowTen' &&
         current.type !== 'enWordMean' &&
         current.type !== 'enMeanWord' &&
-        current.type !== 'enSpell')
+        current.type !== 'enSpell' &&
+        current.type !== 'enPictureMean' &&
+        current.type !== 'enPictureWord' &&
+        current.type !== 'enPhoneticWord' &&
+        current.type !== 'poetryPicture')
     ) {
       return;
     }
@@ -1066,6 +1100,10 @@ Page({
       }
       if (q) {
         nextQuestions = questions.concat([q]);
+      } else if (nextIndex >= questions.length) {
+        this.setData({ total: nextIndex });
+        this.finish(answers);
+        return;
       } else {
         this.finish(answers);
         return;

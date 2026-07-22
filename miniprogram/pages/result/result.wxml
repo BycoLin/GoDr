@@ -44,8 +44,9 @@
   <view class="result-dock">
     <button class="btn btn-primary dock-main" wx:if="{{pathNext}}" bindtap="onPathNext">{{pathNextText}}</button>
     <button class="btn btn-primary dock-main" wx:elif="{{pathDone}}" bindtap="onPathHub">回进阶路径</button>
+    <button class="btn btn-primary dock-main" wx:elif="{{showNextLevel}}" bindtap="onNextLevel">下一关</button>
     <button class="btn btn-primary dock-main" wx:elif="{{showRematch}}" bindtap="onRematchSame">再练同类</button>
-    <button class="btn btn-primary dock-main" wx:else bindtap="onRetry">再闯一次</button>
+    <button class="btn btn-primary dock-main" wx:else bindtap="onRetry">{{primaryButtonText}}</button>
 
     <view class="dock-row">
       <button class="dock-chip" open-type="share" hover-class="dock-chip--active">分享</button>

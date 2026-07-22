@@ -48,18 +48,34 @@ export function formatMaxChinese(max: number): string {
   return String(max);
 }
 
-function isThemeSkill(skill: MathSkill): boolean {
-  return skill === 'bigNumber' || skill === 'placeValue' || skill === 'angle' || skill === 'line';
+function isGeometrySkill(skill: MathSkill): boolean {
+  return skill === 'angle' || skill === 'line';
+}
+
+function isBigNumberSkill(skill: MathSkill): boolean {
+  return skill === 'bigNumber' || skill === 'placeValue';
 }
 
 /** 数学关卡展示标题（地图 / 进度 / 导航栏） */
 export function displayMathItemTitle(item: MathItem): string {
   const label = SKILL_LABELS[item.skill] || item.skill;
+  if (isGeometrySkill(item.skill)) {
+    const tail = item.subtitle?.trim();
+    return tail ? `${label}·${tail}` : label;
+  }
   const maxLabel = formatMaxChinese(item.max);
-  if (item.max >= 10000 || isThemeSkill(item.skill)) {
+  if (item.max >= 10000 || isBigNumberSkill(item.skill)) {
     return `${label}·${maxLabel}`;
   }
   return `${maxLabel}以内${label}`;
+}
+
+/** 关卡副标题（地图 node-meta，避免与 title 重复） */
+export function mathItemMeta(item: MathItem): string {
+  if (isGeometrySkill(item.skill) && item.subtitle) {
+    return item.tags?.join(' · ') || '数学练习';
+  }
+  return item.subtitle || item.tags?.join(' · ') || '数学练习';
 }
 
 /** 兼容旧数据里「1000000以内角」这类标题 */
@@ -69,8 +85,11 @@ export function beautifyMathTitle(title: string): string {
   const max = Number(m[1]);
   const tail = m[2].replace(/强化$|·\d+$/, '').trim();
   const label = LEGACY_TAIL_LABELS[tail] || tail;
+  if (['角', '线'].includes(tail)) {
+    return label;
+  }
   const maxLabel = formatMaxChinese(max);
-  if (max >= 10000 || ['角', '线', '大数', '数位'].includes(tail)) {
+  if (max >= 10000 || ['大数', '数位'].includes(tail)) {
     return `${label}·${maxLabel}`;
   }
   return `${maxLabel}以内${label}`;

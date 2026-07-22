@@ -1,13 +1,17 @@
 {
   "name": "GoDr",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "闯关叭叭 · 趣味闯关练习微信小程序，覆盖数学、语文、英语等学科",
   "scripts": {
+    "sync:version": "node scripts/sync-app-version.mjs",
+    "pretypecheck": "npm run sync:version",
+    "preexpand:items": "npm run sync:version",
+    "prepare": "npm run sync:version",
     "extract:poetry": "node scripts/extract-poetry.mjs",
     "sync:meiyuwen": "node scripts/sync-meiyuwen-poetry.mjs",
     "sync:pep-english": "node scripts/sync-pep-english.mjs",
     "fetch:tts": "node scripts/fetch-pinyin-tts.mjs",
-    "audit:pinyin-tts": "node scripts/audit-pinyin-tts.mjs",
+    "audit:quiz-pools": "node scripts/audit-quiz-pools.mjs",
     "expand:items": "node scripts/expand-items.mjs",
     "smoke:quiz": "node scripts/smoke-quiz.mjs",
     "typecheck": "tsc --noEmit"

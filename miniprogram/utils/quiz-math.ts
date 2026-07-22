@@ -14,6 +14,11 @@ import type {
 } from './types';
 import { findThemeGame } from './math-themes';
 import {
+  levelEnrichCount,
+  mergeInterleavedQuestions,
+  planMathLevelEnrich,
+} from './level-enrich';
+import {
   buildTypeSchedule,
   pickItemsForSession,
   registerQuestion,
@@ -1037,6 +1042,9 @@ function skillToModes(skill: MathItem['skill'], item?: MathItem): MathQuizType[]
   if (skill === 'angle') return ['mathAngleClassify', 'mathAngleMeasure'];
   if (skill === 'line') return ['mathLineType', 'mathGeoRelation'];
   if (skill === 'add' || skill === 'sub' || skill === 'mix') {
+    if (item && item.max <= 20) {
+      return ['mathVisual', 'mathCalc', 'mathMissing', 'mathCompare'];
+    }
     return ['mathCalc', 'mathMissing', 'mathCompare'];
   }
   return ['mathCalc', 'mathCompare', 'mathMissing'];
@@ -1151,27 +1159,67 @@ export function isDedicatedMathMode(mode: ArcadeMode): mode is MathQuizType {
   return ALL_MATH_QUIZ_TYPES.includes(mode as MathQuizType);
 }
 
+export interface BuildMathQuizOptions {
+  enrich?: boolean;
+  pool?: MathItem[];
+  grade?: number;
+}
+
 export function buildMathQuizForItem(
   item: MathItem,
   count = 8,
   preferTypes?: MathQuizType[],
+  options?: BuildMathQuizOptions,
 ): Question[] {
   const types = preferTypes?.filter((t) => ALL_MATH_QUIZ_TYPES.includes(t));
   const skillModes = skillToModes(item.skill, item);
-  const typeSchedule = buildTypeSchedule(
-    types?.length ? types : skillModes.length ? skillModes : ALL_MATH_QUIZ_TYPES,
-    count * 3,
-  );
+  const coreTypes = types?.length ? types : skillModes.length ? skillModes : ALL_MATH_QUIZ_TYPES;
+  const typeSchedule = buildTypeSchedule(coreTypes, count * 3);
+
+  const buildCore = (target: number, usedKeys: Set<string>): Question[] => {
+    const questions: Question[] = [];
+    let guard = 0;
+    while (questions.length < target && guard < target * 20) {
+      guard += 1;
+      const type = typeSchedule[guard % typeSchedule.length];
+      const q = makeByMathType(type, item, buildGenHint(type, questions.length, usedKeys));
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
+  const buildEnrich = (target: number, usedKeys: Set<string>): Question[] => {
+    const pool = options?.pool?.length ? options.pool : [item];
+    const grade = options?.grade ?? item.grade ?? 1;
+    const { types: enrichTypes } = planMathLevelEnrich(item, grade, pool, coreTypes, poolForMode);
+    if (!enrichTypes.length) return [];
+    const enrichSchedule = buildTypeSchedule(enrichTypes, target * 3);
+    const altPool = pool.filter((p) => p.id !== item.id);
+    const itemOrder = pickItemsForSession(altPool.length ? altPool : pool, Math.max(target * 2, 6));
+    const questions: Question[] = [];
+    let guard = 0;
+    let itemCursor = 0;
+    while (questions.length < target && guard < target * 24) {
+      guard += 1;
+      const type = enrichSchedule[guard % enrichSchedule.length];
+      const enrichItem = itemOrder[itemCursor % itemOrder.length] || item;
+      itemCursor += 1;
+      const q = makeByMathType(type, enrichItem, buildGenHint(type, questions.length, usedKeys));
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
   const usedKeys = new Set<string>();
-  const questions: Question[] = [];
-  let guard = 0;
-  while (questions.length < count && guard < count * 20) {
-    guard += 1;
-    const type = typeSchedule[guard % typeSchedule.length];
-    const q = makeByMathType(type, item, buildGenHint(type, questions.length, usedKeys));
-    if (q && registerQuestion(usedKeys, q)) questions.push(q);
+  if (!options?.enrich || !options.pool?.length) {
+    return buildCore(count, usedKeys);
   }
-  return questions;
+
+  const enrichTarget = levelEnrichCount(count);
+  const coreTarget = count - enrichTarget;
+  const core = buildCore(coreTarget, usedKeys);
+  const enrich = buildEnrich(enrichTarget, usedKeys);
+  return mergeInterleavedQuestions(core, enrich, count);
 }
 
 export function buildMathArcadeQuiz(

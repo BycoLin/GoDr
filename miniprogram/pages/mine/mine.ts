@@ -33,6 +33,7 @@ import {
   toShareTimeline,
 } from '../../utils/share';
 import { formatGradeLabel } from '../../utils/grade-label';
+import { APP_VERSION } from '../../utils/app-version';
 
 interface FavoriteRow extends FavoriteEntry {
   key: string;
@@ -54,7 +55,7 @@ Page({
     badgeSummary: '已点亮 0 / 0',
     badgePercent: 0,
     badgesExpanded: false,
-    version: '1.0.0',
+    version: APP_VERSION,
     packId: 'poetry-g1-g2',
     subjectLabel: '语文',
     sfxMuted: false,

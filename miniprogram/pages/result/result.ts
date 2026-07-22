@@ -8,6 +8,7 @@ import { getPackSubjectKind } from '../../utils/registry';
 import { markPracticeDay } from '../../utils/streak';
 import { recordPracticeSession } from '../../utils/practice-log';
 import { goPathHub, markPathStep, buildStepUrl, isPathKind } from '../../utils/skill-path';
+import { findNextLevelItemId } from '../../utils/level-map';
 import { parseGradeQuery } from '../../utils/grade-label';
 import { getActiveGrade } from '../../utils/active-subject';
 import {
@@ -71,6 +72,9 @@ Page({
     rematchTypesText: '',
     rematchTags: [] as string[],
     wrongTypes: [] as QuizType[],
+    showNextLevel: false,
+    nextItemId: '',
+    primaryButtonText: '再闯一次',
     showBackLink: false,
     backLabel: '',
   },
@@ -223,6 +227,21 @@ Page({
     const rematchTags = rematchTypesText
       ? rematchTypesText.split(/[、,，]/).map((s) => s.trim()).filter(Boolean)
       : [];
+
+    let showNextLevel = false;
+    let nextItemId = '';
+    let primaryButtonText = '再闯一次';
+    if (!arcade && itemId && cleared) {
+      const next = findNextLevelItemId(packId, grade, itemId);
+      if (next) {
+        showNextLevel = true;
+        nextItemId = next;
+        primaryButtonText = '下一关';
+      } else if (stars < 3) {
+        primaryButtonText = '再闯一次冲三星';
+      }
+    }
+
     const showBackLink = !pathNext && !pathDone;
     const backLabel = boss
       ? '错题本'
@@ -273,6 +292,9 @@ Page({
       rematchTypesText,
       rematchTags,
       wrongTypes,
+      showNextLevel,
+      nextItemId,
+      primaryButtonText,
       showBackLink,
       backLabel,
     });
@@ -353,6 +375,17 @@ Page({
         unitNo,
         unitSemester,
       }),
+    });
+  },
+
+  onNextLevel() {
+    const { packId, grade, nextItemId } = this.data;
+    if (!nextItemId) {
+      this.onBackLevels();
+      return;
+    }
+    wx.redirectTo({
+      url: `/pages/play/play?packId=${packId}&grade=${grade}&itemId=${nextItemId}`,
     });
   },
 

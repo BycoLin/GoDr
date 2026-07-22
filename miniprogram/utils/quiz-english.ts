@@ -14,11 +14,27 @@ import {
   registerQuestion,
   shuffle as sessionShuffle,
 } from './quiz-session';
+import { emojiForEnglishItem } from './english-pictures';
+import {
+  levelEnrichCount,
+  mergeInterleavedQuestions,
+  planEnglishLevelEnrich,
+} from './level-enrich';
 
-const EN_MIXED_TYPES: Array<EnglishQuizType | 'matchPair'> = [
+const EN_QUIZ_TYPES: EnglishQuizType[] = [
+  'enPictureMean',
+  'enPictureWord',
+  'enPhoneticWord',
   'enWordMean',
   'enMeanWord',
   'enSpell',
+];
+
+function isEnQuizType(t: string): t is EnglishQuizType {
+  return EN_QUIZ_TYPES.includes(t as EnglishQuizType);
+}
+const EN_MIXED_TYPES: Array<EnglishQuizType | 'matchPair'> = [
+  ...EN_QUIZ_TYPES,
   'matchPair',
 ];
 
@@ -148,6 +164,65 @@ function buildEnMatchFromItems(picked: EnglishItem[]): MatchPairQuestion | null 
   };
 }
 
+export function makeEnPictureMean(
+  item: EnglishItem,
+  pool: EnglishItem[],
+): EnglishChoiceQuestion | null {
+  const emoji = emojiForEnglishItem(item);
+  if (!emoji) return null;
+  const distractors = pickDistractors(pool, item.id, 3).map((d) => d.meaning);
+  if (distractors.length < 2) return null;
+  const { options, answerId } = toOptions(item.meaning, distractors);
+  return {
+    id: uid('enpm'),
+    type: 'enPictureMean',
+    itemId: item.id,
+    prompt: '看图选意思',
+    visualEmoji: emoji,
+    options,
+    answerId,
+  };
+}
+
+export function makeEnPictureWord(
+  item: EnglishItem,
+  pool: EnglishItem[],
+): EnglishChoiceQuestion | null {
+  const emoji = emojiForEnglishItem(item);
+  if (!emoji) return null;
+  const distractors = pickDistractors(pool, item.id, 3).map((d) => d.word);
+  if (distractors.length < 2) return null;
+  const { options, answerId } = toOptions(item.word, distractors);
+  return {
+    id: uid('enpw'),
+    type: 'enPictureWord',
+    itemId: item.id,
+    prompt: '看图选单词',
+    visualEmoji: emoji,
+    options,
+    answerId,
+  };
+}
+
+export function makeEnPhoneticWord(
+  item: EnglishItem,
+  pool: EnglishItem[],
+): EnglishChoiceQuestion | null {
+  const phonetic = item.phonetic?.trim();
+  if (!phonetic || phonetic.length < 3) return null;
+  const distractors = pickDistractors(pool, item.id, 3).map((d) => d.word);
+  if (distractors.length < 2) return null;
+  const { options, answerId } = toOptions(item.word, distractors);
+  return {
+    id: uid('enph'),
+    type: 'enPhoneticWord',
+    itemId: item.id,
+    prompt: `听音标选单词：${phonetic}`,
+    options,
+    answerId,
+  };
+}
+
 function makeByType(
   type: EnglishQuizType | 'matchPair',
   item: EnglishItem,
@@ -156,18 +231,29 @@ function makeByType(
   if (type === 'enWordMean') return makeEnWordMean(item, pool);
   if (type === 'enMeanWord') return makeEnMeanWord(item, pool);
   if (type === 'enSpell') return makeEnSpell(item);
+  if (type === 'enPictureMean') {
+    return makeEnPictureMean(item, pool) || makeEnWordMean(item, pool);
+  }
+  if (type === 'enPictureWord') {
+    return makeEnPictureWord(item, pool) || makeEnMeanWord(item, pool);
+  }
+  if (type === 'enPhoneticWord') {
+    return makeEnPhoneticWord(item, pool) || makeEnWordMean(item, pool);
+  }
   if (type === 'matchPair') return makeEnMatchForItem(item, pool);
   return null;
 }
 
 function preferredType(index: number): EnglishQuizType | 'matchPair' {
-  const modes: Array<EnglishQuizType | 'matchPair'> = [
-    'enWordMean',
-    'enMeanWord',
-    'enSpell',
-    'matchPair',
-  ];
-  return modes[index % modes.length];
+  return EN_MIXED_TYPES[index % EN_MIXED_TYPES.length];
+}
+
+function isEnArcadeMode(mode: ArcadeMode): mode is EnglishQuizType | 'matchPair' {
+  return mode === 'matchPair' || isEnQuizType(mode);
+}
+
+export interface BuildEnglishQuizOptions {
+  enrich?: boolean;
 }
 
 export function buildEnglishQuizForItem(
@@ -175,32 +261,63 @@ export function buildEnglishQuizForItem(
   pool: EnglishItem[],
   count = 8,
   preferTypes?: Array<EnglishQuizType | 'matchPair'>,
+  options?: BuildEnglishQuizOptions,
 ): Question[] {
   const fullPool = pool.length ? pool : [item];
   const types = preferTypes?.filter(
-    (t): t is EnglishQuizType | 'matchPair' =>
-      t === 'matchPair' ||
-      t === 'enWordMean' ||
-      t === 'enMeanWord' ||
-      t === 'enSpell',
+    (t): t is EnglishQuizType | 'matchPair' => t === 'matchPair' || isEnQuizType(t),
   );
-  const typeSchedule = buildTypeSchedule(
-    types?.length ? types : EN_MIXED_TYPES,
-    count * 3,
-  );
+  const coreTypes = types?.length ? types : EN_MIXED_TYPES;
+  const typeSchedule = buildTypeSchedule(coreTypes, count * 3);
+
+  const buildCore = (target: number, usedKeys: Set<string>): Question[] => {
+    const questions: Question[] = [];
+    let guard = 0;
+    while (questions.length < target && guard < target * 20) {
+      guard += 1;
+      const type = typeSchedule[guard % typeSchedule.length];
+      const q =
+        type === 'matchPair'
+          ? makeEnMatch(fullPool)
+          : makeByType(type, item, fullPool);
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
+  const buildEnrich = (target: number, usedKeys: Set<string>): Question[] => {
+    const enrichTypes = planEnglishLevelEnrich(coreTypes);
+    if (!enrichTypes.length || fullPool.length <= 1) return [];
+    const enrichSchedule = buildTypeSchedule(enrichTypes, target * 3);
+    const altPool = fullPool.filter((p) => p.id !== item.id);
+    const itemOrder = pickItemsForSession(altPool.length ? altPool : fullPool, Math.max(target * 2, 6));
+    const questions: Question[] = [];
+    let guard = 0;
+    let itemCursor = 0;
+    while (questions.length < target && guard < target * 24) {
+      guard += 1;
+      const type = enrichSchedule[guard % enrichSchedule.length];
+      const enrichItem = itemOrder[itemCursor % itemOrder.length] || item;
+      itemCursor += 1;
+      const q =
+        type === 'matchPair'
+          ? makeEnMatch(altPool.length >= 3 ? altPool : fullPool)
+          : makeByType(type, enrichItem, fullPool);
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
   const usedKeys = new Set<string>();
-  const questions: Question[] = [];
-  let guard = 0;
-  while (questions.length < count && guard < count * 20) {
-    guard += 1;
-    const type = typeSchedule[guard % typeSchedule.length];
-    const q =
-      type === 'matchPair'
-        ? makeEnMatch(fullPool)
-        : makeByType(type, item, fullPool);
-    if (q && registerQuestion(usedKeys, q)) questions.push(q);
+  if (!options?.enrich || fullPool.length <= 1) {
+    return buildCore(count, usedKeys);
   }
-  return questions;
+
+  const enrichTarget = levelEnrichCount(count);
+  const coreTarget = count - enrichTarget;
+  const core = buildCore(coreTarget, usedKeys);
+  const enrich = buildEnrich(enrichTarget, usedKeys);
+  return mergeInterleavedQuestions(core, enrich, count);
 }
 
 export function buildEnglishArcadeQuiz(
@@ -212,20 +329,13 @@ export function buildEnglishArcadeQuiz(
 ): Question[] {
   if (!pool.length) return [];
   const enPrefer = preferModes?.filter(
-    (t): t is EnglishQuizType | 'matchPair' =>
-      t === 'matchPair' ||
-      t === 'enWordMean' ||
-      t === 'enMeanWord' ||
-      t === 'enSpell',
+    (t): t is EnglishQuizType | 'matchPair' => t === 'matchPair' || isEnQuizType(t),
   );
   const keys = usedKeys ?? new Set<string>();
   const typeSchedule =
     enPrefer?.length
       ? buildTypeSchedule(enPrefer, count * 2)
-      : mode === 'enWordMean' ||
-          mode === 'enMeanWord' ||
-          mode === 'enSpell' ||
-          mode === 'matchPair'
+      : isEnArcadeMode(mode)
         ? buildTypeSchedule([mode], count * 2)
         : buildTypeSchedule(EN_MIXED_TYPES, count * 2);
   const itemOrder = pickItemsForSession(pool, count * 2);
@@ -255,11 +365,8 @@ export function buildEnglishBossQuiz(
     const item = byId.get(hint.itemId);
     if (!item) continue;
     const type: EnglishQuizType | 'matchPair' =
-      hint.quizType === 'enWordMean' ||
-      hint.quizType === 'enMeanWord' ||
-      hint.quizType === 'enSpell' ||
-      hint.quizType === 'matchPair'
-        ? hint.quizType
+      hint.quizType === 'matchPair' || isEnQuizType(hint.quizType)
+        ? (hint.quizType as EnglishQuizType | 'matchPair')
         : preferredType(questions.length);
     const q = makeByType(type, item, pool);
     if (q) questions.push(q);
@@ -283,35 +390,22 @@ export function nextEnglishAdaptiveQuestion(
   if (baseMode === 'boss' && !wrongHints?.length) return null;
 
   const enPrefer = ctx.preferModes?.filter(
-    (t): t is EnglishQuizType | 'matchPair' =>
-      t === 'matchPair' ||
-      t === 'enWordMean' ||
-      t === 'enMeanWord' ||
-      t === 'enSpell',
+    (t): t is EnglishQuizType | 'matchPair' => t === 'matchPair' || isEnQuizType(t),
   );
 
-  let type: EnglishQuizType | 'matchPair' = 'enWordMean';
+  let type: EnglishQuizType | 'matchPair' = 'enPictureMean';
   if (enPrefer?.length) {
     type = enPrefer[Math.floor(Math.random() * enPrefer.length)];
-  } else if (
-    !ctx.lastCorrect &&
-    (ctx.lastType === 'enWordMean' ||
-      ctx.lastType === 'enMeanWord' ||
-      ctx.lastType === 'enSpell' ||
-      ctx.lastType === 'matchPair')
-  ) {
-    type = ctx.lastType;
+  } else if (!ctx.lastCorrect && isEnArcadeMode(ctx.lastType as ArcadeMode)) {
+    type = ctx.lastType as EnglishQuizType | 'matchPair';
   } else if (ctx.combo >= 3) {
-    type = shuffle(['enSpell', 'matchPair', 'enMeanWord'] as Array<EnglishQuizType | 'matchPair'>)[0];
-  } else if (
-    baseMode === 'enWordMean' ||
-    baseMode === 'enMeanWord' ||
-    baseMode === 'enSpell' ||
-    baseMode === 'matchPair'
-  ) {
+    type = shuffle(['enSpell', 'matchPair', 'enPictureWord', 'enPhoneticWord'] as Array<
+      EnglishQuizType | 'matchPair'
+    >)[0];
+  } else if (isEnArcadeMode(baseMode)) {
     type = baseMode;
   } else {
-    type = preferredType(Math.floor(Math.random() * 4));
+    type = preferredType(Math.floor(Math.random() * EN_MIXED_TYPES.length));
   }
 
   const keys = usedKeys ?? new Set<string>();
@@ -328,13 +422,8 @@ export function nextEnglishAdaptiveQuestion(
       const found = pool.find((p) => p.id === hint.itemId);
       if (found) {
         item = found;
-        if (
-          hint.quizType === 'enWordMean' ||
-          hint.quizType === 'enMeanWord' ||
-          hint.quizType === 'enSpell' ||
-          hint.quizType === 'matchPair'
-        ) {
-          type = hint.quizType;
+        if (hint.quizType === 'matchPair' || isEnQuizType(hint.quizType)) {
+          type = hint.quizType as EnglishQuizType | 'matchPair';
         }
       } else if (baseMode === 'boss') {
         continue;
@@ -347,11 +436,18 @@ export function nextEnglishAdaptiveQuestion(
   return null;
 }
 
+export function isDedicatedEnglishMode(mode: ArcadeMode): mode is EnglishQuizType | 'matchPair' {
+  return isEnArcadeMode(mode);
+}
+
 export const ENGLISH_ARCADE_MODE_LABELS: Partial<Record<ArcadeMode, string>> = {
   mixed: '英语综合练',
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
   enSpell: '缺字母练习',
+  enPictureMean: '看图选义',
+  enPictureWord: '看图选词',
+  enPhoneticWord: '音标选词',
   matchPair: '中英配对',
   boss: '错题复习',
   daily: '每日自测',

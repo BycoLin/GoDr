@@ -6,8 +6,11 @@ import type {
   MatchPairQuestion,
   OrderLinesQuestion,
   PoetryItem,
+  PoetryPictureQuestion,
+  PoetryQuizType,
   Question,
   QuizType,
+  SimilarCharQuestion,
   TitleAuthorQuestion,
 } from './types';
 import {
@@ -16,6 +19,21 @@ import {
   registerQuestion,
   shuffle as sessionShuffle,
 } from './quiz-session';
+import {
+  isAccumulationItem,
+  isCoupletAccumulationItem,
+  isClassicalProseItem,
+  isMythStoryItem,
+  isNarrativeItem,
+} from './poetry-games';
+import {
+  buildPoetryEnrichPool,
+  levelEnrichCount,
+  mergeInterleavedQuestions,
+  planPoetryLevelEnrich,
+} from './level-enrich';
+import { pickSimilarWrong, similarCharDrillsForGrade, similarCharsFor, type SimilarCharDrill } from './similar-chars';
+import { hasPoetryPicture, poetryEmojiFor } from './poetry-pictures';
 
 function shuffle<T>(arr: T[]): T[] {
   const a = arr.slice();
@@ -43,15 +61,33 @@ function quizLines(item: PoetryItem): string[] {
   return item.lines.filter((l) => l && !PLACEHOLDER_LINE.test(l.trim()) && l.trim().length >= 2);
 }
 
+/** 猜诗名/篇名：去掉与标题完全相同的行，避免「拔萝卜→拔萝卜」送分题 */
+function quizLinesForTitleAuthor(item: PoetryItem): string[] {
+  const lines = quizLines(item);
+  const title = item.title.trim();
+  const withoutTitle = lines.filter((l) => l.trim() !== title);
+  if (withoutTitle.length) return withoutTitle;
+  const longer = lines.filter((l) => l.trim().length > title.length);
+  return longer.length ? longer : lines;
+}
+
 function isRealAuthor(author: string): boolean {
   return Boolean(author && author.length >= 2 && !META_AUTHORS.has(author));
 }
 
-/** 生成「选下一句」 */
-export function makeFillNext(item: PoetryItem, pool: PoetryItem[]): FillNextQuestion | null {
+/** 生成「选下一句」；lineIdx 指定从哪一句起接龙，专项练轮播用 */
+export function makeFillNext(
+  item: PoetryItem,
+  pool: PoetryItem[],
+  lineIdx?: number,
+): FillNextQuestion | null {
   const lines = quizLines(item);
   if (lines.length < 2) return null;
-  const idx = Math.floor(Math.random() * (lines.length - 1));
+  const maxIdx = lines.length - 2;
+  const idx =
+    lineIdx === undefined
+      ? Math.floor(Math.random() * (maxIdx + 1))
+      : ((lineIdx % (maxIdx + 1)) + maxIdx + 1) % (maxIdx + 1);
   const prompt = lines[idx];
   const answer = lines[idx + 1];
 
@@ -69,10 +105,49 @@ export function makeFillNext(item: PoetryItem, pool: PoetryItem[]): FillNextQues
     id: uid('fill'),
     type: 'fillNext',
     itemId: item.id,
+    sourceTitle: item.title,
     prompt: `「${prompt}」的下一句是？`,
     options,
     answerId: 'ans',
   };
+}
+
+/** 专项「下一句」：按篇目×句位轮播，保证多首诗都能轮到 */
+function buildDedicatedFillNextQuiz(
+  pool: PoetryItem[],
+  count: number,
+  keys: Set<string>,
+): Question[] {
+  const slots: Array<{ item: PoetryItem; lineIdx: number }> = [];
+  shuffle(pool).forEach((item) => {
+    const lines = quizLines(item);
+    for (let i = 0; i < lines.length - 1; i += 1) {
+      slots.push({ item, lineIdx: i });
+    }
+  });
+  if (!slots.length) return [];
+
+  shuffle(slots);
+  const questions: Question[] = [];
+  let slotCursor = 0;
+  let guard = 0;
+  const maxGuard = count * 32;
+  let allowRepeat = false;
+
+  while (questions.length < count && guard < maxGuard) {
+    guard += 1;
+    const slot = slots[slotCursor % slots.length];
+    slotCursor += 1;
+    const q = makeFillNext(slot.item, pool, slot.lineIdx);
+    if (!q) continue;
+    if (registerQuestion(keys, q)) {
+      questions.push(q);
+      continue;
+    }
+    if (questions.length > 0 && guard > count * 2) allowRepeat = true;
+    if (allowRepeat) questions.push(q);
+  }
+  return questions;
 }
 
 /** 生成上下句配对（点选配对） */
@@ -97,7 +172,55 @@ export function makeMatchPairForItem(
     item,
     ...pickN(others, Math.min(pairCount - 1, others.length)),
   ];
+  if (isAccumulationItem(item) || gradePool.every(isAccumulationItem)) {
+    const coupletPool = gradePool.filter(isCoupletAccumulationItem);
+    const source = coupletPool.length ? coupletPool : gradePool.filter(isAccumulationItem);
+    if (source.length) return buildMatchPairFromAccumulation(source);
+  }
   return buildMatchPairFromPoems(selected);
+}
+
+function accumulationLinePairs(item: PoetryItem): Array<[string, string]> {
+  const pairs: Array<[string, string]> = [];
+  for (let i = 0; i + 1 < item.lines.length; i += 2) {
+    pairs.push([item.lines[i], item.lines[i + 1]]);
+  }
+  return pairs;
+}
+
+function buildMatchPairFromAccumulation(items: PoetryItem[]): MatchPairQuestion | null {
+  const pairPool: Array<{ left: string; right: string }> = [];
+  items.forEach((poem) => {
+    accumulationLinePairs(poem).forEach(([left, right]) => {
+      pairPool.push({ left, right });
+    });
+  });
+  if (pairPool.length < 2) return null;
+
+  const wantCount =
+    pairPool.length >= 3 ? (Math.random() < 0.45 ? 2 : Math.min(3, pairPool.length)) : 2;
+  const picked = pickN(pairPool, Math.min(wantCount, pairPool.length));
+  const left: ChoiceOption[] = [];
+  const right: ChoiceOption[] = [];
+  const answerMap: Record<string, string> = {};
+
+  picked.forEach((pair, i) => {
+    const leftId = `L${i}`;
+    const rightId = `R${i}`;
+    left.push({ id: leftId, text: pair.left });
+    right.push({ id: rightId, text: pair.right });
+    answerMap[leftId] = rightId;
+  });
+
+  return {
+    id: uid('match'),
+    type: 'matchPair',
+    itemIds: items.map((p) => p.id),
+    couplet: true,
+    left: shuffle(left),
+    right: shuffle(right),
+    answerMap,
+  };
 }
 
 function buildMatchPairFromPoems(selected: PoetryItem[]): MatchPairQuestion | null {
@@ -130,10 +253,15 @@ export function makeTitleAuthor(
   item: PoetryItem,
   pool: PoetryItem[],
   mode: 'title' | 'author' = 'title',
+  lineIdx?: number,
 ): TitleAuthorQuestion | null {
-  const lines = quizLines(item);
+  const lines = quizLinesForTitleAuthor(item);
   if (!lines.length) return null;
-  const line = lines[Math.floor(Math.random() * lines.length)];
+  const idx =
+    lineIdx === undefined
+      ? Math.floor(Math.random() * lines.length)
+      : ((lineIdx % lines.length) + lines.length) % lines.length;
+  const line = lines[idx];
   const useAuthor = mode === 'author' && isRealAuthor(item.author);
   const quizMode: 'title' | 'author' = useAuthor ? 'author' : 'title';
   const answerText = quizMode === 'title' ? item.title : item.author;
@@ -152,14 +280,64 @@ export function makeTitleAuthor(
     ...pickN(unique, 3).map((text, i) => ({ id: `d${i}`, text })),
   ]);
 
+  const isClassical = item.author === '文言文';
+  const isMyth = isMythStoryItem(item);
+  const isProse = isClassicalProseItem(item);
+  let prompt = '';
+  let typeLabel = '';
+  if (quizMode === 'title') {
+    if (isMyth) {
+      prompt = '这段文字讲的是哪个神话故事？';
+      typeLabel = '猜故事';
+    } else if (isProse || isClassical) {
+      prompt = '这篇小古文叫什么？';
+      typeLabel = '猜篇名';
+    } else {
+      prompt = '这句诗出自哪一首？';
+      typeLabel = '选诗名';
+    }
+  } else {
+    prompt = '这句诗的作者是？';
+    typeLabel = '选作者';
+  }
   return {
     id: uid('ta'),
     type: 'titleAuthor',
     itemId: item.id,
     mode: quizMode,
-    prompt: quizMode === 'title' ? `诗句「${line}」出自哪首诗？` : `诗句「${line}」的作者是？`,
+    prompt,
+    typeLabel,
+    excerpt: line,
     options,
     answerId,
+  };
+}
+
+/** 看图猜篇：emoji 场景选诗名/童谣名 */
+export function makePoetryPicture(
+  item: PoetryItem,
+  pool: PoetryItem[],
+): PoetryPictureQuestion | null {
+  const visualEmoji = poetryEmojiFor(item);
+  if (!visualEmoji) return null;
+  const distractorTexts = pool
+    .filter((p) => p.id !== item.id)
+    .map((p) => p.title)
+    .filter((t) => t && t !== item.title);
+  const unique = Array.from(new Set(distractorTexts));
+  if (unique.length < 1) return null;
+  const options = shuffle([
+    { id: 'ans', text: item.title },
+    ...pickN(unique, 3).map((text, i) => ({ id: `d${i}`, text })),
+  ]);
+  return {
+    id: uid('ppic'),
+    type: 'poetryPicture',
+    itemId: item.id,
+    prompt: '看图标猜是哪一首？',
+    visualEmoji,
+    options,
+    answerId: 'ans',
   };
 }
 
@@ -177,28 +355,45 @@ export function makeOrderLines(item: PoetryItem): OrderLinesQuestion | null {
     guard += 1;
   }
 
+  const narrative = isNarrativeItem(item);
   return {
     id: uid('order'),
     type: 'orderLines',
     itemId: item.id,
-    prompt: `把《${item.title}》的诗句排成正确顺序`,
+    narrative,
+    prompt: narrative
+      ? `把《${item.title}》的内容按正确顺序排列`
+      : `把《${item.title}》的诗句排成正确顺序`,
     options: shuffled,
     answerOrder,
   };
 }
 
+function isHanChar(ch: string): boolean {
+  return /^[\u4e00-\u9fff]$/.test(ch);
+}
+
+function blankableIndices(line: string): number[] {
+  const indices: number[] = [];
+  for (let i = 0; i < line.length; i += 1) {
+    if (isHanChar(line[i])) indices.push(i);
+  }
+  return indices;
+}
+
 /** 缺一字填空 */
 export function makeFillBlank(item: PoetryItem, pool: PoetryItem[]): FillBlankQuestion | null {
-  const candidates = quizLines(item).filter((line) => line.length >= 2);
+  const candidates = quizLines(item).filter((line) => blankableIndices(line).length >= 2);
   if (!candidates.length) return null;
   const line = candidates[Math.floor(Math.random() * candidates.length)];
-  const blankIdx = Math.floor(Math.random() * line.length);
+  const indices = blankableIndices(line);
+  const blankIdx = indices[Math.floor(Math.random() * indices.length)];
   const answerChar = line[blankIdx];
   const promptLine = `${line.slice(0, blankIdx)}＿${line.slice(blankIdx + 1)}`;
 
   const charPool = pool
-    .flatMap((p) => p.lines.join('').split(''))
-    .filter((ch) => ch && ch !== answerChar && !/\s/.test(ch));
+    .flatMap((p) => quizLines(p).join('').split(''))
+    .filter((ch) => isHanChar(ch) && ch !== answerChar);
   const unique = Array.from(new Set(charPool));
   if (unique.length < 1) return null;
 
@@ -217,12 +412,139 @@ export function makeFillBlank(item: PoetryItem, pool: PoetryItem[]): FillBlankQu
   };
 }
 
+interface SimilarCharSlot {
+  drill: SimilarCharDrill;
+  line: string;
+  idx: number;
+  correct: string;
+}
+
+function makeSimilarCharFromDrill(
+  drill: SimilarCharDrill,
+  fixed?: { line: string; idx: number; correct: string },
+): SimilarCharQuestion | null {
+  const line = fixed?.line ?? drill.line;
+  const idx = fixed?.idx ?? drill.idx;
+  const correct = fixed?.correct ?? drill.correct;
+  if (line[idx] !== correct) return null;
+
+  const wrong = pickSimilarWrong(correct);
+  if (!wrong) return null;
+
+  const displayLine = `${line.slice(0, idx)}${wrong}${line.slice(idx + 1)}`;
+  const distractors = new Set<string>([wrong]);
+  similarCharsFor(correct).forEach((ch) => distractors.add(ch));
+  distractors.delete(correct);
+  const picked = pickN(Array.from(distractors), Math.min(3, distractors.size));
+  const options = shuffle([
+    { id: 'ans', text: correct },
+    ...picked.map((text, i) => ({ id: `d${i}`, text })),
+  ]);
+
+  return {
+    id: uid('sim'),
+    type: 'similarChar',
+    itemId: drill.id,
+    prompt: '找出形近错字，选出正确的字',
+    displayLine,
+    wrongIdx: idx,
+    displayChars: displayLine.split(''),
+    options,
+    answerId: 'ans',
+  };
+}
+
+/** 形近字找茬：专练句中混入形近错字，选出正确字 */
+export function makeSimilarChar(item: PoetryItem, _pool: PoetryItem[]): SimilarCharQuestion | null {
+  const drills = similarCharDrillsForGrade(item.grade);
+  if (!drills.length) return null;
+  const drill = drills[Math.floor(Math.random() * drills.length)];
+  return makeSimilarCharFromDrill(drill);
+}
+
+function buildDedicatedSimilarCharQuiz(
+  pool: PoetryItem[],
+  count: number,
+  keys: Set<string>,
+): Question[] {
+  const grade = pool[0]?.grade ?? 4;
+  const drills = similarCharDrillsForGrade(grade);
+  if (!drills.length) return [];
+
+  const slots: SimilarCharSlot[] = drills.map((drill) => ({
+    drill,
+    line: drill.line,
+    idx: drill.idx,
+    correct: drill.correct,
+  }));
+  shuffle(slots);
+  const questions: Question[] = [];
+  let slotCursor = 0;
+  let guard = 0;
+  const maxGuard = count * 32;
+  let allowRepeat = false;
+
+  while (questions.length < count && guard < maxGuard) {
+    guard += 1;
+    const slot = slots[slotCursor % slots.length];
+    slotCursor += 1;
+    const q = makeSimilarCharFromDrill(slot.drill, slot);
+    if (!q) continue;
+    if (registerQuestion(keys, q)) {
+      questions.push(q);
+      continue;
+    }
+    if (questions.length > 0 && guard > count * 2) allowRepeat = true;
+    if (allowRepeat) questions.push(q);
+  }
+  return questions;
+}
+
+function buildDedicatedTitleAuthorQuiz(
+  pool: PoetryItem[],
+  count: number,
+  keys: Set<string>,
+): Question[] {
+  const slots: Array<{ item: PoetryItem; lineIdx: number }> = [];
+  shuffle(pool).forEach((item) => {
+    quizLinesForTitleAuthor(item).forEach((_, lineIdx) => {
+      slots.push({ item, lineIdx });
+    });
+  });
+  if (!slots.length) return [];
+
+  shuffle(slots);
+  const questions: Question[] = [];
+  let slotCursor = 0;
+  let guard = 0;
+  const maxGuard = count * 32;
+  let allowRepeat = false;
+
+  while (questions.length < count && guard < maxGuard) {
+    guard += 1;
+    const slot = slots[slotCursor % slots.length];
+    slotCursor += 1;
+    const q = makeTitleAuthor(slot.item, pool, 'title', slot.lineIdx);
+    if (!q) continue;
+    if (registerQuestion(keys, q)) {
+      questions.push(q);
+      continue;
+    }
+    if (questions.length > 0 && guard > count * 2) allowRepeat = true;
+    if (allowRepeat) questions.push(q);
+  }
+  return questions;
+}
+
 export interface BuildQuizOptions {
   count?: number;
   modes?: QuizType[];
   preferTitle?: boolean;
   /** 中段偏难：后半程优先难题型 */
   rampHard?: boolean;
+  /** 穿插同年级专项/主题/加练题，丰富闯关 */
+  enrich?: boolean;
+  packId?: string;
 }
 
 export interface AdaptiveContext {
@@ -234,6 +556,21 @@ export interface AdaptiveContext {
 
 const HARD_MODES: QuizType[] = ['orderLines', 'fillBlank', 'matchPair'];
 const EASY_MODES: QuizType[] = ['fillNext', 'titleAuthor'];
+
+const POETRY_DEDICATED_MODES: PoetryQuizType[] = [
+  'fillNext',
+  'matchPair',
+  'titleAuthor',
+  'orderLines',
+  'fillBlank',
+  'similarChar',
+  'poetryPicture',
+];
+
+/** 语文专项练：固定单一题型，不因连击切换题型 */
+export function isDedicatedPoetryMode(mode: ArcadeMode): mode is PoetryQuizType {
+  return POETRY_DEDICATED_MODES.includes(mode as PoetryQuizType);
+}
 
 function makeByType(
   mode: QuizType,
@@ -252,10 +589,15 @@ function makeByType(
   }
   if (mode === 'orderLines') return makeOrderLines(item);
   if (mode === 'fillBlank') return makeFillBlank(item, pool);
+  if (mode === 'similarChar') return makeSimilarChar(item, pool);
+  if (mode === 'poetryPicture') {
+    return makePoetryPicture(item, pool) || makeTitleAuthor(item, pool, 'title');
+  }
   return null;
 }
 
 function resolvePreferModes(ctx: AdaptiveContext, baseMode: ArcadeMode): QuizType[] {
+  if (isDedicatedPoetryMode(baseMode)) return [baseMode];
   if (ctx.preferModes?.length) return ctx.preferModes;
   if (!ctx.lastCorrect && ctx.lastType) return [ctx.lastType];
   if (ctx.combo >= 3) return HARD_MODES;
@@ -269,13 +611,10 @@ function resolvePreferModes(ctx: AdaptiveContext, baseMode: ArcadeMode): QuizTyp
   ) {
     return [...EASY_MODES, ...HARD_MODES];
   }
-  if (baseMode === 'fillNext' || baseMode === 'matchPair' || baseMode === 'titleAuthor' || baseMode === 'orderLines' || baseMode === 'fillBlank') {
-    return [baseMode];
-  }
   return [...EASY_MODES, ...HARD_MODES];
 }
 
-/** 围绕单篇诗词生成一局题目（混合题型，可中段偏难） */
+/** 围绕单篇诗词生成一局题目（混合题型，可中段偏难；可穿插专项/主题题） */
 export function buildQuizForItem(
   item: PoetryItem,
   pool: PoetryItem[],
@@ -284,7 +623,16 @@ export function buildQuizForItem(
   const count = options.count ?? 8;
   const preferTitle = options.preferTitle !== false;
   const rampHard = options.rampHard !== false;
-  const easyFirst: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+  const easyFirst: QuizType[] = [
+    'fillNext',
+    'titleAuthor',
+    'matchPair',
+    'orderLines',
+    'fillBlank',
+  ];
+  if (hasPoetryPicture(item)) {
+    easyFirst.unshift('poetryPicture');
+  }
   const modePool = options.modes?.length ? options.modes : easyFirst;
   const typeSchedule = buildTypeSchedule(
     rampHard
@@ -292,18 +640,51 @@ export function buildQuizForItem(
       : modePool,
     count * 2,
   );
-  const usedKeys = new Set<string>();
-  const questions: Question[] = [];
-  let guard = 0;
 
-  while (questions.length < count && guard < count * 20) {
-    guard += 1;
-    const mode = typeSchedule[guard % typeSchedule.length];
-    const q = makeByType(mode, item, pool, preferTitle);
-    if (q && registerQuestion(usedKeys, q)) questions.push(q);
+  const buildCore = (target: number, usedKeys: Set<string>): Question[] => {
+    const questions: Question[] = [];
+    let guard = 0;
+    while (questions.length < target && guard < target * 20) {
+      guard += 1;
+      const mode = typeSchedule[guard % typeSchedule.length];
+      const q = makeByType(mode, item, pool, preferTitle);
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
+  const buildEnrich = (target: number, usedKeys: Set<string>): Question[] => {
+    if (target <= 0 || pool.length <= 1) return [];
+    const { modes, themes } = planPoetryLevelEnrich(item);
+    const enrichPool = buildPoetryEnrichPool(item, pool, themes);
+    const enrichSchedule = buildTypeSchedule(modes, target * 3);
+    const itemOrder = pickItemsForSession(enrichPool, Math.max(target * 2, 8));
+    const questions: Question[] = [];
+    let guard = 0;
+    let itemCursor = 0;
+    while (questions.length < target && guard < target * 24) {
+      guard += 1;
+      const mode = enrichSchedule[guard % enrichSchedule.length];
+      // 看图猜篇必须锚定本篇 + 专属图标，避免 🎵🎶 对应多首童谣
+      const enrichItem =
+        mode === 'poetryPicture' ? item : itemOrder[itemCursor % itemOrder.length] || enrichPool[0];
+      if (mode !== 'poetryPicture') itemCursor += 1;
+      const q = makeByType(mode, enrichItem, pool, preferTitle);
+      if (q && registerQuestion(usedKeys, q)) questions.push(q);
+    }
+    return questions;
+  };
+
+  const usedKeys = new Set<string>();
+  if (!options.enrich || pool.length <= 1) {
+    return buildCore(count, usedKeys);
   }
 
-  return questions;
+  const enrichTarget = levelEnrichCount(count);
+  const coreTarget = count - enrichTarget;
+  const core = buildCore(coreTarget, usedKeys);
+  const enrich = buildEnrich(enrichTarget, usedKeys);
+  return mergeInterleavedQuestions(core, enrich, count);
 }
 
 /** 游戏厅：按专项玩法从年级题库抽题 */
@@ -317,30 +698,67 @@ export function buildArcadeQuiz(
   if (!pool.length) return [];
   const preferTitle = pool[0].grade <= 1;
   const keys = usedKeys ?? new Set<string>();
-  const mixedTypes: QuizType[] = ['fillNext', 'titleAuthor', 'matchPair', 'orderLines', 'fillBlank'];
+  const dedicated = isDedicatedPoetryMode(mode);
+  if (dedicated && mode === 'fillNext') {
+    return buildDedicatedFillNextQuiz(pool, count, keys);
+  }
+  if (dedicated && mode === 'similarChar') {
+    return buildDedicatedSimilarCharQuiz(pool, count, keys);
+  }
+  if (dedicated && mode === 'titleAuthor') {
+    return buildDedicatedTitleAuthorQuiz(pool, count, keys);
+  }
+  let quizPool = pool;
+  if (dedicated && mode === 'poetryPicture') {
+    quizPool = pool.filter(hasPoetryPicture);
+    if (!quizPool.length) return [];
+  }
+  const mixedTypes: QuizType[] = [
+    'poetryPicture',
+    'fillNext',
+    'titleAuthor',
+    'matchPair',
+    'orderLines',
+    'fillBlank',
+    'similarChar',
+  ];
   const typeSchedule = preferModes?.length
     ? buildTypeSchedule(preferModes, count * 2)
-    : mode === 'mixed' ||
-        mode === 'boss' ||
-        mode === 'daily' ||
-        mode === 'duel' ||
-        mode === 'sprint' ||
-        mode === 'exam' ||
-        mode === 'unit'
-      ? buildTypeSchedule(mixedTypes, count * 2)
-      : buildTypeSchedule([mode], count * 2);
-  const itemOrder = pickItemsForSession(pool, count * 2);
+    : dedicated
+      ? buildTypeSchedule([mode], count * 2)
+      : mode === 'mixed' ||
+          mode === 'boss' ||
+          mode === 'daily' ||
+          mode === 'duel' ||
+          mode === 'sprint' ||
+          mode === 'exam' ||
+          mode === 'unit'
+        ? buildTypeSchedule(mixedTypes, count * 2)
+        : buildTypeSchedule([mode], count * 2);
+  const itemOrder = pickItemsForSession(quizPool, Math.max(count * 3, dedicated ? 16 : count * 2));
   const questions: Question[] = [];
   let guard = 0;
   let itemCursor = 0;
+  const maxGuard = dedicated ? count * 48 : count * 24;
+  let allowRepeat = false;
 
-  while (questions.length < count && guard < count * 24) {
+  while (questions.length < count && guard < maxGuard) {
     guard += 1;
-    const item = itemOrder[itemCursor % itemOrder.length] || pool[guard % pool.length];
+    const item = itemOrder[itemCursor % itemOrder.length] || quizPool[guard % quizPool.length];
     itemCursor += 1;
     const quizType = typeSchedule[guard % typeSchedule.length];
     const q = makeByType(quizType, item, pool, preferTitle);
-    if (q && registerQuestion(keys, q)) questions.push(q);
+    if (!q) continue;
+    if (registerQuestion(keys, q)) {
+      questions.push(q);
+      continue;
+    }
+    if (dedicated && questions.length > 0 && guard > count * 3) {
+      allowRepeat = true;
+    }
+    if (allowRepeat) {
+      questions.push(q);
+    }
   }
 
   return questions;
@@ -382,15 +800,17 @@ export function nextAdaptiveQuestion(
   if (!pool.length) return null;
   if (baseMode === 'boss' && !wrongHints?.length) return null;
   const preferTitle = pool[0].grade <= 1;
+  const lockedType = isDedicatedPoetryMode(baseMode) ? baseMode : null;
   const modes = resolvePreferModes(ctx, baseMode);
   const keys = usedKeys ?? new Set<string>();
   const itemOrder = sessionShuffle(pool);
   let guard = 0;
   let itemCursor = 0;
+  let allowRepeat = false;
 
-  while (guard < 24) {
+  while (guard < 64) {
     guard += 1;
-    const quizType = modes[Math.floor(Math.random() * modes.length)];
+    const quizType = lockedType ?? modes[Math.floor(Math.random() * modes.length)];
     let item = itemOrder[itemCursor % itemOrder.length];
     itemCursor += 1;
     if (wrongHints?.length && (baseMode === 'boss' || !ctx.lastCorrect)) {
@@ -403,7 +823,10 @@ export function nextAdaptiveQuestion(
       if (baseMode === 'boss') continue;
     }
     const q = makeByType(quizType, item, pool, preferTitle);
-    if (q && registerQuestion(keys, q)) return q;
+    if (!q) continue;
+    if (registerQuestion(keys, q)) return q;
+    if (lockedType && guard > 16) allowRepeat = true;
+    if (allowRepeat) return q;
   }
   return null;
 }
@@ -431,6 +854,7 @@ export function gradeAnswer(
     question.type === 'fillNext' ||
     question.type === 'titleAuthor' ||
     question.type === 'fillBlank' ||
+    question.type === 'similarChar' ||
     question.type === 'mathCalc' ||
     question.type === 'mathCompare' ||
     question.type === 'mathMissing' ||
@@ -448,7 +872,11 @@ export function gradeAnswer(
     question.type === 'mathBorrowTen' ||
     question.type === 'enWordMean' ||
     question.type === 'enMeanWord' ||
-    question.type === 'enSpell'
+    question.type === 'enSpell' ||
+    question.type === 'enPictureMean' ||
+    question.type === 'enPictureWord' ||
+    question.type === 'enPhoneticWord' ||
+    question.type === 'poetryPicture'
   ) {
     return typeof payload === 'string' && payload === question.answerId;
   }
@@ -487,8 +915,10 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   fillNext: '下一句练习',
   matchPair: '配对练习',
   titleAuthor: '诗名作者',
+  poetryPicture: '看图猜篇',
   orderLines: '诗句排序',
   fillBlank: '缺字填空',
+  similarChar: '形近字找茬',
   mathCalc: '口算练习',
   mathVisual: '看图口算',
   mathSequence: '数字排队',
@@ -510,6 +940,9 @@ export const ARCADE_MODE_LABELS: Record<ArcadeMode, string> = {
   enWordMean: '看词选义',
   enMeanWord: '看义选词',
   enSpell: '缺字母练习',
+  enPictureMean: '看图选义',
+  enPictureWord: '看图选词',
+  enPhoneticWord: '音标选词',
   boss: '错题复习',
   daily: '每日自测',
   duel: '趣味对练',

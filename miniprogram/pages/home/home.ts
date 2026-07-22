@@ -34,7 +34,7 @@ interface FeaturePlay {
   action: 'review' | 'sprint' | 'exam' | 'unit' | 'flash' | 'pinyin' | 'pinyinFinal' | 'puzzle' | 'visual' | 'path';
 }
 
-function featuresForPack(packId: string): FeaturePlay[] {
+function featuresForPack(packId: string, grade = 0): FeaturePlay[] {
   const kind = getPackSubjectKind(packId);
   if (kind === 'math') {
     return [
@@ -50,6 +50,39 @@ function featuresForPack(packId: string): FeaturePlay[] {
       { id: 'flash', title: '翻翻看', desc: '翻一翻记一记', tag: '认读', tone: 'q-flash', action: 'flash' },
     ];
   }
+  if (grade >= 4) {
+    return [
+      { id: 'unit', title: '单元测验', desc: '四年级课内 · 固定 10 题', tag: '单元', tone: 'q-exam', action: 'unit' },
+      { id: 'flash', title: '诗词翻翻', desc: '必背古诗卡片认读', tag: '诗词', tone: 'q-flash', action: 'flash' },
+      { id: 'sprint', title: '限时冲刺', desc: '60 秒诗词挑战', tag: '冲刺', tone: 'q-sprint', action: 'sprint' },
+      { id: 'exam', title: '模拟卷', desc: '综合测一测', tag: '模拟', tone: 'q-teal', action: 'exam' },
+    ];
+  }
+  if (grade === 3) {
+    return [
+      { id: 'unit', title: '单元测验', desc: '按单元固定 10 题', tag: '单元', tone: 'q-exam', action: 'unit' },
+      { id: 'path', title: '诗词进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
+      { id: 'flash', title: '翻翻看', desc: '诗词卡片认读', tag: '认读', tone: 'q-flash', action: 'flash' },
+      { id: 'sprint', title: '限时冲刺', desc: '60 秒练手速', tag: '冲刺', tone: 'q-sprint', action: 'sprint' },
+    ];
+  }
+  if (grade === 2) {
+    return [
+      { id: 'unit', title: '单元测验', desc: '按单元固定 10 题', tag: '单元', tone: 'q-exam', action: 'unit' },
+      { id: 'path', title: '拼音巩固', desc: '韵母复习 · 拼读过关', tag: '路径', tone: 'q-teal', action: 'path' },
+      { id: 'flash', title: '诗词翻翻', desc: '梅花 · 登鹳雀楼 · 江雪', tag: '诗词', tone: 'q-flash', action: 'flash' },
+      { id: 'sprint', title: '限时冲刺', desc: '60 秒古诗挑战', tag: '冲刺', tone: 'q-sprint', action: 'sprint' },
+    ];
+  }
+  if (grade === 1) {
+    return [
+      { id: 'unit', title: '单元测验', desc: '按单元固定 10 题', tag: '单元', tone: 'q-exam', action: 'unit' },
+      { id: 'path', title: '拼音进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
+      { id: 'pinyin-i', title: '声母练', desc: '23 个声母认读拼读', tag: '声母', tone: 'q-sky', action: 'pinyin' },
+      { id: 'pinyin-f', title: '韵母练', desc: '单韵母到鼻韵母', tag: '韵母', tone: 'q-flash', action: 'pinyinFinal' },
+      { id: 'flash', title: '翻翻看', desc: '咏鹅 · 对韵歌 · 江南', tag: '认读', tone: 'q-flash', action: 'flash' },
+    ];
+  }
   return [
     { id: 'unit', title: '单元测验', desc: '按单元固定 10 题', tag: '单元', tone: 'q-exam', action: 'unit' },
     { id: 'path', title: '拼音进阶', desc: '学 → 练 → 测', tag: '路径', tone: 'q-teal', action: 'path' },
@@ -59,10 +92,10 @@ function featuresForPack(packId: string): FeaturePlay[] {
   ];
 }
 
-const DEFAULT_FEATURES: FeaturePlay[] = featuresForPack('poetry-g1-g2');
+const DEFAULT_FEATURES: FeaturePlay[] = featuresForPack('poetry-g1-g2', 0);
 
-function buildPanelFeatures(packId: string): FeaturePlay[] {
-  const base = featuresForPack(packId);
+function buildPanelFeatures(packId: string, grade: number): FeaturePlay[] {
+  const base = featuresForPack(packId, grade);
   const review = getReviewSummary(packId);
   if (review.total <= 0) return base;
   return [
@@ -196,7 +229,7 @@ function buildSubjectPanel(packId: string): SubjectPanel {
     adventureBubble,
     continueTip,
     continueShort,
-    features: buildPanelFeatures(packId),
+    features: buildPanelFeatures(packId, resolvedGrade),
     reviewTotal: review.total,
     reviewTip: review.tip,
     reviewWrongs: review.wrongs,
@@ -433,7 +466,7 @@ Page({
           : DEFAULT_GRADE_OPTIONS,
         features: this.data.features.length
           ? this.data.features
-          : featuresForPack(this.data.packId || 'poetry-g1-g2'),
+          : featuresForPack(this.data.packId || 'poetry-g1-g2', this.data.grade ?? 0),
       });
       wx.showToast({ title: '加载失败，再试一次', icon: 'none' });
     }

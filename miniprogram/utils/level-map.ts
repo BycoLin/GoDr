@@ -9,7 +9,7 @@ import {
 import { loadPackProgress } from './progress';
 import { isFavorite } from './favorites';
 import { getItemSemester, getItemUnit } from './unit-test';
-import { resolveMathDisplayTitle } from './math-item-label';
+import { mathItemMeta, resolveMathDisplayTitle } from './math-item-label';
 import type { KnowledgeItem } from './types';
 
 export interface LevelRow {
@@ -69,7 +69,7 @@ export function buildLevelSnapshot(packId: string, grade: number): LevelSnapshot
       index === 0 || Boolean(progress.items[items[index - 1].id]?.cleared);
     let meta = '';
     if (isMath(item)) {
-      meta = item.subtitle || item.tags?.join(' · ') || '数学练习';
+      meta = mathItemMeta(item);
     } else if (isEnglish(item)) {
       meta = item.meaning + (item.phonetic ? ` · ${item.phonetic}` : '');
     } else if (isPoetry(item)) {
@@ -105,6 +105,18 @@ export function buildLevelSnapshot(packId: string, grade: number): LevelSnapshot
 
 export function peekLevelSnapshot(packId: string, grade: number): LevelSnapshot | null {
   return snapshotCache.get(mapKey(packId, grade)) || null;
+}
+
+/** 当前关通过后，取排序上的下一关 itemId */
+export function findNextLevelItemId(
+  packId: string,
+  grade: number,
+  currentItemId: string,
+): string | null {
+  const snapshot = peekLevelSnapshot(packId, grade) || buildLevelSnapshot(packId, grade);
+  const idx = snapshot.levels.findIndex((l) => l.id === currentItemId);
+  if (idx < 0 || idx >= snapshot.levels.length - 1) return null;
+  return snapshot.levels[idx + 1].id;
 }
 
 export function prefetchLevelSnapshot(packId: string, grade: number): void {

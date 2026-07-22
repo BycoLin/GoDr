@@ -259,11 +259,13 @@
     <!-- fillNext / titleAuthor / fillBlank -->
     <view
       class="card q-card {{current.diagram ? 'visual-card' : ''}}"
-      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'mathPlaceValue' || current.type === 'mathBigRead' || current.type === 'mathRound' || current.type === 'mathLineType' || current.type === 'mathGeoRelation' || current.type === 'mathAngleClassify' || current.type === 'mathMakeTen' || current.type === 'mathBreakTen' || current.type === 'mathFlatTen' || current.type === 'mathBorrowTen' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell'}}"
+      wx:if="{{current.type === 'fillNext' || current.type === 'titleAuthor' || current.type === 'fillBlank' || current.type === 'similarChar' || current.type === 'poetryPicture' || current.type === 'mathCalc' || current.type === 'mathCompare' || current.type === 'mathMissing' || current.type === 'mathPlaceValue' || current.type === 'mathBigRead' || current.type === 'mathRound' || current.type === 'mathLineType' || current.type === 'mathGeoRelation' || current.type === 'mathAngleClassify' || current.type === 'mathMakeTen' || current.type === 'mathBreakTen' || current.type === 'mathFlatTen' || current.type === 'mathBorrowTen' || current.type === 'enWordMean' || current.type === 'enMeanWord' || current.type === 'enSpell' || current.type === 'enPictureMean' || current.type === 'enPictureWord' || current.type === 'enPhoneticWord'}}"
     >
       <view class="q-type">
         <block wx:if="{{current.type === 'fillNext'}}">下一句</block>
         <block wx:elif="{{current.type === 'fillBlank'}}">缺字填空</block>
+        <block wx:elif="{{current.type === 'similarChar'}}">形近字找茬</block>
+        <block wx:elif="{{current.type === 'poetryPicture'}}">看图猜篇</block>
         <block wx:elif="{{current.type === 'mathCalc'}}">速算</block>
         <block wx:elif="{{current.type === 'mathCompare'}}">比大小</block>
         <block wx:elif="{{current.type === 'mathPlaceValue'}}">数位认识</block>
@@ -280,8 +282,12 @@
         <block wx:elif="{{current.type === 'enWordMean'}}">看词选义</block>
         <block wx:elif="{{current.type === 'enMeanWord'}}">看义选词</block>
         <block wx:elif="{{current.type === 'enSpell'}}">缺字母</block>
-        <block wx:else>{{current.mode === 'title' ? '选诗名' : '选作者'}}</block>
+        <block wx:elif="{{current.type === 'enPictureMean'}}">看图选义</block>
+        <block wx:elif="{{current.type === 'enPictureWord'}}">看图选词</block>
+        <block wx:elif="{{current.type === 'enPhoneticWord'}}">音标选词</block>
+        <block wx:else>{{current.typeLabel || (current.mode === 'title' ? '选诗名' : '选作者')}}</block>
       </view>
+      <view class="q-source" wx:if="{{current.type === 'fillNext' && current.sourceTitle}}">《{{current.sourceTitle}}》</view>
 
       <!-- 几何示意图：线条 / 平行垂直 / 角的分类 -->
       <view class="geo-diagram" wx:if="{{current.diagram}}">
@@ -346,10 +352,31 @@
         >{{item.text}}</text>
       </view>
 
-      <view class="q-prompt {{current.diagram ? 'visual-desc' : ''}} {{current.type === 'fillBlank' ? 'q-prompt-center' : ''}}">{{current.prompt}}</view>
-      <view class="options {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'options-chars' : ''}}">
+      <block wx:if="{{current.type === 'similarChar'}}">
+        <view class="similar-hint">{{current.prompt}}</view>
+        <view class="similar-line">
+          <text
+            class="similar-char {{index === current.wrongIdx ? 'similar-wrong' : ''}}"
+            wx:for="{{current.displayChars}}"
+            wx:for-index="index"
+            wx:key="index"
+          >{{item}}</text>
+        </view>
+      </block>
+      <block wx:elif="{{current.type === 'titleAuthor'}}">
+        <view class="similar-hint">{{current.prompt}}</view>
+        <view class="excerpt-line">{{current.excerpt}}</view>
+      </block>
+      <block wx:elif="{{current.visualEmoji}}">
+        <view class="emoji-visual">
+          <text class="emoji-visual-chars">{{current.visualEmoji}}</text>
+        </view>
+        <view class="q-prompt visual-desc">{{current.prompt}}</view>
+      </block>
+      <view wx:else class="q-prompt {{current.diagram ? 'visual-desc' : ''}} {{current.type === 'fillBlank' ? 'q-prompt-center' : ''}}">{{current.prompt}}</view>
+      <view class="options {{current.type === 'fillBlank' || current.type === 'similarChar' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'options-chars' : ''}}">
         <view
-          class="option {{current.type === 'fillBlank' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
+          class="option {{current.type === 'fillBlank' || current.type === 'similarChar' || current.type === 'mathCompare' || current.type === 'enSpell' ? 'option-char' : ''}} {{locked && item.id === current.answerId ? 'correct' : ''}} {{locked && feedback === 'bad' && item.id !== current.answerId ? 'dim' : ''}}"
           wx:for="{{current.options}}"
           wx:key="id"
           data-id="{{item.id}}"
@@ -360,8 +387,8 @@
 
     <!-- matchPair -->
     <view class="card q-card" wx:if="{{current.type === 'matchPair'}}">
-      <view class="q-type">{{isEnglishPack ? '中英配对' : '上下句配对'}}</view>
-      <view class="q-prompt">点选左边一句，再点右边对应的下一句</view>
+      <view class="q-type">{{isEnglishPack ? '中英配对' : (current.couplet ? '对联配对' : '上下句配对')}}</view>
+      <view class="q-prompt">{{current.couplet ? '点选上联，再点选对应的下联' : '点选左边一句，再点右边对应的下一句'}}</view>
       <view class="match-board">
         <view class="match-col">
           <view
@@ -390,7 +417,7 @@
 
     <!-- orderLines -->
     <view class="card q-card" wx:if="{{current.type === 'orderLines'}}">
-      <view class="q-type">诗句排序</view>
+      <view class="q-type">{{current.narrative ? '内容排序' : '诗句排序'}}</view>
       <view class="q-prompt">{{current.prompt}}</view>
       <view class="order-picked" wx:if="{{orderPickedTexts.length}}">
         <view class="order-picked-label">已选顺序</view>
